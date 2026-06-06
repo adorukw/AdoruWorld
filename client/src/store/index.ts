@@ -1,0 +1,11 @@
+import { createPinia } from 'pinia'
+
+export const pinia = createPinia()
+
+export { usePostStore } from './post'
+export { usePostCategoryStore } from './post-category'
+export { usePostTagStore } from './post-tag'
+export { useDexStore } from './dex'
+export { useDexGenreStore } from './dex-genre'
+export { useMediaTagStore } from './media-tag'
+export { useMediaStore } from './media'
