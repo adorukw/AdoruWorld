@@ -11,7 +11,7 @@ categories = [
         "count": 12, "icon": '💻', "color": '#3C5AA6'},
     {"id": '2', "name": '生活随笔', "slug": 'life', "description": '日常记录、思考、见闻',
         "count": 8, "icon": '🌸', "color": '#FF7300'},
-    {"id": '3', "name": '项目记录', "slug": 'projects', "description": '个人项目开发日志',
+    {"id": '3', "name": '开发日志', "slug": 'projects', "description": '个人项目开发日志',
         "count": 5, "icon": '🚀', "color": '#FF0000'},
     {"id": '4', "name": '读书笔记', "slug": 'reading', "description": '书籍阅读心得',
         "count": 6, "icon": '📚', "color": '#7B5BA6'},
@@ -700,7 +700,134 @@ def calculate_reading_time(content: str) -> int:
     return max(1, int(total_time + 0.99))
 
 
+async def seed_categories(db: AsyncSession) -> dict[str, str]:
+    """播种文章分类，返回 {分类名称: id} 映射"""
+    cat_map = {}
+    for c in categories:
+        obj = PostCategory(
+            name=c["name"],
+            slug=c["slug"],
+            description=c.get("description"),
+            icon=c.get("icon"),
+            color=c.get("color"),
+        )
+        db.add(obj)
+        await db.flush()
+        cat_map[c["name"]] = obj.id
+    await db.flush()
+    print(f"✅ 导入 {len(categories)} 个文章分类")
+    return cat_map
+
+
+async def seed_tags(db: AsyncSession) -> dict[str, str]:
+    """播种文章标签，返回 {标签名称: id} 映射"""
+    tag_map = {}
+    for t in tags:
+        obj = PostTag(
+            name=t["name"],
+            slug=t["slug"],
+            color=t.get("color"),
+        )
+        db.add(obj)
+        await db.flush()
+        tag_map[t["name"]] = obj.id
+    await db.flush()
+    print(f"✅ 导入 {len(tags)} 个文章标签")
+    return tag_map
+
+
+async def seed_posts(db: AsyncSession, cat_map: dict[str, str], tag_map: dict[str, str]):
+    """播种文章（依赖分类和标签映射）"""
+    for p in posts:
+        content = p["content"]
+        reading_time = calculate_reading_time(content)
+        word_count = len(content.strip())
+
+        post = Post(
+            slug=p["slug"],
+            title=p["title"],
+            description=p.get("description"),
+            content=p["content"],
+            cover_image=p.get("cover_image"),
+
+            # 状态字段
+            published=p.get("published", True),
+            featured=p.get("featured", False),
+
+            # 统计字段
+            reading_time=reading_time,
+            word_count=word_count,
+            views=p.get("views", 0),
+
+            # 关联字段
+            category_id=cat_map[p["category"]],
+        )
+        db.add(post)
+        await db.flush()
+
+        # 关联标签
+        for tag_name in p["tags"]:
+            tag_id = tag_map[tag_name]
+            await db.execute(
+                post_to_post_tags.insert().values(
+                    post_id=post.id,
+                    post_tag_id=tag_id
+                )
+            )
+    print(f"✅ 导入 {len(posts)} 篇文章")
+
+
+async def seed_dex_genres(db: AsyncSession) -> dict[str, str]:
+    """播种图鉴题材，返回 {题材名称: id} 映射"""
+    genre_map = {}
+    for genre in dexGenres:
+        dexGenre = DexGenre(
+            name=genre["name"],
+            slug=genre["slug"],
+            color=genre["color"],
+        )
+        db.add(dexGenre)
+        await db.flush()
+        genre_map[genre["name"]] = dexGenre.id
+    await db.flush()
+    print(f"✅ 导入 {len(dexGenres)} 个图鉴题材")
+    return genre_map
+
+
+async def seed_dex_entries(db: AsyncSession, genre_map: dict[str, str]):
+    """播种图鉴条目（依赖题材映射）"""
+    for d in dexEntries:
+        dexEntry = DexEntry(
+            slug=d["slug"],
+            title=d["title"],
+            original_title=d["originalTitle"],
+            cover_image=d["coverImage"],
+            category=d["category"],
+            status=d["status"],
+            rating=d["rating"],
+            start_date=d.get("startDate"),
+            finish_date=d.get("finish_date"),
+            comment=d.get("comment"),
+            creator=d.get("creator"),
+            year=d.get("year"),
+            summary=d.get("summary"),
+        )
+        db.add(dexEntry)
+        await db.flush()
+
+        for genre_name in d["genre"]:
+            genre_id = genre_map[genre_name]
+            await db.execute(
+                dex_to_dex_genres.insert().values(
+                    dex_entry_id=dexEntry.id,
+                    dex_genre_id=genre_id
+                )
+            )
+    print(f"✅ 导入 {len(dexEntries)} 个图鉴条目")
+
+
 async def seed():
+    """一键播种所有数据"""
     await init_db()
     async with async_session() as db:
         print("🧹 清空现有数据...")
@@ -717,107 +844,11 @@ async def seed():
         await db.commit()
         print("✅ 数据清空完成")
 
-        # 1. 插入分类
-        cat_map = {}
-        for c in categories:
-            obj = PostCategory(
-                name=c["name"],
-                slug=c["slug"],
-                description=c.get("description"),
-                icon=c.get("icon"),
-                color=c.get("color"),
-            )
-            db.add(obj)
-            await db.flush()
-            cat_map[c["name"]] = obj.id
-        await db.flush()
-
-        tag_map = {}
-        for t in tags:
-            obj = PostTag(
-                name=t["name"],
-                slug=t["slug"],
-                color=t.get("color"),
-            )
-            db.add(obj)
-            await db.flush()
-            tag_map[t["name"]] = obj.id
-        await db.flush()
-
-        for p in posts:
-            content = p["content"]
-            reading_time = calculate_reading_time(content)
-            word_count = len(content.strip())
-
-            post = Post(
-                slug=p["slug"],
-                title=p["title"],
-                description=p.get("description"),
-                content=p["content"],
-                cover_image=p.get("cover_image"),
-
-                # 状态字段
-                published=p.get("published", True),
-                featured=p.get("featured", False),
-
-                # 统计字段
-                reading_time=reading_time,
-                word_count=word_count,
-                views=p.get("views", 0),
-
-                # 关联字段
-                category_id=cat_map[p["category"]],
-            )
-            db.add(post)
-            await db.flush()
-
-            # 4. 关联标签
-            for tag_name in p["tags"]:
-                tag_id = tag_map[tag_name]
-                await db.execute(
-                    post_to_post_tags.insert().values(
-                        post_id=post.id,
-                        post_tag_id=tag_id
-                    )
-                )
-        genre_map = {}
-        for genre in dexGenres:
-            dexGenre = DexGenre(
-                name=genre["name"],
-                slug=genre["slug"],
-                color=genre["color"],
-            )
-            db.add(dexGenre)
-            await db.flush()
-            genre_map[genre["name"]] = dexGenre.id
-        await db.flush()
-
-        for d in dexEntries:
-            dexEntry = DexEntry(
-                slug=d["slug"],
-                title=d["title"],
-                original_title=d["originalTitle"],
-                cover_image=d["coverImage"],
-                category=d["category"],
-                status=d["status"],
-                rating=d["rating"],
-                start_date=d.get("startDate"),
-                finish_date=d.get("finish_date"),
-                comment=d.get("comment"),
-                creator=d.get("creator"),
-                year=d.get("year"),
-            )
-            db.add(dexEntry)
-            await db.flush()
-
-            for genre_name in d["genre"]:
-                genre_id = genre_map[genre_name]
-                await db.execute(
-                    dex_to_dex_genres.insert().values(
-                        dex_entry_id=dexEntry.id,
-                        dex_genre_id=genre_id
-                    )
-                )
+        cat_map = await seed_categories(db)
+        tag_map = await seed_tags(db)
+        # await seed_posts(db, cat_map, tag_map)
+        genre_map = await seed_dex_genres(db)
+        # await seed_dex_entries(db, genre_map)
 
         await db.commit()
         print("✅ 数据导入完成")

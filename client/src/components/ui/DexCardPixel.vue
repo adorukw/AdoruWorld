@@ -105,7 +105,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { DexEntryResponse } from '@/types'
-import { getCategoryInfo, getStatusInfo } from '@/constants/mock'
 
 interface Props {
     entry: DexEntryResponse

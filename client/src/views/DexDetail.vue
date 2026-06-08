@@ -91,6 +91,15 @@ const relatedEntries = computed(() => {
                                     </div>
                                 </div>
                             </div>
+
+                            <div v-if="entry.summary" class="pixel-card p-5 mt-6">
+                                <h2 class="pixel-text text-sm text-pokemon-black mb-3 flex items-center gap-2">
+                                    <span>📖</span> 作品简介
+                                </h2>
+                                <p class="text-pokemon-dark-gray text-sm leading-relaxed whitespace-pre-line">
+                                    {{ entry.summary }}
+                                </p>
+                            </div>
                         </div>
 
                         <div class="md:col-span-2">

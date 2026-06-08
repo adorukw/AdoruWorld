@@ -355,7 +355,13 @@ async function handleDelete(item: any) {
                                     class="border-b-2 border-gray-200 hover:bg-gray-50 transition-colors">
                                     <td class="p-4 font-medium">{{ item.name }}</td>
                                     <td class="p-4 text-sm text-gray-600">{{ item.slug }}</td>
-                                    <td class="p-4" :style="{ backgroundColor: item.color }"></td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-6 h-6 rounded border-2 border-black"
+                                                :style="{ backgroundColor: item.color }"></div>
+                                            <span class="text-sm font-mono">{{ item.color }}</span>
+                                        </div>
+                                    </td>
                                     <td class="p-4">
                                         <span class="px-2 py-1 bg-gold-light border-2 border-black rounded text-xs">
                                             {{ item.count }} 次

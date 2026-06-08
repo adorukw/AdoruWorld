@@ -1,7 +1,3 @@
-import { createPinia } from 'pinia'
-
-export const pinia = createPinia()
-
 export { usePostStore } from './post'
 export { usePostCategoryStore } from './post-category'
 export { usePostTagStore } from './post-tag'
