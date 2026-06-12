@@ -94,24 +94,24 @@ const sizeClass = computed(() => {
 })
 
 // 自定义样式
-const customStyles = computed(() => {
-    if (props.color !== 'custom') return {}
+// const customStyles = computed(() => {
+//     if (props.color !== 'custom') return {}
 
-    const baseShadow = {
-        '--inset-top-left': props.customShadow?.insetTopLeft || '#9a2208',
-        '--inset-bottom-right': props.customShadow?.insetBottomRight || '#ff6b4a',
-        '--outer-shadow': props.customShadow?.outer || '#000000',
-    }
+//     const baseShadow = {
+//         '--inset-top-left': props.customShadow?.insetTopLeft || '#9a2208',
+//         '--inset-bottom-right': props.customShadow?.insetBottomRight || '#ff6b4a',
+//         '--outer-shadow': props.customShadow?.outer || '#000000',
+//     }
 
-    if (props.customColor) {
-        return {
-            ...baseShadow,
-            'background-color': props.customColor,
-        }
-    }
+//     if (props.customColor) {
+//         return {
+//             ...baseShadow,
+//             'background-color': props.customColor,
+//         }
+//     }
 
-    return baseShadow
-})
+//     return baseShadow
+// })
 </script>
 
 <style scoped>

@@ -9,11 +9,11 @@
                 <div class="text-white pixel-text md:text-2xl tracking-widest ">AdoruWorld</div>
             </div>
             <div class="hidden md:flex items-center gap-6 text-xl">
-                <a v-for="navItem in navItems" :key="navItem.path" :href="navItem.path"
+                <router-link v-for="navItem in navItems" :key="navItem.path" :to="navItem.path"
                     class=" !hover:text-yellow-300 transition-colors! no-underline">
                     <span>{{ navItem.icon }}</span>
                     <span>{{ navItem.name }}</span>
-                </a>
+                </router-link>
             </div>
             <!-- 移动端菜单按钮 -->
             <button class="md:hidden pixel-btn text-xs px-3 py-2">☰</button>

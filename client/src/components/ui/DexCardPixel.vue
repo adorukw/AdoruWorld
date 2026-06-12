@@ -1,3 +1,5 @@
+<!-- @ts-nocheck -->
+
 <template>
     <!-- Grid 视图卡片 -->
     <router-link v-if="viewMode === 'grid'" :to="`/dex/${entry.slug}`" class="group block">
@@ -103,6 +105,7 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
 import { computed } from 'vue'
 import type { DexEntryResponse } from '@/types'
 

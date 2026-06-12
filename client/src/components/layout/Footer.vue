@@ -202,14 +202,4 @@ onUnmounted(() => {
 .uptime-seconds {
     animation: pulse 1s infinite;
 }
-
-/* 卡片悬停效果 */
-.px-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.px-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
 </style>

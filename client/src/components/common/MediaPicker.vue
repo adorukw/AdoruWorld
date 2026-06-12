@@ -1,6 +1,6 @@
 <!-- src/components/common/MediaPicker.vue -->
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref} from 'vue'
 import { useMediaStore } from '@/store/media'
 import type { MediaResponse } from '@/types/media'
 

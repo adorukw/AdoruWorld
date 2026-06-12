@@ -8,6 +8,9 @@
       "path": "./tsconfig.node.json"
     }
   ],
+  "exclude":[
+    "node_modules",
+  ],
   "compilerOptions": {
     "types":["node"]
     // "moduleResolution": "bundler",

@@ -6,11 +6,11 @@ import PixelButton from '@/components/ui/PixelButton.vue'
 import SkyCloud from '@/components/ui/SkyCloud.vue'
 import { projects } from '@/constants/mock'
 
-const statusColors = {
-    'completed': { bg: 'bg-grass', text: '已完成' },
-    'in-progress': { bg: 'bg-gold', text: '进行中' },
-    'archived': { bg: 'bg-gray', text: '已归档' }
-}
+// const statusColors = {
+//     'completed': { bg: 'bg-grass', text: '已完成' },
+//     'in-progress': { bg: 'bg-gold', text: '进行中' },
+//     'archived': { bg: 'bg-gray', text: '已归档' }
+// }
 
 const groupedProjects = computed(() => ({
     'in-progress': projects.filter(p => p.status === 'in-progress'),
