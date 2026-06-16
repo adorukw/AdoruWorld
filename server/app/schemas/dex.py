@@ -6,7 +6,7 @@ DexCategoryType = str
 DexStatusType = str
 
 
-class DexEntryCreate(BaseModel):
+class DexCreate(BaseModel):
     slug: str
     title: str
     original_title: str | None = Field(None, alias="originalTitle")
@@ -25,7 +25,7 @@ class DexEntryCreate(BaseModel):
     model_config = {"populate_by_name": True}
 
 
-class DexEntryUpdate(BaseModel):
+class DexUpdate(BaseModel):
     slug: str | None = None
     title: str | None = None
     original_title: str | None = Field(None, alias="originalTitle")
@@ -43,7 +43,7 @@ class DexEntryUpdate(BaseModel):
     model_config = {"populate_by_name": True}
 
 
-class DexEntryResponse(BaseModel):
+class DexResponse(BaseModel):
     id: str
     slug: str
     title: str

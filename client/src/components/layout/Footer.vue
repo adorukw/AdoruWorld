@@ -100,11 +100,11 @@ const postStore = usePostStore()
 
 const { totalPostsCount, totalWordCount, totalViewsCount } = postStore
 
-const LAUNCH_DATE = ref<Date>(new Date('2026-01-01T00:00:00Z'))
+const launchDate = ref<Date>(new Date('2026-01-01T00:00:00Z'))
 
 const getLaunchDate = async () => {
     const response = await api.system.systemInfo()
-    LAUNCH_DATE.value = new Date(response.launch_date)
+    launchDate.value = new Date(response.launch_date)
 }
 
 onMounted(async () => {
@@ -116,7 +116,7 @@ let uptimeTimer: number | null = null
 
 const calculateUptime = () => {
     const now = new Date()
-    const diffInSeconds = Math.floor((now.getTime() - LAUNCH_DATE.value.getTime()) / 1000)
+    const diffInSeconds = Math.floor((now.getTime() - launchDate.value.getTime()) / 1000)
     uptimeSeconds.value = diffInSeconds
 }
 

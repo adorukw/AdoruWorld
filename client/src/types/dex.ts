@@ -21,7 +21,7 @@ export interface DexStatusInfo {
     color: string
 }
 
-export interface DexEntryResponse {
+export interface DexResponse {
     id: string,
     slug: string,
     title: string,
@@ -39,7 +39,7 @@ export interface DexEntryResponse {
     genres?: DexGenreResponse[]
 }
 
-export interface DexEntryCreate {
+export interface DexCreate {
     slug: string,
     title: string,
     originalTitle?: string,
@@ -56,7 +56,7 @@ export interface DexEntryCreate {
     genreIds?: string[]
 }
 
-export interface DexEntryUpdate {
+export interface DexUpdate {
     slug?: string,
     title?: string,
     originalTitle?: string,

@@ -1,7 +1,7 @@
 import type {
     PostCreate, PostUpdate, PostCategoryCreate,
     PostCategoryUpdate, PostTagCreate, PostTagUpdate,
-    DexEntryCreate, DexEntryUpdate, DexGenreCreate, DexGenreUpdate,
+    DexCreate, DexUpdate, DexGenreCreate, DexGenreUpdate,
     MediaTagCreate, MediaTagUpdate, MediaCreate, MediaUpdate,
 } from '@/types'
 import {
@@ -318,7 +318,7 @@ export const postTagUpdateConfig: FormConfig<PostTagUpdate> = {
     saveApi: (data, id) => usePostTagStore().updatePostTag(id!, data)
 }
 
-export const dexEntryCreateConfig: FormConfig<DexEntryCreate> = {
+export const dexCreateConfig: FormConfig<DexCreate> = {
     fields: [
         {
             key: 'slug',
@@ -437,10 +437,10 @@ export const dexEntryCreateConfig: FormConfig<DexEntryCreate> = {
             },
         }
     ],
-    saveApi: (data) => useDexStore().createDexEntry(data)
+    saveApi: (data) => useDexStore().createDex(data)
 }
 
-export const dexEntryUpdateConfig: FormConfig<DexEntryUpdate> = {
+export const dexUpdateConfig: FormConfig<DexUpdate> = {
     fields: [
         {
             key: 'slug',
@@ -559,7 +559,7 @@ export const dexEntryUpdateConfig: FormConfig<DexEntryUpdate> = {
             },
         }
     ],
-    saveApi: (data, id) => useDexStore().updateDexEntry(id!, data)
+    saveApi: (data, id) => useDexStore().updateDex(id!, data)
 }
 
 export const dexGenreCreateConfig: FormConfig<DexGenreCreate> = {

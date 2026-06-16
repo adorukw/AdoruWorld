@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import { ref} from 'vue'
+import { ref } from 'vue'
 import { api } from '@/api'
-import type { DexEntryResponse, DexStats, DexEntryCreate, DexEntryUpdate } from '@/types'
+import type { DexResponse, DexStats, DexCreate, DexUpdate } from '@/types'
 
 export const useDexStore = defineStore('dex', () => {
-    const dexEntries = ref<DexEntryResponse[]>([])
-    const currentDexEntry = ref<DexEntryResponse | null>(null)
+    const dexEntries = ref<DexResponse[]>([])
+    const currentDex = ref<DexResponse | null>(null)
     const dexStats = ref<DexStats>({
         total: 0,
         byCategory: {},
@@ -49,11 +49,11 @@ export const useDexStore = defineStore('dex', () => {
     }
 
 
-    const getDexEntryBySlug = async (slug: string) => {
+    const getDexBySlug = async (slug: string) => {
         loading.value = true
         error.value = null
         try {
-            currentDexEntry.value = await api.dexs.getBySlug(slug)
+            currentDex.value = await api.dexs.getBySlug(slug)
         }
         catch (err: any) {
             error.value = err.message || '获取图鉴详情失败'
@@ -63,11 +63,11 @@ export const useDexStore = defineStore('dex', () => {
         }
     }
 
-    const getDexEntryById = async (id: string) => {
+    const getDexById = async (id: string) => {
         loading.value = true
         error.value = null
         try {
-            currentDexEntry.value = await api.dexs.getById(id)
+            currentDex.value = await api.dexs.getById(id)
         }
         catch (err: any) {
             error.value = err.message || '获取图鉴详情失败'
@@ -77,13 +77,13 @@ export const useDexStore = defineStore('dex', () => {
         }
     }
 
-    const createDexEntry = async (data: DexEntryCreate) => {
+    const createDex = async (data: DexCreate) => {
         loading.value = true
         error.value = null
         try {
-            const newDexEntry = await api.dexs.create(data)
-            dexEntries.value.unshift(newDexEntry)
-            return newDexEntry
+            const newDex = await api.dexs.create(data)
+            dexEntries.value.unshift(newDex)
+            return newDex
         }
         catch (err: any) {
             error.value = err.message || '创建图鉴失败'
@@ -94,19 +94,19 @@ export const useDexStore = defineStore('dex', () => {
         }
     }
 
-    const updateDexEntry = async (id: string, data: DexEntryUpdate) => {
+    const updateDex = async (id: string, data: DexUpdate) => {
         loading.value = true
         error.value = null
         try {
-            const updateDexEntry = await api.dexs.update(id, data)
+            const updateDex = await api.dexs.update(id, data)
             const index = dexEntries.value.findIndex(entry => entry.id === id)
             if (index > -1) {
-                dexEntries.value[index] = updateDexEntry
+                dexEntries.value[index] = updateDex
             }
-            if (currentDexEntry.value?.id === id) {
-                currentDexEntry.value = updateDexEntry
+            if (currentDex.value?.id === id) {
+                currentDex.value = updateDex
             }
-            return updateDexEntry
+            return updateDex
         }
         catch (err: any) {
             error.value = err.message || '更新图鉴失败'
@@ -117,14 +117,14 @@ export const useDexStore = defineStore('dex', () => {
         }
     }
 
-    const deleteDexEntry = async (id: string) => {
+    const deleteDex = async (id: string) => {
         loading.value = true
         error.value = null
         try {
             await api.dexs.delete(id)
             dexEntries.value = dexEntries.value.filter(entry => entry.id !== id)
-            if (currentDexEntry.value?.id === id) {
-                currentDexEntry.value = null
+            if (currentDex.value?.id === id) {
+                currentDex.value = null
             }
         }
         catch (err: any) {
@@ -137,8 +137,8 @@ export const useDexStore = defineStore('dex', () => {
     }
     return {
         dexEntries, dexStats, loading, error,
-        getDexEntries, getDexEntryBySlug, getDexEntryById,
-        createDexEntry, updateDexEntry, deleteDexEntry,
+        getDexEntries, getDexBySlug, getDexById,
+        createDex, updateDex, deleteDex,
         getDexStats
     }
 

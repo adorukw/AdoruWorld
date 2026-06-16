@@ -6,13 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.crud import posts as crud
-from app.schemas import PostResponse, PostCreate, PostUpdate, PostListItem, ArchiveItem
+from app.schemas import PostResponse, PostCreate, PostUpdate, ArchiveItem
 from app.utils import format_post
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
 
-@router.get("", response_model=list[PostListItem])
+@router.get("", response_model=list[PostResponse])
 async def list_posts(
     published: bool | None = None,
     featured: bool | None = None,
@@ -23,7 +23,7 @@ async def list_posts(
     db: AsyncSession = Depends(get_db)
 ):
     row = await crud.get_posts(db, published=published, featured=featured, category_slug=category, tag_slug=tag, skip=skip, limit=limit)
-    return [PostListItem(**format_post(post)) for post in row]
+    return [PostResponse(**format_post(post)) for post in row]
 
 
 @router.get("/total-posts-count", response_model=int)
@@ -52,7 +52,7 @@ async def list_archives(db: AsyncSession = Depends(get_db)):
         data = format_post(post)
         created_time = post.created_at
         key = (created_time.year, created_time.month)
-        grouped[key].append(PostListItem(**data))
+        grouped[key].append(PostResponse(**data))
     res = []
     for (year, month), items in sorted(grouped.items(), reverse=True):
         res.append(ArchiveItem(year=year, month=month, posts=items))

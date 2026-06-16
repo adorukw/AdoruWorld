@@ -16,5 +16,5 @@ class DexGenre(Base):
     slug: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     color: Mapped[str] = mapped_column(String, nullable=False)
 
-    dex_entries = relationship(
-        "DexEntry", secondary="dex_to_dex_genres", back_populates="genres")
+    dex = relationship(
+        "Dex", secondary="dex_to_dex_genres", back_populates="genres")

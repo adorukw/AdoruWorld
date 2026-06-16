@@ -156,11 +156,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { DexEntryResponse } from '@/types'
+import type { DexResponse } from '@/types'
 import { dexCategories, dexStatuses } from '@/constants'
 
 interface Props {
-    entry: DexEntryResponse
+    entry: DexResponse
     index: number
     viewMode: 'grid' | 'list'
 }

@@ -7,7 +7,7 @@ import {
     postCreateConfig, postUpdateConfig,
     postCategoryCreateConfig, postCategoryUpdateConfig,
     postTagCreateConfig, postTagUpdateConfig,
-    dexEntryCreateConfig, dexEntryUpdateConfig,
+    dexCreateConfig, dexUpdateConfig,
     dexGenreCreateConfig, dexGenreUpdateConfig,
     mediaTagCreateConfig, mediaTagUpdateConfig,
     mediaCreateConfig, mediaUpdateConfig,
@@ -34,7 +34,7 @@ const config = computed<FormConfig<any>>(() => {
             create: postTagCreateConfig, update: postTagUpdateConfig
         },
         dexs: {
-            create: dexEntryCreateConfig, update: dexEntryUpdateConfig
+            create: dexCreateConfig, update: dexUpdateConfig
         },
         dexGenres: {
             create: dexGenreCreateConfig, update: dexGenreUpdateConfig

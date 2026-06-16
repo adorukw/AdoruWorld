@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from '@/api'
-import type { PostResponse, PostListItem, ArchiveItem, PostCreate, PostUpdate } from '@/types'
+import type { PostResponse, ArchiveItem, PostCreate, PostUpdate } from '@/types'
 
 export const usePostStore = defineStore('post', () => {
     // ==================== State ====================
-    const posts = ref<PostListItem[]>([])
-    const allPosts = ref<PostListItem[]>([])
+    const posts = ref<PostResponse[]>([])
+    const allPosts = ref<PostResponse[]>([])
     const currentPost = ref<PostResponse | null>(null)
     const archives = ref<ArchiveItem[]>([])
     const totalPostsCount = ref<number>(0)
@@ -161,7 +161,7 @@ export const usePostStore = defineStore('post', () => {
             await api.posts.incrementViews(id)
         }
         catch (err: any) {
-            error.value = err.message || '获取文章列表失败'
+            error.value = err.message || '增加文章阅读量失败'
         }
         finally {
             loading.value = false
@@ -175,7 +175,7 @@ export const usePostStore = defineStore('post', () => {
             const count = await api.posts.totalPostsCount()
             totalPostsCount.value = count
         } catch (err: any) {
-            error.value = err.message || '获取文章列表失败'
+            error.value = err.message || '获取文章数量失败'
         }
         finally {
             loading.value = false
@@ -189,7 +189,7 @@ export const usePostStore = defineStore('post', () => {
             const count = await api.posts.totalWords()
             totalWordCount.value = count
         } catch (err: any) {
-            error.value = err.message || '获取文章列表失败'
+            error.value = err.message || '获取文章总字数失败'
         }
         finally {
             loading.value = false
@@ -203,7 +203,7 @@ export const usePostStore = defineStore('post', () => {
             const count = await api.posts.totalViews()
             totalViewsCount.value = count
         } catch (err: any) {
-            error.value = err.message || '获取文章列表失败'
+            error.value = err.message || '获取文章总阅读量失败'
         }
         finally {
             loading.value = false

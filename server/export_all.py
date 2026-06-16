@@ -24,7 +24,7 @@ sys.path.insert(0, str(SERVER_DIR))
 from app.database import async_session, init_db
 from app.models import (
     Post, PostCategory, PostTag, post_to_post_tags,
-    DexEntry, DexGenre, dex_to_dex_genres,
+    Dex, DexGenre, dex_to_dex_genres,
     Media, MediaTag, media_to_media_tags,
 )
 
@@ -103,7 +103,7 @@ async def collect_data() -> dict:
 
         print("📦 正在导出图鉴条目...")
         rows = await db.execute(
-            DexEntry.__table__.select().order_by(DexEntry.__table__.c.title)
+            Dex.__table__.select().order_by(Dex.__table__.c.title)
         )
         entries = [_row_to_dict(r) for r in rows.fetchall()]
         for entry in entries:
@@ -176,7 +176,7 @@ def add_media_files(zf: zipfile.ZipFile, data: dict):
         else:
             print(f"  ⚠️  封面文件不存在，跳过: {local}")
 
-    # 额外检查 DexEntry cover_image
+    # 额外检查 Dex cover_image
     for entry in data.get("dexEntries", []):
         cover = entry.get("cover_image", "") or ""
         if not cover.startswith("/"):

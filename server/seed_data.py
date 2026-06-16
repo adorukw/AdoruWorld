@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import async_session, init_db
 from app.models import (PostCategory, PostTag, Post, post_to_post_tags,
-                        DexEntry, DexGenre, dex_to_dex_genres, Media, MediaTypeEnum, media_to_media_tags, MediaTag)
+                        Dex, DexGenre, dex_to_dex_genres, Media, MediaTypeEnum, media_to_media_tags, MediaTag)
 import re
 
 categories = [
@@ -797,7 +797,7 @@ async def seed_dex_genres(db: AsyncSession) -> dict[str, str]:
 async def seed_dex_entries(db: AsyncSession, genre_map: dict[str, str]):
     """播种图鉴条目（依赖题材映射）"""
     for d in dexEntries:
-        dexEntry = DexEntry(
+        dex = Dex(
             slug=d["slug"],
             title=d["title"],
             original_title=d["originalTitle"],
@@ -812,14 +812,14 @@ async def seed_dex_entries(db: AsyncSession, genre_map: dict[str, str]):
             year=d.get("year"),
             summary=d.get("summary"),
         )
-        db.add(dexEntry)
+        db.add(dex)
         await db.flush()
 
         for genre_name in d["genre"]:
             genre_id = genre_map[genre_name]
             await db.execute(
                 dex_to_dex_genres.insert().values(
-                    dex_entry_id=dexEntry.id,
+                    dex_entry_id=dex.id,
                     dex_genre_id=genre_id
                 )
             )
@@ -837,7 +837,7 @@ async def seed():
         await db.execute(Post.__table__.delete())
         await db.execute(PostTag.__table__.delete())
         await db.execute(PostCategory.__table__.delete())
-        await db.execute(DexEntry.__table__.delete())
+        await db.execute(Dex.__table__.delete())
         await db.execute(DexGenre.__table__.delete())
         await db.execute(Media.__table__.delete())
         await db.execute(MediaTag.__table__.delete())

@@ -104,7 +104,7 @@ async def upload_media(
 
 
 @router.get("", response_model=list[MediaResponse])
-async def list_meida(
+async def list_media(
     media_type: str | None = None,
     tag_slug: str | None = None,
     skip: int = 0,

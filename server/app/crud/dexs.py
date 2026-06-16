@@ -2,42 +2,42 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models import DexEntry, DexGenre
-from app.schemas import DexEntryCreate, DexEntryUpdate
+from app.models import Dex, DexGenre
+from app.schemas import DexCreate, DexUpdate
 
 
-async def get_dex_entries(
+async def get_dex(
         db: AsyncSession,
         category: str | None = None,
         status: str | None = None,
         skip: int = 0,
         limit: int = 20
-) -> list[DexEntry]:
-    stmt = select(DexEntry)
+) -> list[Dex]:
+    stmt = select(Dex)
     if category:
-        stmt = stmt.where(DexEntry.category == category)
+        stmt = stmt.where(Dex.category == category)
     if status:
-        stmt = stmt.where(DexEntry.status == status)
-    stmt = stmt.order_by(DexEntry.title).offset(skip).limit(limit)
+        stmt = stmt.where(Dex.status == status)
+    stmt = stmt.order_by(Dex.title).offset(skip).limit(limit)
     res = await db.execute(stmt)
     return list(res.scalars().all())
 
 
 async def get_dex_stats(db: AsyncSession) -> dict:
-    total_res = await db.execute(select(func.count()).select_from(DexEntry))
+    total_res = await db.execute(select(func.count()).select_from(Dex))
     total = total_res.scalar_one()
 
     cat_res = await db.execute(
-        select(DexEntry.category, func.count()).group_by(DexEntry.category)
+        select(Dex.category, func.count()).group_by(Dex.category)
     )
     by_category = {row[0]: row[1] for row in cat_res.all()}
 
     status_res = await db.execute(
-        select(DexEntry.status, func.count()).group_by(DexEntry.status)
+        select(Dex.status, func.count()).group_by(Dex.status)
     )
     by_status = {row[0]: row[1] for row in status_res.all()}
 
-    avg_res = await db.execute(select(func.coalesce(func.avg(DexEntry.rating), 0.0)))
+    avg_res = await db.execute(select(func.coalesce(func.avg(Dex.rating), 0.0)))
     average_rating = round(avg_res.scalar_one(), 1)
 
     return {
@@ -48,17 +48,17 @@ async def get_dex_stats(db: AsyncSession) -> dict:
     }
 
 
-async def get_dex_entry_by_slug(db: AsyncSession, slug: str) -> DexEntry | None:
-    res = await db.execute(select(DexEntry).where(DexEntry.slug == slug))
+async def get_dex_by_slug(db: AsyncSession, slug: str) -> Dex | None:
+    res = await db.execute(select(Dex).where(Dex.slug == slug))
     return res.scalar_one_or_none()
 
 
-async def get_dex_entry_by_id(db: AsyncSession, entry_id: str) -> DexEntry | None:
-    res = await db.execute(select(DexEntry).where(DexEntry.id == entry_id))
+async def get_dex_by_id(db: AsyncSession, entry_id: str) -> Dex | None:
+    res = await db.execute(select(Dex).where(Dex.id == entry_id))
     return res.scalar_one_or_none()
 
 
-async def create_dex_entry(db: AsyncSession, data: DexEntryCreate) -> DexEntry:
+async def create_dex(db: AsyncSession, data: DexCreate) -> Dex:
     """创建新的 Dex 条目"""
     # 提取 genre_ids（排除关联字段，避免直接传入模型）
     genre_ids = data.genre_ids
@@ -67,7 +67,7 @@ async def create_dex_entry(db: AsyncSession, data: DexEntryCreate) -> DexEntry:
     entry_data = data.model_dump(exclude={"genre_ids"})
 
     # 创建 DexEntry 实例
-    entry = DexEntry(**entry_data)
+    entry = Dex(**entry_data)
 
     # 处理多对多关联：绑定标签
     if genre_ids:
@@ -82,15 +82,15 @@ async def create_dex_entry(db: AsyncSession, data: DexEntryCreate) -> DexEntry:
 
     # 重新加载关联数据（确保返回的对象包含 genres）
     stmt = (
-        select(DexEntry)
-        .options(selectinload(DexEntry.genres))
-        .where(DexEntry.id == entry.id)
+        select(Dex)
+        .options(selectinload(Dex.genres))
+        .where(Dex.id == entry.id)
     )
     result = await db.execute(stmt)
     return result.scalar_one()
 
 
-async def update_dex_entry(db: AsyncSession, entry: DexEntry, data: DexEntryUpdate) -> DexEntry:
+async def update_dex(db: AsyncSession, entry: Dex, data: DexUpdate) -> Dex:
     """更新 Dex 条目"""
     # 获取需更新的字段（仅更新客户端提供的字段）
     update_data = data.model_dump(exclude_unset=True)
@@ -119,14 +119,14 @@ async def update_dex_entry(db: AsyncSession, entry: DexEntry, data: DexEntryUpda
 
     # 重新加载关联数据
     stmt = (
-        select(DexEntry)
-        .options(selectinload(DexEntry.genres))
-        .where(DexEntry.id == entry.id)
+        select(Dex)
+        .options(selectinload(Dex.genres))
+        .where(Dex.id == entry.id)
     )
     result = await db.execute(stmt)
     return result.scalar_one()
 
 
-async def delete_dex_entry(db: AsyncSession, entry: DexEntry) -> None:
+async def delete_dex(db: AsyncSession, entry: Dex) -> None:
     await db.delete(entry)
     await db.commit()

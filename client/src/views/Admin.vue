@@ -7,9 +7,6 @@ import {
     usePostStore, usePostCategoryStore, usePostTagStore,
     useDexStore, useDexGenreStore, useMediaStore, useMediaTagStore
 } from '@/store'
-// import type {
-//     PostResponse, PostListItem, PostCategoryResponse, PostTagResponse, DexEntryResponse, DexGenreResponse
-// } from '@/types'
 
 const postStore = usePostStore()
 const postCategoryStore = usePostCategoryStore()
@@ -152,7 +149,7 @@ async function handleDelete(item: any) {
                 await postTagStore.deletePostTag(item.id)
                 break
             case 'dexs':
-                await dexStore.deleteDexEntry(item.id)
+                await dexStore.deleteDex(item.id)
                 break
             case 'dexGenres':
                 await dexGenreStore.deleteDexGenre(item.id)

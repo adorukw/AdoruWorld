@@ -4,6 +4,7 @@ from sqlalchemy import Float, Integer, String, Text, Enum as SAEnum, Table, Colu
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.models.dex_genre import DexGenre
 
 
 def _uuid():
@@ -21,15 +22,15 @@ DexStatusEnum = SAEnum(
 dex_to_dex_genres = Table(
     "dex_to_dex_genres",
     Base.metadata,
-    Column("dex_entry_id", String, ForeignKey(
-        "dex_entries.id"), primary_key=True),
+    Column("dex_id", String, ForeignKey(
+        "dex.id"), primary_key=True),
     Column("dex_genre_id", String, ForeignKey(
         "dex_genres.id"), primary_key=True)
 )
 
 
-class DexEntry(Base):
-    __tablename__ = "dex_entries"
+class Dex(Base):
+    __tablename__ = "dex"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
     slug: Mapped[str] = mapped_column(String, unique=True, nullable=False)
@@ -46,5 +47,5 @@ class DexEntry(Base):
     creator: Mapped[str | None] = mapped_column(String, nullable=True)
     year: Mapped[int | None] = mapped_column(Integer, nullable=True)
     
-    genres: Mapped[list["DexGenre"]] = relationship(
-        "DexGenre", secondary=dex_to_dex_genres, back_populates="dex_entries", lazy="selectin")
+    genres: Mapped[list[DexGenre]] = relationship(
+        "DexGenre", secondary=dex_to_dex_genres, back_populates="dex", lazy="selectin")

@@ -107,10 +107,10 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { computed } from 'vue'
-import type { DexEntryResponse } from '@/types'
+import type { DexResponse } from '@/types'
 
 interface Props {
-    entry: DexEntryResponse
+    entry: DexResponse
     index: number
     viewMode: 'grid' | 'list'
 }

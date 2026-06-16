@@ -5,7 +5,7 @@ import { useMediaStore } from '@/store/media'
 import type { MediaResponse } from '@/types/media'
 
 const props = defineProps<{
-    modelValue: string
+    modelValue?: string
 }>()
 
 const emit = defineEmits<{

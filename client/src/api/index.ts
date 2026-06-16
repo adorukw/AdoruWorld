@@ -2,8 +2,8 @@ import { request } from '@/utils'
 import type {
   PostCategoryResponse, PostCategoryCreate, PostCategoryUpdate,
   PostTagResponse, PostTagCreate, PostTagUpdate,
-  PostResponse, PostListItem, ArchiveItem, PostCreate, PostUpdate,
-  DexEntryResponse, DexEntryCreate, DexEntryUpdate, DexStats,
+  PostResponse, ArchiveItem, PostCreate, PostUpdate,
+  DexResponse, DexCreate, DexUpdate, DexStats,
   DexGenreResponse, DexGenreCreate, DexGenreUpdate,
   MediaTagResponse, MediaTagCreate, MediaTagUpdate,
   MediaResponse, MediaCreate, MediaUpdate, MediaUploadResponse
@@ -67,7 +67,7 @@ export const api = {
       limit?: number
     }) => {
       const query = params ? '?' + new URLSearchParams(params as Record<string, string>).toString() : ''
-      return request<PostListItem[]>(`/posts${query}`)
+      return request<PostResponse[]>(`/posts${query}`)
     },
 
     // 获取归档
@@ -110,15 +110,15 @@ export const api = {
       limit?: number
     }) => {
       const query = params ? '?' + new URLSearchParams(params as Record<string, string>).toString() : ''
-      return request<DexEntryResponse[]>(`/dexs${query}`)
+      return request<DexResponse[]>(`/dexs${query}`)
     },
-    getBySlug: (slug: string) => request<DexEntryResponse>(`/dexs/slug/${slug}`),
-    getById: (id: string) => request<DexEntryResponse>(`/dexs/${id}`),
-    create: (data: DexEntryCreate) => request<DexEntryResponse>('/dexs', {
+    getBySlug: (slug: string) => request<DexResponse>(`/dexs/slug/${slug}`),
+    getById: (id: string) => request<DexResponse>(`/dexs/${id}`),
+    create: (data: DexCreate) => request<DexResponse>('/dexs', {
       method: 'POST',
       body: JSON.stringify(data)
     }),
-    update: (id: string, data: DexEntryUpdate) => request<DexEntryResponse>(`/dexs/${id}`, {
+    update: (id: string, data: DexUpdate) => request<DexResponse>(`/dexs/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     }),

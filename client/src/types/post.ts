@@ -19,27 +19,10 @@ export interface PostResponse {
     views: number
 }
 
-export interface PostListItem {
-    id: string
-    slug: string
-    title: string
-    description?: string
-    content: string
-    coverImage?: string
-    createdAt: string
-    published: boolean
-    featured: boolean
-    category: PostCategoryResponse
-    tags: PostTagResponse[]
-    readingTime: number
-    wordCount: number
-    views: number
-}
-
 export interface ArchiveItem {
     year: number
     month: number
-    posts: PostListItem[]
+    posts: PostResponse[]
 }
 
 export interface PostCreate {

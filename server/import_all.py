@@ -26,7 +26,7 @@ sys.path.insert(0, str(SERVER_DIR))
 from app.database import async_session, init_db
 from app.models import (
     Post, PostCategory, PostTag, post_to_post_tags,
-    DexEntry, DexGenre, dex_to_dex_genres,
+    Dex, DexGenre, dex_to_dex_genres,
     Media, MediaTag, media_to_media_tags,
 )
 from sqlalchemy import insert, delete as sa_delete
@@ -57,7 +57,7 @@ async def clear_database(db):
 
     info("清空主表（有依赖优先）...")
     await db.execute(sa_delete(Post.__table__))
-    await db.execute(sa_delete(DexEntry.__table__))
+    await db.execute(sa_delete(Dex.__table__))
     await db.execute(sa_delete(Media.__table__))
 
     info("清空主表（无依赖）...")
@@ -208,7 +208,7 @@ async def import_data(db, data: dict, dry_run: bool):
             for entry in entries:
                 genre_ids = entry.pop("_genreIds", [])
 
-                stmt = insert(DexEntry).values(**entry)
+                stmt = insert(Dex).values(**entry)
                 await db.execute(stmt)
 
                 for genre_id in genre_ids:

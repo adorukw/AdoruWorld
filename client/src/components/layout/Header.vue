@@ -8,7 +8,7 @@
                 </div>
                 <div class="text-white pixel-text md:text-2xl tracking-widest ">AdoruWorld</div>
             </div>
-            <div class="hidden md:flex items-center gap-6 text-xl">
+            <div class="hidden md:flex items-center gap-6 text-xl text-white">
                 <router-link v-for="navItem in navItems" :key="navItem.path" :to="navItem.path"
                     class=" !hover:text-yellow-300 transition-colors! no-underline">
                     <span>{{ navItem.icon }}</span>
