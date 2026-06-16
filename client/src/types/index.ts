@@ -6,6 +6,18 @@ export * from './dex-genre'
 export * from './media'
 export * from './media-tag'
 
+export interface NavItem {
+    name: string,
+    path: string,
+    icon?: string
+}
+
+export interface SocialLink {
+    name: string,
+    url: string,
+    icon?: string
+}
+
 export interface SiteStats {
     totalPosts: number,
     totalWords: number,
@@ -33,10 +45,4 @@ export interface Project {
     github?: string,
     image?: string,
     status: 'completed' | 'in-progress' | 'archived'
-}
-
-export interface NavItem {
-    name: string,
-    path: string,
-    icon?: string
 }

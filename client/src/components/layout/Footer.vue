@@ -32,53 +32,43 @@
                     <!-- 统计数据网格：2x2布局 -->
                     <div class="grid grid-cols-2 gap-4">
                         <!-- 文章数卡片 -->
-                        <px-card round class=" bg-white/80 rounded p-3 relative overflow-hidden">
+                        <div class="pixel-card bg-white/80 rounded p-3 relative overflow-hidden">
                             <div class="  text-sky-dark text-lg relative z-10">{{ totalPostsCount }}
                             </div>
                             <div class="  relative z-10">总文章数</div>
-                        </px-card>
+                        </div>
                         <!-- 总字数卡片 -->
-                        <px-card round class=" bg-white/80 rounded p-3 relative overflow-hidden">
+                        <div class="pixel-card bg-white/80 rounded p-3 relative overflow-hidden">
                             <div class="  text-sky-dark text-lg relative z-10">{{ totalWordCount }}
                             </div>
                             <div class="  relative z-10">总字数</div>
-                        </px-card>
+                        </div>
                         <!-- 阅读量卡片 -->
-                        <px-card round class=" bg-white/80 rounded p-3 relative overflow-hidden">
+                        <div class="pixel-card bg-white/80 rounded p-3 relative overflow-hidden">
                             <div class="  text-sky-dark text-lg relative z-10">{{ totalViewsCount }}
                             </div>
                             <div class="  relative z-10">总阅览次数</div>
-                        </px-card>
+                        </div>
                         <!-- 运行天数卡片 -->
-                        <px-card round class=" bg-white/80 rounded p-3 relative overflow-hidden">
+                        <div class="pixel-card bg-white/80 rounded p-3 relative overflow-hidden">
                             <div class="  text-sky-dark text-lg relative z-10">{{ shortUptime }}</div>
                             <div class="  relative z-10">运行时长</div>
-                        </px-card>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 第三栏：社交媒体链接 -->
                 <div class="text-center md:text-right">
-                    <h3 class="  text-pokemon-black   mb-4">社交媒体</h3>
+                    <h3 class="mb-4">社交媒体</h3>
                     <!-- 社交媒体图标容器 -->
                     <div class="flex justify-center md:justify-end gap-3">
-                        <!-- GitHub链接 -->
-                        <px-button circle size="large" title="GitHub">
-                            <a href="#" target="_blank">
-                                <!-- GitHub SVG图标 -->
-                                <px-icon icon="github" size="30" class="w-5 h-5 relative z-10" />
+                        <div v-for="socialLink in socialLinks" :key="socialLink.name">
+                            <a :href=socialLink.url target="_blank" class="text-blue-500 hover:text-blue-700">
+                                <!-- 图标 -->
+                                <div class="pixel-card w-12 h-12 shrink-0" v-html="socialLink.icon"></div>
+                                {{ socialLink.name }}
                             </a>
-                        </px-button>
-                        <px-button circle size="large" title="GitHub">
-                            <a href="#" target="_blank">
-                                <span class="text-black! w-5 h-5 relative z-10">B站</span>
-                            </a>
-                        </px-button>
-                        <px-button circle size="large" title="GitHub">
-                            <a href="#" target="_blank">
-                                <px-icon icon="envelope" size="30" class="w-5 h-5 relative z-10" />
-                            </a>
-                        </px-button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -104,6 +94,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { usePostStore } from '@/store'
 import { api } from '@/api'
+import { socialLinks } from '@/constants/index'
 
 const postStore = usePostStore()
 

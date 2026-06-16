@@ -57,7 +57,7 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-    history: createWebHistory("/blog/"),
+    history: createWebHistory("/adoru-world/"),
     routes,
     scrollBehavior(_to, _from, savedPosition) {
         if (savedPosition) return savedPosition
