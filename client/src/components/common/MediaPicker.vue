@@ -57,18 +57,13 @@ async function handleUpload(event: Event) {
         input.value = ''  // 清空 input 以便重复上传
     }
 }
-
-function getThumbnailUrl(filePath: string): string {
-    // 根据你的文件服务调整
-    return `http://localhost:8000${filePath}`
-}
 </script>
 
 <template>
     <!-- 封面预览 + 选择按钮 -->
     <div class="space-y-2">
         <div v-if="modelValue" class="relative w-48 h-32 border-4 border-black overflow-hidden">
-            <img :src="getThumbnailUrl(modelValue)" class="w-full h-full object-cover" alt="封面预览" />
+            <img :src="modelValue" class="w-full h-full object-cover" alt="封面预览" />
             <button type="button" @click="emit('update:modelValue', '')"
                 class="absolute top-1 right-1 bg-red-500 text-white px-2 py-1 text-xs pixel-text">
                 ✕ 移除
@@ -110,7 +105,7 @@ function getThumbnailUrl(filePath: string): string {
                             :class="selectedPath === media.filePath
                                 ? 'border-sky ring-4 ring-sky/50 scale-105'
                                 : 'border-black hover:border-gray-400'">
-                            <img :src="getThumbnailUrl(media.filePath)" class="w-full h-full object-cover"
+                            <img :src="media.filePath" class="w-full h-full object-cover"
                                 :alt="media.title" />
                             <!-- 预览文件名 -->
                             <div

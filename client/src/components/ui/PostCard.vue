@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-defineProps<{
+const props = defineProps<{
     title?: string
     coverImage?: string
     tags?: string[]
@@ -11,6 +11,7 @@ defineProps<{
     featured?: boolean
     description?: string
 }>()
+
 </script>
 
 <template>
@@ -27,8 +28,7 @@ defineProps<{
             </div>
         </div>
         <div class="p-5 relative">
-            <div
-                class="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-transparent via-black/10 to-transparent">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-transparent via-black/10 to-transparent">
             </div>
 
             <div class="flex flex-wrap gap-2 mb-3">
@@ -79,5 +79,4 @@ defineProps<{
     </article>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

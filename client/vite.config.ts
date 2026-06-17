@@ -6,7 +6,7 @@ import { fileURLToPath, URL } from 'node:url'
 // https://vite.dev/config/
 export default defineConfig({
   base: '/adoru-world/',
-  plugins: [vue(),tailwindcss()],
+  plugins: [vue(), tailwindcss()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -14,13 +14,14 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': {
+      '/api/v1': {
         target: 'http://localhost:8000',
         changeOrigin: true
       },
-      '/uploads': {
+      '/adoru-world/uploads': {
         target: 'http://localhost:8000',
-        changeOrigin: true
+        changeOrigin: true,
+        // rewrite: path => path.replace(/^\/adoru-world\/uploads/, '') // Remove the '/adoru-world/uploads' prefix from the path
       }
     }
   }
