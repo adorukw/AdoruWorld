@@ -8,12 +8,12 @@ import {
     usePostStore, usePostCategoryStore, usePostTagStore, useDexStore, useDexGenreStore,
     useMediaTagStore, useMediaStore
 } from '@/store'
-import { dexCategories, dexStatuses} from '@/constants'
+import { dexCategories, dexStatuses } from '@/constants'
 
 export interface FormField {
     key: string
     label: string
-    type: 'text' | 'textarea' | 'select' | 'multiSelect' | 'switch' | 'number' | 'file'|'mediaPicker'
+    type: 'text' | 'textarea' | 'select' | 'multiSelect' | 'switch' | 'number' | 'file' | 'mediaPicker'
     required?: boolean
     rows?: number
     optionsGetter?: () => Promise<{ label: string; value: any }[]>
@@ -110,14 +110,14 @@ export const postUpdateConfig: FormConfig<PostUpdate> = {
             key: 'title',
             label: '文章标题',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入文章标题'
         },
         {
             key: 'slug',
             label: '文章别名',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入文章别名'
         },
         {
@@ -132,7 +132,7 @@ export const postUpdateConfig: FormConfig<PostUpdate> = {
             key: 'content',
             label: '文章内容',
             type: 'textarea',
-            required: false,
+            required: true,
             rows: 15,
             placeholder: '请输入文章内容'
         },
@@ -145,14 +145,14 @@ export const postUpdateConfig: FormConfig<PostUpdate> = {
         {
             key: 'published',
             label: '立即发布',
-            required: false,
+            required: true,
             type: 'switch'
         },
         {
             key: 'categoryId',
             label: '分类',
             type: 'select',
-            required: false,
+            required: true,
             optionsGetter: async () => {
                 const store = usePostCategoryStore()
                 await store.getPostCategories?.()
@@ -166,7 +166,7 @@ export const postUpdateConfig: FormConfig<PostUpdate> = {
             key: 'tagIds',
             label: '标签',
             type: 'multiSelect',
-            required: false,
+            required: true,
             optionsGetter: async () => {
                 const store = usePostTagStore()
                 await store.getPostTags?.()
@@ -228,14 +228,14 @@ export const postCategoryUpdateConfig: FormConfig<PostCategoryUpdate> = {
             key: 'name',
             label: '分类名称',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入分类名称'
         },
         {
             key: 'slug',
             label: '分类别名',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入分类别名'
         },
         {
@@ -297,14 +297,14 @@ export const postTagUpdateConfig: FormConfig<PostTagUpdate> = {
             key: 'name',
             label: '标签名称',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入标签名称'
         },
         {
             key: 'slug',
             label: '标签别名',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入标签别名'
         },
         {
@@ -426,7 +426,7 @@ export const dexCreateConfig: FormConfig<DexCreate> = {
             key: 'genreIds',
             label: '作品类型',
             type: 'multiSelect',
-            required: false,
+            required: true,
             optionsGetter: async () => {
                 const store = useDexGenreStore()
                 await store.getDexGenres?.()
@@ -446,14 +446,14 @@ export const dexUpdateConfig: FormConfig<DexUpdate> = {
             key: 'slug',
             label: '作品别名',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入作品别名'
         },
         {
             key: 'title',
             label: '作品名称',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入作品名称'
         },
         {
@@ -467,13 +467,13 @@ export const dexUpdateConfig: FormConfig<DexUpdate> = {
             key: 'coverImage',
             label: '封面图片',
             type: 'mediaPicker',
-            required: false,
+            required: true,
         },
         {
             key: 'category',
             label: '作品类型',
             type: 'select',
-            required: false,
+            required: true,
             optionsGetter: async () => {
                 return dexCategories.map(c => ({
                     label: c.name,
@@ -485,7 +485,7 @@ export const dexUpdateConfig: FormConfig<DexUpdate> = {
             key: 'status',
             label: '作品状态',
             type: 'select',
-            required: false,
+            required: true,
             optionsGetter: async () => {
                 return dexStatuses.map(s => ({
                     label: s.name,
@@ -497,7 +497,7 @@ export const dexUpdateConfig: FormConfig<DexUpdate> = {
             key: 'rating',
             label: '作品评分',
             type: 'number',
-            required: false,
+            required: true,
             placeholder: '请输入作品评分'
         },
         {
@@ -548,7 +548,7 @@ export const dexUpdateConfig: FormConfig<DexUpdate> = {
             key: 'genreIds',
             label: '作品类型',
             type: 'multiSelect',
-            required: false,
+            required: true,
             optionsGetter: async () => {
                 const store = useDexGenreStore()
                 await store.getDexGenres?.()
@@ -595,14 +595,14 @@ export const dexGenreUpdateConfig: FormConfig<DexGenreUpdate> = {
             key: 'name',
             label: '题材名称',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入题材名称'
         },
         {
             key: 'slug',
             label: '题材别名',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入题材别名'
         },
         {
@@ -649,14 +649,14 @@ export const mediaTagUpdateConfig: FormConfig<MediaTagUpdate> = {
             key: 'name',
             label: '标签名称',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入标签名称'
         },
         {
             key: 'slug',
             label: '标签别名',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入标签别名'
         },
         {
@@ -701,7 +701,7 @@ export const mediaCreateConfig: FormConfig<MediaCreate> = {
             key: 'tagIds',
             label: '标签',
             type: 'multiSelect',
-            required: false,
+            required: true,
             optionsGetter: async () => {
                 const store = useMediaTagStore()
                 await store.getMediaTags?.()
@@ -740,21 +740,21 @@ export const mediaUpdateConfig: FormConfig<MediaUpdate> = {
             key: 'title',
             label: '媒体标题',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入媒体标题'
         },
         {
             key: 'slug',
             label: '媒体别名',
             type: 'text',
-            required: false,
+            required: true,
             placeholder: '请输入媒体别名'
         },
         {
             key: 'tagIds',
             label: '标签',
             type: 'multiSelect',
-            required: false,
+            required: true,
             optionsGetter: async () => {
                 const store = useMediaTagStore()
                 await store.getMediaTags?.()

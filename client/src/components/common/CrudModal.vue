@@ -147,7 +147,27 @@ watch(() => props.initialData, () => {
 async function handleSubmit() {
     loading.value = true
     errorMsg.value = ''
-    console.log('Form data:', form)
+
+    for (const field of config.value.fields) {
+        if (field.required) {
+            const val = form[field.key]
+            let isEmpty = false
+
+            if (val === null || val === undefined) {
+                isEmpty = true
+            } else if (typeof val === 'string') {
+                isEmpty = val.trim() === ''
+            } else if (Array.isArray(val)) {
+                isEmpty = val.length === 0
+            }
+
+            if (isEmpty) {
+                errorMsg.value = `${field.label} 不能为空`
+                loading.value = false
+                return   // ← 直接返回，不提交
+            }
+        }
+    }
     try {
         if (props.mode === 'create') {
             await config.value.saveApi(form)
@@ -228,7 +248,7 @@ async function handleFileUpload(field: FormField, event: Event) {
                     <!-- Text / Number -->
                     <input v-if="['text', 'number'].includes(field.type)" v-model="form[field.key]"
                         class="w-full p-3 border-4 border-black focus:outline-none focus:ring-2 focus:ring-sky"
-                        :type="field.type" :placeholder="field.placeholder" :required="field.required" />
+                        :type="field.type" :placeholder="field.placeholder"/>
 
                     <!-- Textarea -->
                     <textarea v-else-if="field.type === 'textarea'" v-model="form[field.key]"
@@ -237,7 +257,7 @@ async function handleFileUpload(field: FormField, event: Event) {
 
                     <!-- Select -->
                     <select v-else-if="field.type === 'select'" v-model="form[field.key]"
-                        class="w-full p-3 border-4 border-black bg-white" :required="field.required">
+                        class="w-full p-3 border-4 border-black bg-white" >
                         <option disabled value="">请选择 {{ field.label }}</option>
                         <option v-for="opt in optionsMap[field.key]" :key="opt.value" :value="opt.value">
                             {{ opt.label }}

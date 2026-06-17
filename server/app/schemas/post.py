@@ -4,6 +4,8 @@ from app.schemas.post_category import PostCategoryResponse
 from app.schemas.post_tag import PostTagResponse
 
 # ---------- 创建 / 更新 ----------
+
+
 class PostCreate(BaseModel):
     title: str
     slug: str
@@ -14,8 +16,6 @@ class PostCreate(BaseModel):
     featured: bool = False
     category_id: str = Field(..., alias="categoryId")
     tag_ids: list[str] = Field(default_factory=list, alias="tagIds")
-    # reading_time: int = Field(default=0, alias="readingTime")
-    # word_count: int = Field(default=0, alias="wordCount")
 
     model_config = {"populate_by_name": True}
 
@@ -28,10 +28,8 @@ class PostUpdate(BaseModel):
     cover_image: str | None = Field(None, alias="coverImage")
     published: bool | None = None
     featured: bool | None = None
-    category_id: str = Field(..., alias="categoryId")
-    tag_ids: list[str] = Field(default_factory=list, alias="tagIds")
-    # reading_time: int = Field(default=0, alias="readingTime")
-    # word_count: int = Field(default=0, alias="wordCount")
+    category_id: str | None = Field(..., alias="categoryId")
+    tag_ids: list[str] | None = Field(default_factory=list, alias="tagIds")
 
     model_config = {"populate_by_name": True}
 
@@ -58,6 +56,8 @@ class PostResponse(BaseModel):
     model_config = {"from_attributes": True, "populate_by_name": True}
 
 # ---------- 归档 ----------
+
+
 class ArchiveItem(BaseModel):
     year: int
     month: int

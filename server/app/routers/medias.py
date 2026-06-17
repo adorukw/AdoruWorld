@@ -11,7 +11,7 @@ from app.crud import medias as crud
 from app.schemas import (
     MediaCreate, MediaUpdate, MediaResponse, MediaUploadResponse
 )
-from app.models import Media
+from app.config import UPLOAD_URL_PREFIX
 
 router = APIRouter(prefix="/medias", tags=["medias"])
 
@@ -94,7 +94,7 @@ async def upload_media(
     metadata = analyze_file_metadata(save_path, media_type)
 
     return MediaUploadResponse(
-        file_path=f"/{save_path}",
+        file_path=f"{UPLOAD_URL_PREFIX}/{save_path}",
         file_size=os.path.getsize(save_path),
         mime_type=file.content_type,
         extension=ext,

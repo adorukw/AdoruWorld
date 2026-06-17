@@ -29,7 +29,7 @@ class DexUpdate(BaseModel):
     slug: str | None = None
     title: str | None = None
     original_title: str | None = Field(None, alias="originalTitle")
-    cover_image: str = Field(..., alias="coverImage")
+    cover_image: str | None = Field(..., alias="coverImage")
     category: DexCategoryType | None = None
     status: DexStatusType | None = None
     rating: float | None = None
