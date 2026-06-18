@@ -21,7 +21,7 @@ export default defineConfig({
       '/adoru-world/uploads': {
         target: 'http://localhost:8000',
         changeOrigin: true,
-        // rewrite: path => path.replace(/^\/adoru-world\/uploads/, '') // Remove the '/adoru-world/uploads' prefix from the path
+        rewrite: path => path.replace(/^\/adoru-world/, '') // Remove the '/adoru-world/uploads' prefix from the path
       }
     }
   }

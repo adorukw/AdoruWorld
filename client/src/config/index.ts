@@ -1,16 +1,10 @@
-// export const BASE_API_URL = 'http://localhost:8000/api/v1';
-// export const BASE_API_URL = '/adoru-world/api/v1';
-
-// let base_api_url: string;
-
-// if (import.meta.env.NODE_ENV === 'development') {
-//     base_api_url = 'http://localhost:8000/api/v1';
-// }
-// else {
-//     base_api_url = '/adoru-world/api/v1';
-// }
-
-// export const BASE_API_URL = base_api_url;
+export * from './post-form.ts'
+export * from './post-category-form.ts'
+export * from './post-tag-form.ts'
+export * from './dex-form.ts'
+export * from './dex-genre-form.ts'
+export * from './media-form.ts'
+export * from './media-tag-form.ts'
 
 export const BASE_API_URL = import.meta.env.DEV
   ? '/api/v1'              // 开发模式 → Vite proxy

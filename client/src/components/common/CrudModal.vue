@@ -1,7 +1,6 @@
-<!-- src/components/common/CrudModal.vue -->
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch, computed } from 'vue'
-import type { FormConfig, FormField } from '@/config/form-config'
+import type { FormConfig, FormField } from '@/types'
 import MediaPicker from '@/components/common/MediaPicker.vue'
 import {
     postCreateConfig, postUpdateConfig,
@@ -11,7 +10,7 @@ import {
     dexGenreCreateConfig, dexGenreUpdateConfig,
     mediaTagCreateConfig, mediaTagUpdateConfig,
     mediaCreateConfig, mediaUpdateConfig,
-} from '@/config/form-config'
+} from '@/config'
 
 const props = defineProps<{
     module: string
@@ -248,7 +247,7 @@ async function handleFileUpload(field: FormField, event: Event) {
                     <!-- Text / Number -->
                     <input v-if="['text', 'number'].includes(field.type)" v-model="form[field.key]"
                         class="w-full p-3 border-4 border-black focus:outline-none focus:ring-2 focus:ring-sky"
-                        :type="field.type" :placeholder="field.placeholder"/>
+                        :type="field.type" :placeholder="field.placeholder" />
 
                     <!-- Textarea -->
                     <textarea v-else-if="field.type === 'textarea'" v-model="form[field.key]"
@@ -257,7 +256,7 @@ async function handleFileUpload(field: FormField, event: Event) {
 
                     <!-- Select -->
                     <select v-else-if="field.type === 'select'" v-model="form[field.key]"
-                        class="w-full p-3 border-4 border-black bg-white" >
+                        class="w-full p-3 border-4 border-black bg-white">
                         <option disabled value="">请选择 {{ field.label }}</option>
                         <option v-for="opt in optionsMap[field.key]" :key="opt.value" :value="opt.value">
                             {{ opt.label }}
@@ -277,7 +276,7 @@ async function handleFileUpload(field: FormField, event: Event) {
                     <label v-else-if="field.type === 'switch'" class="inline-flex items-center cursor-pointer">
                         <input type="checkbox" v-model="form[field.key]" class="w-5 h-5 border-2 border-black" />
                         <span class="ml-2 pixel-text text-sm">
-                            {{ form[field.key] ? '已发布' : '未发布' }}
+                            {{ form[field.key] ? 'True' : 'False' }}
                         </span>
                     </label>
 
