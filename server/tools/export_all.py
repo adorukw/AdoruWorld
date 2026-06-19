@@ -105,15 +105,15 @@ async def collect_data() -> dict:
         rows = await db.execute(
             Dex.__table__.select().order_by(Dex.__table__.c.title)
         )
-        entries = [_row_to_dict(r) for r in rows.fetchall()]
-        for entry in entries:
+        dexs = [_row_to_dict(r) for r in rows.fetchall()]
+        for dex in dexs:
             genre_rows = await db.execute(
                 dex_to_dex_genres.select().where(
-                    dex_to_dex_genres.c.dex_entry_id == entry["id"]
+                    dex_to_dex_genres.c.dex_id == dex["id"]
                 )
             )
-            entry["_genreIds"] = [r.dex_genre_id for r in genre_rows.fetchall()]
-        data["dexEntries"] = entries
+            dex["_genreIds"] = [r.dex_genre_id for r in genre_rows.fetchall()]
+        data["dex"] = dexs
 
         print("📦 正在导出媒体资源...")
         rows = await db.execute(
@@ -177,8 +177,8 @@ def add_media_files(zf: zipfile.ZipFile, data: dict):
             print(f"  ⚠️  封面文件不存在，跳过: {local}")
 
     # 额外检查 Dex cover_image
-    for entry in data.get("dexEntries", []):
-        cover = entry.get("cover_image", "") or ""
+    for dex in data.get("dex", []):
+        cover = dex.get("cover_image", "") or ""
         if not cover.startswith("/"):
             continue
         zip_path = _path_in_zip(cover)
@@ -201,7 +201,7 @@ def count_stats(data: dict) -> dict:
         "图鉴题材": len(data.get("dexGenres", [])),
         "媒体标签": len(data.get("mediaTags", [])),
         "文章": len(data.get("posts", [])),
-        "图鉴条目": len(data.get("dexEntries", [])),
+        "图鉴条目": len(data.get("dex", [])),
         "媒体资源": len(data.get("medias", [])),
     }
 
