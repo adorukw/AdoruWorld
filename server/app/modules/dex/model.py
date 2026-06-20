@@ -48,4 +48,4 @@ class Dex(Base):
     year: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     genres: Mapped[list[DexGenre]] = relationship(
-        "DexGenre", secondary=dex_to_dex_genres, back_populates="dex", lazy="selectin")
+        "DexGenre", secondary=dex_to_dex_genres, back_populates="dexs", lazy="selectin")

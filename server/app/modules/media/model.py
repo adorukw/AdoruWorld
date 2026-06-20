@@ -56,7 +56,4 @@ class Media(Base):
 
     # 关联标签
     tags: Mapped[list["MediaTag"]] = relationship(
-        "MediaTag",
-        secondary=media_to_media_tags,
-        lazy="selectin"
-    )
+        "MediaTag", secondary=media_to_media_tags, back_populates="medias", lazy="selectin")

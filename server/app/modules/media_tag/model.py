@@ -16,5 +16,5 @@ class MediaTag(Base):
     slug: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     color: Mapped[str | None] = mapped_column(String, nullable=True)
 
-    media: Mapped[list["Media"]] = relationship(
+    medias: Mapped[list["Media"]] = relationship(
         "Media", secondary="media_to_media_tags", back_populates="tags")
