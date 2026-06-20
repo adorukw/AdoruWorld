@@ -5,9 +5,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.core.config import API_PREFIX, PROJECT_NAME, VERSION, DESCRIPTION
-from app.core.database import init_db
-from app.modules import (
+from app.config import API_PREFIX, PROJECT_NAME, VERSION, DESCRIPTION
+from app.database import init_db
+from app.routers import (
     posts_router, post_categories_router, post_tags_router,
     dexs_router, dex_genres_router, system_router,
     medias_router, media_tags_router

@@ -1,9 +1,8 @@
 import asyncio
-from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database import async_session, init_db
-from app.models import (PostCategory, PostTag, Post, post_to_post_tags,
-                        Dex, DexGenre, dex_to_dex_genres, Media, MediaTypeEnum, media_to_media_tags, MediaTag)
+from app.core.database import async_session, init_db
+from app.modules import (PostCategory, PostTag, Post, post_to_post_tags,
+                                Dex, DexGenre, dex_to_dex_genres, Media, media_to_media_tags, MediaTag)
 import re
 
 categories = [
@@ -844,10 +843,10 @@ async def seed():
         await db.commit()
         print("✅ 数据清空完成")
 
-        cat_map = await seed_categories(db)
-        tag_map = await seed_tags(db)
+        # cat_map = await seed_categories(db)
+        # tag_map = await seed_tags(db)
         # await seed_posts(db, cat_map, tag_map)
-        genre_map = await seed_dex_genres(db)
+        # genre_map = await seed_dex_genres(db)
         # await seed_dex_entries(db, genre_map)
 
         await db.commit()

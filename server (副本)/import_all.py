@@ -200,29 +200,29 @@ async def import_data(db, data: dict, dry_run: bool):
     total_inserted += len(posts)
 
     # 图鉴条目
-    entries = data.get("dexEntries", [])
-    if entries:
+    dexs = data.get("dexs", [])
+    if dexs:
         if dry_run:
-            info(f"图鉴条目: {len(entries)} 条（预览，不写入）")
+            info(f"图鉴条目: {len(dexs)} 条（预览，不写入）")
         else:
-            for entry in entries:
-                genre_ids = entry.pop("_genreIds", [])
+            for dex in dexs:
+                genre_ids = dex.pop("_genreIds", [])
 
-                stmt = insert(Dex).values(**entry)
+                stmt = insert(Dex).values(**dex)
                 await db.execute(stmt)
 
                 for genre_id in genre_ids:
                     await db.execute(
                         insert(dex_to_dex_genres).values(
-                            dex_entry_id=entry["id"],
+                            dex_id=dex["id"],
                             dex_genre_id=genre_id,
                         )
                     )
             await db.commit()
-            ok(f"图鉴条目: 已导入 {len(entries)} 条")
+            ok(f"图鉴条目: 已导入 {len(dexs)} 条")
     else:
         info("图鉴条目: 0 条（无数据）")
-    total_inserted += len(entries)
+    total_inserted += len(dexs)
 
     # 媒体资源
     medias = data.get("medias", [])
@@ -263,7 +263,7 @@ def validate_manifest(data: dict) -> list[str]:
 
     required_keys = [
         "postCategories", "postTags", "dexGenres", "mediaTags",
-        "posts", "dexEntries", "medias",
+        "posts", "dexs", "medias",
     ]
     for key in required_keys:
         if key not in data:
@@ -280,12 +280,12 @@ def validate_manifest(data: dict) -> list[str]:
             if tid not in tag_ids:
                 warnings.append(f"文章 '{post.get('title', '?')}' 引用了不存在的标签 ID: {tid}")
 
-    # 检查 dexEntries 引用的 genre 是否存在
+    # 检查 dexs 引用的 genre 是否存在
     genre_ids = {g["id"] for g in data.get("dexGenres", [])}
-    for entry in data.get("dexEntries", []):
-        for gid in entry.get("_genreIds", []):
+    for dex in data.get("dexs", []):
+        for gid in dex.get("_genreIds", []):
             if gid not in genre_ids:
-                warnings.append(f"图鉴 '{entry.get('title', '?')}' 引用了不存在的题材 ID: {gid}")
+                warnings.append(f"图鉴 '{dex.get('title', '?')}' 引用了不存在的题材 ID: {gid}")
 
     # 检查 medias 引用的 tag 是否存在
     media_tag_ids = {t["id"] for t in data.get("mediaTags", [])}
@@ -305,7 +305,7 @@ def print_stats(data: dict):
         "图鉴题材": len(data.get("dexGenres", [])),
         "媒体标签": len(data.get("mediaTags", [])),
         "文章": len(data.get("posts", [])),
-        "图鉴条目": len(data.get("dexEntries", [])),
+        "图鉴条目": len(data.get("dexs", [])),
         "媒体资源": len(data.get("medias", [])),
     }
     total = sum(stats.values())

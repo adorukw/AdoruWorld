@@ -1,9 +1,8 @@
-from app.main import app
 import uvicorn
 import sys
 from pathlib import Path
 import subprocess
-from app.config import DATABASE_URL
+from app.core.config import DATABASE_URL
 
 server_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(server_dir))

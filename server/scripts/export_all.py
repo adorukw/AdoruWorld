@@ -21,8 +21,8 @@ from pathlib import Path
 SERVER_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SERVER_DIR))
 
-from app.database import async_session, init_db
-from app.models import (
+from app.core.database import async_session, init_db
+from app.modules import (
     Post, PostCategory, PostTag, post_to_post_tags,
     Dex, DexGenre, dex_to_dex_genres,
     Media, MediaTag, media_to_media_tags,
@@ -113,7 +113,7 @@ async def collect_data() -> dict:
                 )
             )
             dex["_genreIds"] = [r.dex_genre_id for r in genre_rows.fetchall()]
-        data["dex"] = dexs
+        data["dexs"] = dexs
 
         print("📦 正在导出媒体资源...")
         rows = await db.execute(
@@ -177,7 +177,7 @@ def add_media_files(zf: zipfile.ZipFile, data: dict):
             print(f"  ⚠️  封面文件不存在，跳过: {local}")
 
     # 额外检查 Dex cover_image
-    for dex in data.get("dex", []):
+    for dex in data.get("dexs", []):
         cover = dex.get("cover_image", "") or ""
         if not cover.startswith("/"):
             continue
@@ -201,7 +201,7 @@ def count_stats(data: dict) -> dict:
         "图鉴题材": len(data.get("dexGenres", [])),
         "媒体标签": len(data.get("mediaTags", [])),
         "文章": len(data.get("posts", [])),
-        "图鉴条目": len(data.get("dex", [])),
+        "图鉴条目": len(data.get("dexs", [])),
         "媒体资源": len(data.get("medias", [])),
     }
 
