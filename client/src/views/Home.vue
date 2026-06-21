@@ -4,15 +4,20 @@ import Sidebar from "@/components/layout/Sidebar.vue"
 import PostCard from "@/components/ui/PostCard.vue"
 import PixelButton from "@/components/ui/PixelButton.vue"
 import { usePostStore } from "@/store"
-import { storeToRefs } from 'pinia'
 import { onMounted } from 'vue'
+import type { PostResponse } from '@/types'
+import { ref } from 'vue'
 
 const postStore = usePostStore()
-const { featuredPosts, recentPosts } = storeToRefs(postStore)
+const featuredPosts = ref<PostResponse[] | null>(null)
+const recentPosts = ref<PostResponse[] | null>(null)
+
 
 onMounted(async () => {
-    await postStore.getFeaturedPosts()
-    await postStore.getRecentPosts()
+    await postStore.getPosts({ published: true, featured: true, limit: 6 })
+    featuredPosts.value = postStore.posts
+    await postStore.getPosts({ published: true, limit: 6 })
+    recentPosts.value = postStore.posts
 })
 </script>
 

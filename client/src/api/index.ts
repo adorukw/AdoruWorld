@@ -92,7 +92,14 @@ export const api = {
       limit?: number;
     }) => {
       const query = params
-        ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+        ? "?" +
+          new URLSearchParams(
+            Object.fromEntries(
+              Object.entries(params)
+                .filter(([_, v]) => v !== undefined)
+                .map(([k, v]) => [k, String(v)]),
+            ),
+          ).toString()
         : "";
       return request<PostResponse[]>(`/posts${query}`);
     },
@@ -138,7 +145,14 @@ export const api = {
       limit?: number;
     }) => {
       const query = params
-        ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+        ? "?" +
+          new URLSearchParams(
+            Object.fromEntries(
+              Object.entries(params)
+                .filter(([_, v]) => v !== undefined)
+                .map(([k, v]) => [k, String(v)]),
+            ),
+          ).toString()
         : "";
       return request<DexResponse[]>(`/dexs${query}`);
     },
@@ -217,7 +231,14 @@ export const api = {
       limit?: number;
     }) => {
       const query = params
-        ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+        ? "?" +
+          new URLSearchParams(
+            Object.fromEntries(
+              Object.entries(params)
+                .filter(([_, v]) => v !== undefined)
+                .map(([k, v]) => [k, String(v)]),
+            ),
+          ).toString()
         : "";
       return request<MediaResponse[]>(`/medias${query}`);
     },

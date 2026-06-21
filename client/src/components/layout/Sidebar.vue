@@ -1,23 +1,40 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import PixelBadge from '@/components/ui/PixelBadge.vue'
 import { usePostStore, usePostTagStore, usePostCategoryStore } from '@/store'
-import { storeToRefs } from 'pinia'
+import type { PostResponse, PostTagResponse, PostCategoryResponse } from '@/types'
 
 const postStore = usePostStore()
 const tagStore = usePostTagStore()
 const categoryStore = usePostCategoryStore()
-const { recentPosts } = storeToRefs(postStore)
-const { postTags } = storeToRefs(tagStore)
-const { postCategories } = storeToRefs(categoryStore)
+const recentPosts = ref<PostResponse[] | null>(null)
+const postTags = ref<PostTagResponse[] | null>(null)
+const postCategories = ref<PostCategoryResponse[] | null>(null)
 
 onMounted(async () => {
-    await Promise.all([
-        tagStore.getPostTags(),
-        categoryStore.getPostCategories(),
-    ])
+    await postStore.getPosts({ published: true, limit: 6 })
+    recentPosts.value = postStore.posts
+
+    await tagStore.getPostTags()
+    postTags.value = tagStore.postTags
+
+    await categoryStore.getPostCategories()
+    postCategories.value = categoryStore.postCategories
 })
+
+const sortedCategories = computed(() => {
+    return postCategories.value
+        ? [...postCategories.value].sort((a, b) => b.count - a.count)
+        : []
+})
+
+const sortedTags = computed(() => {
+    return postTags.value
+        ? [...postTags.value].sort((a, b) => b.count - a.count).slice(0, 10)
+        : []
+})
+
 
 const router = useRouter()
 
@@ -62,10 +79,10 @@ const handleCategoryClick = (categorySlug: string) => {
 
         <div class="pixel-box">
             <h3 class="font-bold text-gray-900 text-xl mb-4 flex items-center gap-2 font-mono">
-                <span class="text-blue-600">📁</span> 分类
+                <span class="text-blue-600">📁</span> 热门分类
             </h3>
             <div class="space-y-2">
-                <div v-for="category in postCategories" :key="category.id"
+                <div v-for="category in sortedCategories" :key="category.id"
                     class="flex items-center justify-between p-2 border-2 border-transparent hover:border-gray-800 hover:bg-yellow-100/50 cursor-pointer transition-all duration-100 rounded"
                     @click="handleCategoryClick(category.slug)">
                     <div class="flex items-center gap-2">
@@ -84,12 +101,12 @@ const handleCategoryClick = (categorySlug: string) => {
                 <span class="text-yellow-600">🏷️</span> 热门标签
             </h3>
             <div class="flex flex-wrap gap-2">
-                <PixelBadge v-for="tag in postTags.slice(0, 10)" :key="tag.id" :name="tag.name" :color="tag.color"
+                <PixelBadge v-for="tag in sortedTags" :key="tag.id" :name="tag.name" :color="tag.color"
                     :count="tag.count" @click="handleTagClick(tag.slug)" />
             </div>
         </div>
 
-        <div class="pixel-box">
+        <!-- <div class="pixel-box">
             <h3 class="font-bold text-gray-900 text-xl mb-4 flex items-center gap-2 font-mono">
                 <span class="text-red-600">🔥</span> 最新文章
             </h3>
@@ -102,7 +119,7 @@ const handleCategoryClick = (categorySlug: string) => {
                     <p class="text-xl text-gray-600 mt-1">{{ post.createdAt }}</p>
                 </router-link>
             </div>
-        </div>
+        </div> -->
     </aside>
 </template>
 

@@ -19,38 +19,16 @@ const readingProgress = ref(0)
 const post = ref<PostResponse | null>(null)
 const relatedPosts = ref<PostResponse[]>([])
 
-onMounted(async () => {
-    await postStore.getPostBySlug(route.params.slug as string)
+watch(() => route.params.slug, async (newSlug) => {
+    if (!newSlug) return
+    const slug = newSlug as string
+
+    await postStore.getPostBySlug(slug)
     post.value = postStore.currentPost
-    if (!post.value) {
-        console.error('未找到文章')
-    }
+
     await postStore.getRelatedPosts(route.params.slug as string)
     relatedPosts.value = postStore.relatedPosts
-})
-
-watch(() => route.params.slug, async (newSlug, oldSlug) => {
-    if (newSlug !== oldSlug && post.value) {
-        try {
-            await postStore.incrementViews(post.value.id)
-        }
-        catch (err) {
-            console.error('获取文章失败:', err)
-        }
-    }
 }, { immediate: true })
-
-// const relatedPosts = computed(() => {
-//     if (!post.value) return []
-//     return allPosts
-//         .filter(p => {
-//             if (p.id === post.value?.id) return false
-//             const sharedTags = p.tags.map(t => t.name).filter(tag => post.value?.tags.map(t => t.name).includes(tag))
-//             return sharedTags.length > 0
-//         })
-//         .slice(0, 3)
-// })
-
 marked.use({
     breaks: true,
     gfm: true,
@@ -219,8 +197,7 @@ watch(() => route.params.slug, () => {
                     </div>
                 </div>
 
-                <section v-if="relatedPosts.length"
-                    class="py-12 overflow-hidden relative border-t-4 border-black ">
+                <section v-if="relatedPosts.length" class="py-12 overflow-hidden relative border-t-4 border-black ">
                     <div class="absolute inset-0 gold-pattern opacity-10"></div>
                     <div class="max-w-6xl mx-auto px-4 relative z-10">
                         <h2 class="pixel-text text-2xl mb-8 flex items-center justify-center gap-3">

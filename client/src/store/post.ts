@@ -10,8 +10,6 @@ import type {
 
 export const usePostStore = defineStore("post", () => {
   const posts = ref<PostResponse[]>([]);
-  const recentPosts = ref<PostResponse[]>([]);
-  const featuredPosts = ref<PostResponse[]>([]);
   const relatedPosts = ref<PostResponse[]>([]);
   const currentPost = ref<PostResponse | null>(null);
   const archives = ref<ArchiveItem[]>([]);
@@ -35,42 +33,6 @@ export const usePostStore = defineStore("post", () => {
       posts.value = await api.posts.list(params);
     } catch (err: any) {
       error.value = err.message || "获取文章列表失败";
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  const getRecentPosts = async () => {
-    loading.value = true;
-    error.value = null;
-    try {
-      const res = await api.posts.list({ published: true });
-      recentPosts.value = res
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        )
-        .slice(0, 5);
-    } catch (err: any) {
-      error.value = err.message || "获取最近文章失败";
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  const getFeaturedPosts = async () => {
-    loading.value = true;
-    error.value = null;
-    try {
-      const res = await api.posts.list({ published: true, featured: true });
-      featuredPosts.value = res
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        )
-        .slice(0, 5);
-    } catch (err: any) {
-      error.value = err.message || "获取特色文章失败";
     } finally {
       loading.value = false;
     }
@@ -241,12 +203,7 @@ export const usePostStore = defineStore("post", () => {
     totalWordCount,
     totalViewsCount,
 
-    featuredPosts,
-    recentPosts,
-
     getPosts,
-    getRecentPosts,
-    getFeaturedPosts,
     getArchives,
     getPostBySlug,
     getRelatedPosts,
