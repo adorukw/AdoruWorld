@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import PixelBadge from '@/components/ui/PixelBadge.vue'
+import type { PostTagResponse, PostCategoryResponse } from '@/types'
 
 const props = defineProps<{
-    title?: string
+    title: string
     coverImage?: string
-    tags?: string[]
-    category?: string
+    tags: PostTagResponse[]
+    category: PostCategoryResponse
     date?: string
     readingTime?: number
     views?: number
@@ -21,8 +23,8 @@ const props = defineProps<{
                 class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
                 style="image-rendering: auto;" />
             <div class="absolute inset-0 border-4 border-black/20 pointer-events-none"></div>
-            <div v-if="featured"
-                class="top-3 right-3 bg-red-600 text-white text-xs px-3 py-1 border-2 border-black shadow-md relative overflow-hidden">
+            <div v-if="featured" class="top-3 right-3 bg-red-600 text-white text-xs px-3 pt-0 pb-2.5 border-2 border-black shadow-md
+                relative overflow-hidden ">
                 <div class="absolute inset-0 bg-linear-to-b from-white/30 to-transparent"></div>
                 <span class="relative z-10">精选</span>
             </div>
@@ -32,9 +34,7 @@ const props = defineProps<{
             </div>
 
             <div class="flex flex-wrap gap-2 mb-3">
-                <span class="tag bg-sky-500 text-white">
-                    {{ category }}
-                </span>
+                <PixelBadge :name="category.name" :color="category.color" />
             </div>
             <h3 class="text-sm text-black mb-2 line-clamp-2 group-hover:text-sky-600 transition-colors">
                 {{ title }}
@@ -66,9 +66,8 @@ const props = defineProps<{
                 </span>
             </div>
             <div class="flex flex-wrap gap-2" v-if="tags?.length">
-                <span v-for="tag in tags.slice(0, 3)" :key="tag"
-                    class="text-xs px-2 py-1 bg-yellow-100/80 border-2 border-black text-gray-600 shadow-sm">
-                    #{{ tag }}
+                <span v-for="tag in tags.slice(0, 3)" :key="tag.slug" class="text-xs px-2 py-1">
+                    <PixelBadge :name="tag.name" :color="tag.color" />
                 </span>
                 <span v-if="tags.length > 3"
                     class="text-xs px-2 py-1 bg-gray-100/50 border-2 border-black text-gray-600 shadow-sm">

@@ -220,7 +220,7 @@ watch(() => route.params.slug, () => {
                 </div>
 
                 <section v-if="relatedPosts.length"
-                    class="py-12 overflow-hidden relative border-t-4 border-black bg-white">
+                    class="py-12 overflow-hidden relative border-t-4 border-black ">
                     <div class="absolute inset-0 gold-pattern opacity-10"></div>
                     <div class="max-w-6xl mx-auto px-4 relative z-10">
                         <h2 class="pixel-text text-2xl mb-8 flex items-center justify-center gap-3">
@@ -231,8 +231,8 @@ watch(() => route.params.slug, () => {
                                 :to="`/post/${relatedPost.slug}`"
                                 class="block transform transition-transform hover:-translate-y-2">
                                 <PostCard :title="relatedPost.title" :cover-image="relatedPost.coverImage"
-                                    :tags="relatedPost.tags.map(tag => tag.name)" :date="relatedPost.createdAt"
-                                    :reading-time="relatedPost.readingTime" />
+                                    :tags="relatedPost.tags" :category="relatedPost.category"
+                                    :date="relatedPost.createdAt" :reading-time="relatedPost.readingTime" />
                             </router-link>
                         </div>
                     </div>

@@ -7,7 +7,6 @@ import { usePostStore } from "@/store"
 import { storeToRefs } from 'pinia'
 import { onMounted } from 'vue'
 
-
 const postStore = usePostStore()
 const { featuredPosts, recentPosts } = storeToRefs(postStore)
 
@@ -52,9 +51,9 @@ onMounted(async () => {
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                     <router-link v-for="post in featuredPosts" :key="post.id" :to="`/post/${post.slug}`" class="block">
-                        <PostCard :title="post.title" :cover-image="post.coverImage"
-                            :tags="post.tags.map(tag => tag.name)" :category="post.category.name" :date="post.createdAt"
-                            :reading-time="post.readingTime" :views="post.views" :featured="post.featured" />
+                        <PostCard :title="post.title" :cover-image="post.coverImage" :tags="post.tags"
+                            :category="post.category" :date="post.createdAt" :reading-time="post.readingTime"
+                            :views="post.views" :featured="post.featured" />
                     </router-link>
                 </div>
 
@@ -67,9 +66,9 @@ onMounted(async () => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <router-link v-for="post in recentPosts" :key="post.id" :to="`/post/${post.slug}`"
                                 class="block">
-                                <PostCard :title="post.title" :cover-image="post.coverImage"
-                                    :tags="post.tags.map(tag => tag.name)" :category="post.category.name"
-                                    :date="post.createdAt" :reading-time="post.readingTime" :views="post.views" />
+                                <PostCard :title="post.title" :cover-image="post.coverImage" :tags="post.tags"
+                                    :category="post.category" :date="post.createdAt" :reading-time="post.readingTime"
+                                    :views="post.views" />
                             </router-link>
                         </div>
                         <div class="mt-8 text-center">
@@ -78,9 +77,7 @@ onMounted(async () => {
                                     查看全部文章
                                 </PixelButton>
                             </router-link>
-
                         </div>
-
                     </div>
 
                     <div class="lg:col-span-1">

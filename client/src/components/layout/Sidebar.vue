@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import TagBadge from '../ui/TagBadge.vue'
+import PixelBadge from '@/components/ui/PixelBadge.vue'
 import { usePostStore, usePostTagStore, usePostCategoryStore } from '@/store'
 import { storeToRefs } from 'pinia'
 
@@ -84,7 +84,7 @@ const handleCategoryClick = (categorySlug: string) => {
                 <span class="text-yellow-600">🏷️</span> 热门标签
             </h3>
             <div class="flex flex-wrap gap-2">
-                <TagBadge v-for="tag in postTags.slice(0, 10)" :key="tag.id" :name="tag.name" :color="tag.color"
+                <PixelBadge v-for="tag in postTags.slice(0, 10)" :key="tag.id" :name="tag.name" :color="tag.color"
                     :count="tag.count" @click="handleTagClick(tag.slug)" />
             </div>
         </div>
