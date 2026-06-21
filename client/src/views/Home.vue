@@ -1,3 +1,22 @@
+<script setup lang="ts">
+import Layout from "@/components/layout/Layout.vue"
+import Sidebar from "@/components/layout/Sidebar.vue"
+import PostCard from "@/components/ui/PostCard.vue"
+import PixelButton from "@/components/ui/PixelButton.vue"
+import { usePostStore } from "@/store"
+import { storeToRefs } from 'pinia'
+import { onMounted } from 'vue'
+
+
+const postStore = usePostStore()
+const { featuredPosts, recentPosts } = storeToRefs(postStore)
+
+onMounted(async () => {
+    await postStore.getFeaturedPosts()
+    await postStore.getRecentPosts()
+})
+</script>
+
 <template>
     <Layout>
         <section class="relative py-16 md:py-24 overflow-hidden border-b-2 border-dashed shadow-[0_2px_0_0_#000]
@@ -73,17 +92,6 @@
 
     </Layout>
 </template>
-
-<script setup lang="ts">
-import Layout from "@/components/layout/Layout.vue"
-import Sidebar from "@/components/layout/Sidebar.vue"
-import PostCard from "@/components/ui/PostCard.vue"
-import PixelButton from "@/components/ui/PixelButton.vue"
-import { usePostStore } from "@/store"
-
-const postStore = usePostStore()
-const { featuredPosts, recentPosts } = postStore
-</script>
 
 <style scoped>
 .wallpaper {

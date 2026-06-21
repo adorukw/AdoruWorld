@@ -67,6 +67,15 @@ async def get_post_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
     return PostResponse(**format_post(post))
 
 
+@router.get("/slug/{slug}/related", response_model=list[PostResponse])
+async def get_related_posts(slug: str, db: AsyncSession = Depends(get_db)):
+    post = await crud.get_post_by_slug(db, slug)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    related_posts = await crud.get_related_posts(db, post, limit=3)
+    return [PostResponse(**format_post(post)) for post in related_posts]
+
+
 @router.get("/{post_id}", response_model=PostResponse)
 async def get_post(post_id: str, db: AsyncSession = Depends(get_db)):
     post = await crud.get_post_by_id(db, post_id)

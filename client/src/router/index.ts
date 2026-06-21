@@ -49,11 +49,6 @@ const routes: RouteRecordRaw[] = [
         name: 'Admin',
         component: () => import('@/views/Admin.vue'),
     }
-    // {
-    //     path: '/edit',
-    //     name: 'Edit',
-    //     component: () => import('@/views/E.vue'),
-    // }
 ]
 
 const router = createRouter({

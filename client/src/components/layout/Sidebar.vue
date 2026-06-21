@@ -1,14 +1,23 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import TagBadge from '../ui/TagBadge.vue'
 import { usePostStore, usePostTagStore, usePostCategoryStore } from '@/store'
+import { storeToRefs } from 'pinia'
 
 const postStore = usePostStore()
 const tagStore = usePostTagStore()
 const categoryStore = usePostCategoryStore()
-const { recentPosts } = postStore
-const { postTags } = tagStore
-const { postCategories } = categoryStore
+const { recentPosts } = storeToRefs(postStore)
+const { postTags } = storeToRefs(tagStore)
+const { postCategories } = storeToRefs(categoryStore)
+
+onMounted(async () => {
+    await Promise.all([
+        tagStore.getPostTags(),
+        categoryStore.getPostCategories(),
+    ])
+})
 
 const router = useRouter()
 
@@ -29,7 +38,7 @@ const handleCategoryClick = (categorySlug: string) => {
 
 <template>
     <aside class="space-y-6">
-        <div class="border-2 border-gray-800 bg-white p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div class="pixel-box">
             <div class="flex items-center gap-4 mb-4">
                 <div class="relative">
                     <!-- <img
@@ -51,7 +60,7 @@ const handleCategoryClick = (categorySlug: string) => {
             </p>
         </div>
 
-        <div class="border-2 border-gray-800 bg-white p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div class="pixel-box">
             <h3 class="font-bold text-gray-900 text-xl mb-4 flex items-center gap-2 font-mono">
                 <span class="text-blue-600">📁</span> 分类
             </h3>
@@ -70,7 +79,7 @@ const handleCategoryClick = (categorySlug: string) => {
             </div>
         </div>
 
-        <div class="border-2 border-gray-800 bg-white p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div class="pixel-box">
             <h3 class="font-bold text-gray-900 text-xl mb-4 flex items-center gap-2 font-mono">
                 <span class="text-yellow-600">🏷️</span> 热门标签
             </h3>
@@ -80,7 +89,7 @@ const handleCategoryClick = (categorySlug: string) => {
             </div>
         </div>
 
-        <div class="border-2 border-gray-800 bg-white p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div class="pixel-box">
             <h3 class="font-bold text-gray-900 text-xl mb-4 flex items-center gap-2 font-mono">
                 <span class="text-red-600">🔥</span> 最新文章
             </h3>
@@ -97,12 +106,4 @@ const handleCategoryClick = (categorySlug: string) => {
     </aside>
 </template>
 
-<style>
-.line-clamp-2 {
-    display: -webkit-box;
-    line-clamp: 2;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-</style>
+<style></style>

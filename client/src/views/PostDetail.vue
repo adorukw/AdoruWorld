@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute} from 'vue-router'
+import { useRoute } from 'vue-router'
 import { marked } from 'marked'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.css'
@@ -8,20 +8,25 @@ import Layout from '@/components/layout/Layout.vue'
 import PostCard from '@/components/ui/PostCard.vue'
 import PixelButton from '@/components/ui/PixelButton.vue'
 import { usePostStore } from '@/store'
+import type { PostResponse } from '@/types'
 
 const postStore = usePostStore()
-const { allPosts } = postStore
 
 const route = useRoute()
 
 const readingProgress = ref(0)
 
-const post = computed(() => {
-    const foundPost = allPosts.find(p => p.slug === route.params.slug)
-    if (!foundPost) {
+const post = ref<PostResponse | null>(null)
+const relatedPosts = ref<PostResponse[]>([])
+
+onMounted(async () => {
+    await postStore.getPostBySlug(route.params.slug as string)
+    post.value = postStore.currentPost
+    if (!post.value) {
         console.error('未找到文章')
     }
-    return foundPost
+    await postStore.getRelatedPosts(route.params.slug as string)
+    relatedPosts.value = postStore.relatedPosts
 })
 
 watch(() => route.params.slug, async (newSlug, oldSlug) => {
@@ -35,25 +40,21 @@ watch(() => route.params.slug, async (newSlug, oldSlug) => {
     }
 }, { immediate: true })
 
-const relatedPosts = computed(() => {
-    if (!post.value) return []
-    return allPosts
-        .filter(p => {
-            if (p.id === post.value?.id) return false
-            const sharedTags = p.tags.map(t => t.name).filter(tag => post.value?.tags.map(t => t.name).includes(tag))
-            return sharedTags.length > 0
-        })
-        .slice(0, 3)
-})
+// const relatedPosts = computed(() => {
+//     if (!post.value) return []
+//     return allPosts
+//         .filter(p => {
+//             if (p.id === post.value?.id) return false
+//             const sharedTags = p.tags.map(t => t.name).filter(tag => post.value?.tags.map(t => t.name).includes(tag))
+//             return sharedTags.length > 0
+//         })
+//         .slice(0, 3)
+// })
 
-// ==========================================
-// 1. 使用现代的 marked.use() 替代旧版 API
-// ==========================================
 marked.use({
     breaks: true,
     gfm: true,
     renderer: {
-        // 在 marked.use 中直接覆盖 code 渲染方法
         code({ text, lang }) {
             const language = lang || ''
             const validLang = !!(language && hljs.getLanguage(language))
@@ -61,7 +62,6 @@ marked.use({
                 ? hljs.highlight(text, { language }).value
                 : hljs.highlightAuto(text).value
 
-            // 使用 encodeURIComponent 避免代码中的引号破坏 HTML 结构
             const encodedCode = encodeURIComponent(text)
             const langText = language ? language.toUpperCase() : 'CODE'
 
@@ -80,17 +80,11 @@ marked.use({
     }
 })
 
-// ==========================================
-// 2. 使用 marked.parse() 进行解析
-// ==========================================
 const renderedContent = computed(() => {
     if (!post.value) return ''
 
-    // 防御性处理：有时候从后端/数据库取出的数据，真正的换行符变成了字面字符串 "\\n"
-    // 这会导致 marked 无法识别代码块标记。这里做一下正则替换，确保换行符正常。
     const safeContent = post.value.content.replace(/\\n/g, '\n')
 
-    // 注意：新版必须调用 marked.parse()，不能直接调用 marked()
     return marked.parse(safeContent) as string
 })
 
@@ -104,7 +98,6 @@ const handleContentClick = async (e: MouseEvent) => {
                 const code = decodeURIComponent(encodedCode)
                 await navigator.clipboard.writeText(code)
 
-                // 视觉反馈
                 const originalText = target.innerText
                 target.innerText = '已复制!'
                 target.classList.add('copied')
@@ -139,10 +132,6 @@ watch(() => route.params.slug, () => {
     window.scrollTo(0, 0)
     readingProgress.value = 0
 })
-
-watch(readingProgress, (newValue, oldValue) => {
-    console.log(`阅读进度从 ${oldValue}% 变为 ${newValue}%`)
-})
 </script>
 
 <template>
@@ -150,16 +139,13 @@ watch(readingProgress, (newValue, oldValue) => {
         <template v-if="post">
             <div class="sticky top-20 left-0 right-0 z-40 px-4 py-2 bg-white border-b-4 border-black">
                 <div class="relative w-full h-6 bg-gray-200 border-2 border-black">
-                    <!-- 黄色填充进度 -->
                     <div class="absolute top-0 left-0 h-full bg-yellow-400 transition-all duration-150 ease-out"
                         :style="{ width: `${readingProgress}%` }"></div>
 
-                    <!-- 网格纹理（可选） -->
                     <div class="absolute inset-0 opacity-20" style="background-image: repeating-linear-gradient(
                         45deg,transparent, transparent 4px,rgba(0,0,0,0.1) 4px,rgba(0,0,0,0.1) 8px)">
                     </div>
 
-                    <!-- 百分比文字 -->
                     <div class="absolute inset-0 flex items-center justify-center">
                         <span class="text-xs font-bold text-black! mix-blend-difference">
                             {{ readingProgress }}%
@@ -263,7 +249,9 @@ watch(readingProgress, (newValue, oldValue) => {
                     <p class="mb-8 text-gray-600 font-medium">看起来这篇文章不存在或已被丢进了异次元。</p>
                     <router-link to="/"
                         class="pixel-btn bg-sky text-white border-4 border-black px-6 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-sky-600 transition-all">
-                        返回首页
+                        <PixelButton>
+                            返回首页
+                        </PixelButton>
                     </router-link>
                 </div>
             </div>

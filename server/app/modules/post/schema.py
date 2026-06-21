@@ -3,8 +3,6 @@ from pydantic import BaseModel, Field
 from app.modules.post_category.schema import PostCategoryResponse
 from app.modules.post_tag.schema import PostTagResponse
 
-# ---------- 创建 / 更新 ----------
-
 
 class PostCreate(BaseModel):
     title: str
@@ -33,8 +31,6 @@ class PostUpdate(BaseModel):
 
     model_config = {"populate_by_name": True}
 
-# ---------- 响应 ----------
-
 
 class PostResponse(BaseModel):
     id: str
@@ -54,8 +50,6 @@ class PostResponse(BaseModel):
     featured: bool
 
     model_config = {"from_attributes": True, "populate_by_name": True}
-
-# ---------- 归档 ----------
 
 
 class ArchiveItem(BaseModel):

@@ -15,7 +15,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <article class="pixel-card overflow-hidden group cursor-pointer">
+    <article class="pixel-card pixel-card-interactive overflow-hidden group cursor-pointer">
         <div class="relative overflow-hidden" v-if="coverImage">
             <img :src="coverImage" :alt="title"
                 class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
@@ -79,4 +79,31 @@ const props = defineProps<{
     </article>
 </template>
 
-<style scoped></style>
+<style scoped>
+.pixel-card::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: calc(4px * 2);
+    height: 4px;
+    background: rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.pixel-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 4px solid transparent;
+    border-image: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.4) 0%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.1) 100%) 1;
+    pointer-events: none;
+}
+</style>

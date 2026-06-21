@@ -1,4 +1,5 @@
 from sqlalchemy import func, select
+from app.modules.post.model import post_to_post_tags
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -99,6 +100,25 @@ async def get_post_by_slug(db: AsyncSession, slug: str) -> Post | None:
     ).where(Post.slug == slug)
     res = await db.execute(stmt)
     return res.scalar_one_or_none()
+
+
+async def get_related_posts(db: AsyncSession, post: Post, limit: int = 3):
+    tag_ids = [tag.id for tag in post.tags]
+    if not tag_ids:
+        return []
+
+    stmt = (
+        select(Post)
+        .join(post_to_post_tags, Post.id == post_to_post_tags.c.post_id)
+        .where(post_to_post_tags.c.post_tag_id.in_(tag_ids))
+        .where(Post.id != post.id)
+        .where(Post.published == True)
+        .group_by(Post.id)
+        .order_by(func.count(post_to_post_tags.c.post_tag_id).desc())
+        .limit(limit)
+    )
+    result = await db.execute(stmt)
+    return result.scalars().all()
 
 
 async def get_post_by_id(db: AsyncSession, post_id: str) -> Post | None:
