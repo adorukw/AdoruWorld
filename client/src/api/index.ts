@@ -157,6 +157,8 @@ export const api = {
       return request<DexResponse[]>(`/dexs${query}`);
     },
     getBySlug: (slug: string) => request<DexResponse>(`/dexs/slug/${slug}`),
+    getRelated: (slug: string) =>
+      request<DexResponse[]>(`/dexs/slug/${slug}/related`),
     getById: (id: string) => request<DexResponse>(`/dexs/${id}`),
     create: (data: DexCreate) =>
       request<DexResponse>("/dexs", {

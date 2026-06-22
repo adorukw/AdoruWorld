@@ -1,5 +1,3 @@
-<!-- @ts-nocheck -->
-
 <template>
     <!-- Grid 视图卡片 -->
     <router-link v-if="viewMode === 'grid'" :to="`/dex/${entry.slug}`" class="group block">

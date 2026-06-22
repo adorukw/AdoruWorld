@@ -2,8 +2,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from .model import Dex
-from .model import DexGenre
+from .model import Dex, DexGenre, dex_to_dex_genres
 from .schema import DexCreate, DexUpdate
 
 
@@ -54,8 +53,26 @@ async def get_dex_by_slug(db: AsyncSession, slug: str) -> Dex | None:
     return res.scalar_one_or_none()
 
 
-async def get_dex_by_id(db: AsyncSession, entry_id: str) -> Dex | None:
-    res = await db.execute(select(Dex).where(Dex.id == entry_id))
+async def get_related_dexs(db: AsyncSession, dex: Dex, limit: int = 3):
+    genre_ids = [genre.id for genre in dex.genres]
+    if not genre_ids:
+        return []
+
+    stmt = (
+        select(Dex)
+        .join(dex_to_dex_genres, Dex.id == dex_to_dex_genres.c.dex_genre_id)
+        .where(dex_to_dex_genres.c.dex_genre_id.in_(genre_ids))
+        .where(Dex.id != dex.id)
+        .group_by(Dex.id)
+        .order_by(func.count(dex_to_dex_genres.c.dex_genre_id).desc())
+        .limit(limit)
+    )
+    res = await db.execute(stmt)
+    return res.scalars().all()
+
+
+async def get_dex_by_id(db: AsyncSession, dex_id: str) -> Dex | None:
+    res = await db.execute(select(Dex).where(Dex.id == dex_id))
     return res.scalar_one_or_none()
 
 

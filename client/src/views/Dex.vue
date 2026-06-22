@@ -75,7 +75,7 @@ const filteredEntries = computed(() => {
 
 <template>
     <Layout>
-        <section class="relative py-4 overflow-hidden">
+        <section class="relative py-4 overflow-hidden border-b-4">
             <div class="max-w-6xl mx-auto px-4 relative z-10">
                 <div class="text-center">
                     <div class="inline-block mb-4">
@@ -95,7 +95,7 @@ const filteredEntries = computed(() => {
             </div>
         </section>
 
-        <section class="py-4 border-y-4  overflow-hidden relative">
+        <section class="py-4 border-b-4  overflow-hidden relative">
             <div class="absolute inset-0 sky-gradient"></div>
             <div class="max-w-6xl mx-auto px-4 relative z-10">
                 <div class="grid grid-cols-3 md:grid-cols-7 gap-3">

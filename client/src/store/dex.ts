@@ -5,6 +5,7 @@ import type { DexResponse, DexStats, DexCreate, DexUpdate } from "@/types";
 
 export const useDexStore = defineStore("dex", () => {
   const dexs = ref<DexResponse[]>([]);
+  const relatedDexs = ref<DexResponse[]>([]);
   const currentDex = ref<DexResponse | null>(null);
   const dexStats = ref<DexStats>({
     total: 0,
@@ -82,6 +83,18 @@ export const useDexStore = defineStore("dex", () => {
     }
   };
 
+  const getRelatedDexs = async (slug: string) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      relatedDexs.value = await api.dexs.getRelated(slug);
+    } catch (err: any) {
+      error.value = err.message || "获取相关图鉴失败";
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const getDexById = async (id: string) => {
     loading.value = true;
     error.value = null;
@@ -148,6 +161,8 @@ export const useDexStore = defineStore("dex", () => {
   };
   return {
     dexs,
+    relatedDexs,
+    currentDex,
     dexStats,
     loading,
     error,
@@ -156,6 +171,7 @@ export const useDexStore = defineStore("dex", () => {
     loadMore,
     getDexs,
     getDexBySlug,
+    getRelatedDexs,
     getDexById,
     createDex,
     updateDex,

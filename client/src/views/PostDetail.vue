@@ -29,6 +29,7 @@ watch(() => route.params.slug, async (newSlug) => {
     await postStore.getRelatedPosts(route.params.slug as string)
     relatedPosts.value = postStore.relatedPosts
 }, { immediate: true })
+
 marked.use({
     breaks: true,
     gfm: true,

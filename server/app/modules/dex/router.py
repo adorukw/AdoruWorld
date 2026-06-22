@@ -32,6 +32,15 @@ async def get_dex_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
     return entry
 
 
+@router.get("/slug/{slug}/related", response_model=list[DexResponse])
+async def get_related_dex(slug: str, db: AsyncSession = Depends(get_db)):
+    dex = await crud.get_dex_by_slug(db, slug)
+    if not dex:
+        raise HTTPException(status_code=404, detail="图鉴未找到")
+    related_dexs = await crud.get_related_dexs(db, dex, limit=3)
+    return related_dexs
+
+
 @router.get("/{entry_id}", response_model=DexResponse)
 async def get_dex_by_id(entry_id: str, db: AsyncSession = Depends(get_db)):
     entry = await crud.get_dex_by_id(db, entry_id)

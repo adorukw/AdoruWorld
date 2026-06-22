@@ -71,12 +71,23 @@ const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', 
 
 <template>
     <Layout>
-        <section class="relative py-16 overflow-hidden border-b-2 border-dashed">
-            <SkyCloud></SkyCloud>>
-
-            <div class="max-w-6xl mx-auto px-4 text-center relative z-10">
-                <h1 class=" text-2xl  mb-4 drop-shadow-sm">📚 归档</h1>
-                <p class="">按时间浏览所有文章</p>
+        <section class="relative py-4 overflow-hidden border-b-4">
+            <div class="max-w-6xl mx-auto px-4 relative z-10">
+                <div class="text-center">
+                    <div class="inline-block mb-4">
+                        <div class="w-20 h-20 border-4  mx-auto mb-4
+            flex items-center justify-center shadow-lg relative overflow-hidden">
+                            <div class="absolute inset-0 bg-linear-to-b from-white/30 to-transparent"></div>
+                            <span class="text-4xl relative z-10">📚</span>
+                        </div>
+                    </div>
+                    <h1 class="pixel-text text-2xl md:text-3xl mb-4 drop-shadow-sm">
+                        归档 Archive
+                    </h1>
+                    <p class="pixel-text text-2xl! max-w-xl mx-auto">
+                        按时间浏览所有文章
+                    </p>
+                </div>
             </div>
         </section>
 
