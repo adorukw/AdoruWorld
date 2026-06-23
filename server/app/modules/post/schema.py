@@ -52,7 +52,27 @@ class PostResponse(BaseModel):
     model_config = {"from_attributes": True, "populate_by_name": True}
 
 
+class PostArchiveResponse(BaseModel):
+    """归档列表用的轻量版，不含 content"""
+    id: str
+    slug: str
+    title: str
+    description: str | None = None
+    cover_image: str | None = Field(None, alias="coverImage")
+    created_at: str = Field(..., alias="createdAt")
+    updated_at: str = Field(..., alias="updatedAt")
+    published: bool
+    category: PostCategoryResponse | None = None
+    tags: list[PostTagResponse] = Field(default_factory=list)
+    reading_time: int = Field(default=0, alias="readingTime")
+    word_count: int = Field(default=0, alias="wordCount")
+    views: int
+    featured: bool
+
+    model_config = {"from_attributes": True, "populate_by_name": True}
+
+
 class ArchiveItem(BaseModel):
     year: int
     month: int
-    posts: list[PostResponse]
+    posts: list[PostArchiveResponse]

@@ -110,7 +110,9 @@ const filteredEntries = computed(() => {
                         <div class="text-xs  mt-1">{{ dexStats.byCategory[cat.slug] || 0 }}</div>
                     </div>
                 </div>
+                
             </div>
+            
         </section>
 
         <section class="py-8">
@@ -119,7 +121,7 @@ const filteredEntries = computed(() => {
                     <div class="flex items-center gap-4">
                         <SearchInput v-model="searchQuery" placeholder="搜索图鉴..." />
                         <DropdownMenu v-model="selectedStatus" :options="statusOptions" placeholder="全部状态"
-                            class="pixel-input text-sm py-2" width="w-48"></DropdownMenu>
+                            class="text-sm py-2" width="w-48"></DropdownMenu>
                     </div>
 
                     <div class="flex items-center gap-2">

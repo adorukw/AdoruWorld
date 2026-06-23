@@ -1,7 +1,7 @@
 from sqlalchemy import func, select
 from app.modules.post.model import post_to_post_tags
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, load_only
 
 from .model import Post
 from app.modules.post_category.model import PostCategory
@@ -89,6 +89,27 @@ async def get_posts(
     if tag_slug:
         stmt = stmt.join(Post.tags).where(PostTag.slug == tag_slug)
     stmt = stmt.order_by(Post.created_at.desc()).offset(skip).limit(limit)
+    res = await db.execute(stmt)
+    return list(res.scalars().all())
+
+
+async def get_archive_posts(db: AsyncSession) -> list[Post]:
+    """归档用查询——只加载轻量字段，不加载 content"""
+    stmt = (
+        select(Post)
+        .options(
+            load_only(
+                Post.id, Post.slug, Post.title, Post.description,
+                Post.cover_image, Post.created_at, Post.updated_at,
+                Post.published, Post.reading_time, Post.word_count,
+                Post.views, Post.featured,
+            ),
+            selectinload(Post.category),
+            selectinload(Post.tags),
+        )
+        .where(Post.published == True)
+        .order_by(Post.created_at.desc())
+    )
     res = await db.execute(stmt)
     return list(res.scalars().all())
 

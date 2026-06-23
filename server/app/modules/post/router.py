@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from . import crud
-from .schema import PostResponse, PostCreate, PostUpdate, ArchiveItem
+from .schema import PostResponse, PostCreate, PostUpdate, ArchiveItem, PostArchiveResponse
+from app.modules.post_category.schema import PostCategoryResponse
+from app.modules.post_tag.schema import PostTagResponse
 from app.common.utils import format_post
 
 router = APIRouter(prefix="/posts", tags=["posts"])
@@ -45,13 +47,30 @@ async def total_views_count(db: AsyncSession = Depends(get_db)):
 
 @router.get("/archives", response_model=list[ArchiveItem])
 async def list_archives(db: AsyncSession = Depends(get_db)):
-    rows = await crud.get_posts(db, published=True, skip=0, limit=10000)
+    rows = await crud.get_archive_posts(db)
     grouped: dict[tuple[int, int], list] = defaultdict(list)
     for post in rows:
-        data = format_post(post)
         created_time = post.created_at
         key = (created_time.year, created_time.month)
-        grouped[key].append(PostResponse(**data))
+        grouped[key].append(
+            PostArchiveResponse(
+                id=post.id,
+                slug=post.slug,
+                title=post.title,
+                description=post.description,
+                cover_image=post.cover_image,
+                created_at=post.created_at.isoformat() if post.created_at else "",
+                updated_at=post.updated_at.isoformat() if post.updated_at else "",
+                published=post.published,
+                reading_time=post.reading_time,
+                word_count=post.word_count,
+                views=post.views,
+                featured=post.featured,
+                category=PostCategoryResponse.model_validate(
+                    post.category) if post.category else None,
+                tags=[PostTagResponse.model_validate(t) for t in post.tags],
+            )
+        )
     res = []
     for (year, month), items in sorted(grouped.items(), reverse=True):
         res.append(ArchiveItem(year=year, month=month, posts=items))
