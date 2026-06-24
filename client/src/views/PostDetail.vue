@@ -7,8 +7,11 @@ import 'highlight.js/styles/atom-one-dark.css'
 import Layout from '@/components/layout/Layout.vue'
 import PostCard from '@/components/ui/PostCard.vue'
 import PixelButton from '@/components/ui/PixelButton.vue'
+import TocTree from '@/components/ui/TocTree.vue'
 import { usePostStore } from '@/store'
 import type { PostResponse } from '@/types'
+import type { TocItem } from '@/types'
+
 
 const postStore = usePostStore()
 
@@ -30,10 +33,21 @@ watch(() => route.params.slug, async (newSlug) => {
     relatedPosts.value = postStore.relatedPosts
 }, { immediate: true })
 
+const slugify = (text: string) => {
+    return text.
+        toLowerCase()
+        .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+}
+
 marked.use({
     breaks: true,
     gfm: true,
     renderer: {
+        heading({ text, depth }) {
+            const id = slugify(text)
+            return `<h${depth} id="${id}" style="scroll-margin-top: 130px">${text}</h${depth}>`
+        },
         code({ text, lang }) {
             const language = lang || ''
             const validLang = !!(language && hljs.getLanguage(language))
@@ -57,6 +71,58 @@ marked.use({
             `
         }
     }
+})
+
+function buildTree(items: TocItem[]): TocItem[] {
+    const root: TocItem[] = []
+    const stack: { level: number; list: TocItem[] }[] = [{ level: 0, list: root }]
+
+    for (const item of items) {
+        // 弹出层级 >= 当前项层级的栈顶
+        while (stack.length > 0 && stack[stack.length - 1].level >= item.level) {
+            stack.pop()
+        }
+
+        const parent = stack[stack.length - 1]
+        const newNode: TocItem = { ...item, children: [] }
+        parent.list.push(newNode)
+        stack.push({ level: item.level, list: newNode.children })
+    }
+
+    return root
+}
+
+const tocItems = computed<TocItem[]>(() => {
+    if (!post.value) return []
+
+    // 注意：content 里的 \n 有被转义的问题，先处理
+    const rawContent = post.value.content.replace(/\\n/g, '\n')
+    const lines = rawContent.split('\n')
+
+    const items: TocItem[] = []
+    const headingRegex = /^(#{1,6})\s+(.+)$/
+    let insideCodeBlock = false
+
+    for (const line of lines) {
+        // 跳过代码块内部的标题（防止 ``` 里的 # 被误抓）
+        if (line.trimStart().startsWith('```')) {
+            insideCodeBlock = !insideCodeBlock
+            continue
+        }
+        if (insideCodeBlock) continue
+
+        const match = line.match(headingRegex)
+        if (match) {
+            items.push({
+                id: slugify(match[2]),
+                text: match[2].trim(),
+                level: match[1].length,
+                children: [],
+            })
+        }
+    }
+
+    return buildTree(items)
 })
 
 const renderedContent = computed(() => {
@@ -158,23 +224,47 @@ watch(() => route.params.slug, () => {
                 </header>
 
                 <div class="max-w-6xl mx-auto px-4 -mt-16 relative z-20 pb-12">
-                    <div
-                        class="bg-white border-4 border-black rounded-xl p-6 md:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="max-w-6xl mx-auto px-4 -mt-16 relative z-20 pb-12">
+                        <!-- 改成 flex 布局 -->
+                        <div class="flex gap-8">
+                            <!-- 左列：正文 -->
+                            <div class="flex-1 min-w-0">
+                                <div
+                                    class=" bg-white border-4 border-black rounded-xl p-6 md:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
 
-                        <div v-if="post.coverImage" class="mb-8">
-                            <img :src="post.coverImage" :alt="post.title"
-                                class="w-full h-64 md:h-96 object-cover border-4 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]" />
+                                    <div v-if="post.coverImage" class="mb-8">
+                                        <img :src="post.coverImage" :alt="post.title"
+                                            class="w-full h-64 md:h-96 object-cover border-4 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]" />
+                                    </div>
+
+                                    <div class="flex flex-wrap gap-2 mb-8 border-b-2 border-gray-100 pb-6">
+                                        <span v-for="tag in (post.tags.map(tag => tag.name))" :key="tag"
+                                            class="tag bg-sky-100 border-2 border-black hover:bg-sky-500 hover:text-white cursor-pointer transition-colors px-3 py-1 font-bold rounded">
+                                            #{{ tag }}
+                                        </span>
+                                    </div>
+
+
+                                    <div class="prose prose-lg max-w-none article-content" v-html="renderedContent"
+                                        @click="handleContentClick" />
+                                </div>
+
+                            </div>
+
+                            <!-- 右列：侧边栏目录 -->
+                            <aside class="hidden lg:block w-72 shrink-0">
+                                <div
+                                    class="sticky top-32 bg-white border-4 border-black rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                    <h3
+                                        class="pixel-text text-lg font-bold mb-4 flex items-center gap-2 border-b-2 border-black pb-2">
+                                        📑 目录
+                                    </h3>
+                                    <nav class="text-sm max-h-[70vh] overflow-y-auto">
+                                        <TocTree :items="tocItems" />
+                                    </nav>
+                                </div>
+                            </aside>
                         </div>
-
-                        <div class="flex flex-wrap gap-2 mb-8 border-b-2 border-gray-100 pb-6">
-                            <span v-for="tag in (post.tags.map(tag => tag.name))" :key="tag"
-                                class="tag bg-sky-100 border-2 border-black hover:bg-sky-500 hover:text-white cursor-pointer transition-colors px-3 py-1 font-bold rounded">
-                                #{{ tag }}
-                            </span>
-                        </div>
-
-                        <div class="prose prose-lg max-w-none article-content" v-html="renderedContent"
-                            @click="handleContentClick" />
 
                         <div class="mt-12 pt-8 border-t-4 border-black border-dashed">
                             <div
@@ -430,5 +520,12 @@ watch(() => route.params.slug, () => {
     border-radius: 4px;
     border: 1px solid #ccc;
     font-size: 0.875rem;
+}
+
+.article-content :deep(h1),
+.article-content :deep(h2),
+.article-content :deep(h3),
+.article-content :deep(h4) {
+    scroll-margin-top: 130px;
 }
 </style>
