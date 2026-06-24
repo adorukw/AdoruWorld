@@ -188,7 +188,7 @@ const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', 
 
         <section class="relative py-4 overflow-hidden border-b-4 ">
             <div class="max-w-4xl mx-auto px-4 ">
-                <div class="mb-8 space-y-4 p-4 pixel-card pixel-box  bg-yellow-100!">
+                <div class=" space-y-4 p-4 pixel-card pixel-box  bg-yellow-100!">
                     <!-- 分类 -->
                     <div>
                         <div class="   mb-2">分类</div>
@@ -266,19 +266,18 @@ const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', 
                             </select>
                         </div>
                     </div>
-                    <!-- 清除按钮 -->
                     <div class="text-right">
+
                         <button class="px-3 py-1 text-sm  hover:underline"
                             @click="dateFrom = ''; dateTo = ''; selectedCategory = 'all'; selectedTags = []; clearDates()">
                             <PixelButton>
                                 ✕清除所有筛选
                             </PixelButton>
                         </button>
+                        <div v-if="hasActiveFilters" class="text-left">
+                            筛选结果：共 <strong>{{ filteredPostsCount }}</strong> 篇文章
+                        </div>
                     </div>
-                </div>
-                <!-- 筛选结果统计 -->
-                <div v-if="hasActiveFilters" class="mb-6 text-sm ">
-                    筛选结果：共 <strong>{{ filteredPostsCount }}</strong> 篇文章
                 </div>
             </div>
         </section>

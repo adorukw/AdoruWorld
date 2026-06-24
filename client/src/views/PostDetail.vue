@@ -26,6 +26,9 @@ watch(() => route.params.slug, async (newSlug) => {
     if (!newSlug) return
     const slug = newSlug as string
 
+    post.value = null
+    postStore.loading = true
+
     await postStore.getPostBySlug(slug)
     post.value = postStore.currentPost
 
@@ -308,6 +311,17 @@ watch(() => route.params.slug, () => {
             </article>
         </template>
 
+        <template v-else-if="postStore.loading">
+            <div class="min-h-[60vh] flex items-center justify-center bg-gray-50">
+                <div
+                    class="text-center bg-white border-4 border-black p-10 rounded-xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="text-6xl mb-4">🔍</div>
+                    <h2 class="pixel-text text-2xl mb-4 font-bold">文章正在加载中...</h2>
+                    <p class="mb-8 text-gray-600 font-medium">请耐心等待...</p>
+                </div>
+            </div>
+        </template>
+
         <template v-else>
             <div class="min-h-[60vh] flex items-center justify-center bg-gray-50">
                 <div
@@ -328,9 +342,6 @@ watch(() => route.params.slug, () => {
 </template>
 
 <style scoped>
-/* =========================================
-   文章正文排版 (保证可读性与像素风融合)
-   ========================================= */
 .article-content {
     color: #1a1a1a;
 }

@@ -218,7 +218,7 @@ async function handleDelete(item: any) {
 
                 <!-- 操作栏 -->
                 <div class="flex justify-between items-center mb-6">
-                    <div class="text-sm text-gray-600">
+                    <div class="  text-gray-600">
                         共 {{ currentData.length }} 条记录
                     </div>
                     <PixelButton @click="openCreateModal" class="bg-grass text-white">
@@ -235,58 +235,58 @@ async function handleDelete(item: any) {
                                 <tr>
                                     <!-- 文章表头 -->
                                     <template v-if="activeTab === 'posts'">
-                                        <th class="p-4 text-left pixel-text text-sm">标题</th>
-                                        <th class="p-4 text-left pixel-text text-sm">分类</th>
-                                        <th class="p-4 text-left pixel-text text-sm">标签</th>
-                                        <th class="p-4 text-left pixel-text text-sm">创建时间</th>
-                                        <th class="p-4 text-left pixel-text text-sm">状态</th>
+                                        <th class="p-4 text-left pixel-text  ">标题</th>
+                                        <th class="p-4 text-left pixel-text  ">分类</th>
+                                        <th class="p-4 text-left pixel-text  ">标签</th>
+                                        <th class="p-4 text-left pixel-text  ">创建时间</th>
+                                        <th class="p-4 text-left pixel-text  ">状态</th>
                                     </template>
 
                                     <!-- 分类表头 -->
                                     <template v-if="activeTab === 'postCategories'">
-                                        <th class="p-4 text-left pixel-text text-sm">名称</th>
-                                        <th class="p-4 text-left pixel-text text-sm">别名</th>
-                                        <th class="p-4 text-left pixel-text text-sm">图标</th>
-                                        <th class="p-4 text-left pixel-text text-sm">文章数</th>
+                                        <th class="p-4 text-left pixel-text  ">名称</th>
+                                        <th class="p-4 text-left pixel-text  ">别名</th>
+                                        <th class="p-4 text-left pixel-text  ">图标</th>
+                                        <th class="p-4 text-left pixel-text  ">文章数</th>
                                     </template>
 
                                     <!-- 标签表头 -->
                                     <template v-if="activeTab === 'postTags'">
-                                        <th class="p-4 text-left pixel-text text-sm">名称</th>
-                                        <th class="p-4 text-left pixel-text text-sm">别名</th>
-                                        <th class="p-4 text-left pixel-text text-sm">颜色</th>
-                                        <th class="p-4 text-left pixel-text text-sm">使用次数</th>
+                                        <th class="p-4 text-left pixel-text  ">名称</th>
+                                        <th class="p-4 text-left pixel-text  ">别名</th>
+                                        <th class="p-4 text-left pixel-text  ">颜色</th>
+                                        <th class="p-4 text-left pixel-text  ">使用次数</th>
                                     </template>
 
                                     <!-- 图鉴表头 -->
                                     <template v-if="activeTab === 'dexs'">
-                                        <th class="p-4 text-left pixel-text text-sm">标题</th>
-                                        <th class="p-4 text-left pixel-text text-sm">类别</th>
-                                        <th class="p-4 text-left pixel-text text-sm">状态</th>
-                                        <th class="p-4 text-left pixel-text text-sm">评分</th>
+                                        <th class="p-4 text-left pixel-text  ">标题</th>
+                                        <th class="p-4 text-left pixel-text  ">类别</th>
+                                        <th class="p-4 text-left pixel-text  ">状态</th>
+                                        <th class="p-4 text-left pixel-text  ">评分</th>
                                     </template>
 
                                     <!-- 题材表头 -->
                                     <template v-if="activeTab === 'dexGenres'">
-                                        <th class="p-4 text-left pixel-text text-sm">名称</th>
-                                        <th class="p-4 text-left pixel-text text-sm">颜色</th>
+                                        <th class="p-4 text-left pixel-text  ">名称</th>
+                                        <th class="p-4 text-left pixel-text  ">颜色</th>
                                     </template>
 
                                     <!-- 媒体表头 -->
                                     <template v-if="activeTab === 'medias'">
-                                        <th class="p-4 text-left pixel-text text-sm">名称</th>
-                                        <th class="p-4 text-left pixel-text text-sm">类型</th>
-                                        <th class="p-4 text-left pixel-text text-sm">大小</th>
-                                        <th class="p-4 text-left pixel-text text-sm">标签</th>
+                                        <th class="p-4 text-left pixel-text  ">名称</th>
+                                        <th class="p-4 text-left pixel-text  ">类型</th>
+                                        <th class="p-4 text-left pixel-text  ">大小</th>
+                                        <th class="p-4 text-left pixel-text  ">标签</th>
                                     </template>
 
                                     <!-- 媒体标签 -->
                                     <template v-if="activeTab === 'mediaTags'">
-                                        <th class="p-4 text-left pixel-text text-sm">名称</th>
-                                        <th class="p-4 text-left pixel-text text-sm">颜色</th>
+                                        <th class="p-4 text-left pixel-text  ">名称</th>
+                                        <th class="p-4 text-left pixel-text  ">颜色</th>
                                     </template>
 
-                                    <th class="p-4 text-left pixel-text text-sm">操作</th>
+                                    <th class="p-4 text-left pixel-text  ">操作</th>
                                 </tr>
                             </thead>
 
@@ -309,7 +309,7 @@ async function handleDelete(item: any) {
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="p-4 text-sm">{{ item.createdAt }}</td>
+                                    <td class="p-4  ">{{ item.createdAt }}</td>
                                     <td class="p-4">
                                         <span :class="`px-2 py-1 border-2 border-black rounded text-xs pixel-text`">
                                             {{ item.published ? '已发布' : '未发布' }}
@@ -330,7 +330,7 @@ async function handleDelete(item: any) {
                                     :key="item.id"
                                     class="border-b-2 border-gray-200 hover:bg-gray-50 transition-colors">
                                     <td class="p-4 font-medium">{{ item.name }}</td>
-                                    <td class="p-4 text-sm text-gray-600">{{ item.slug }}</td>
+                                    <td class="p-4   text-gray-600">{{ item.slug }}</td>
                                     <td class="p-4">{{ item.icon }}</td>
                                     <td class="p-4">
                                         <span class="px-2 py-1 bg-grass-light border-2 border-black rounded text-xs">
@@ -351,12 +351,12 @@ async function handleDelete(item: any) {
                                 <tr v-if="activeTab === 'postTags'" v-for="item in postTagsData" :key="item.id"
                                     class="border-b-2 border-gray-200 hover:bg-gray-50 transition-colors">
                                     <td class="p-4 font-medium">{{ item.name }}</td>
-                                    <td class="p-4 text-sm text-gray-600">{{ item.slug }}</td>
+                                    <td class="p-4   text-gray-600">{{ item.slug }}</td>
                                     <td class="p-4">
                                         <div class="flex items-center gap-2">
                                             <div class="w-6 h-6 rounded border-2 border-black"
                                                 :style="{ backgroundColor: item.color }"></div>
-                                            <span class="text-sm font-mono">{{ item.color }}</span>
+                                            <span class="  font-mono">{{ item.color }}</span>
                                         </div>
                                     </td>
                                     <td class="p-4">
@@ -414,7 +414,7 @@ async function handleDelete(item: any) {
                                         <div class="flex items-center gap-2">
                                             <div class="w-6 h-6 rounded border-2 border-black"
                                                 :style="{ backgroundColor: item.color }"></div>
-                                            <span class="text-sm font-mono">{{ item.color }}</span>
+                                            <span class="  font-mono">{{ item.color }}</span>
                                         </div>
                                     </td>
                                     <td class="p-4">
@@ -467,7 +467,7 @@ async function handleDelete(item: any) {
                                         <div class="flex items-center gap-2">
                                             <div class="w-6 h-6 rounded border-2 border-black"
                                                 :style="{ backgroundColor: item.color }"></div>
-                                            <span class="text-sm font-mono">{{ item.color }}</span>
+                                            <span class="  font-mono">{{ item.color }}</span>
                                         </div>
                                     </td>
                                     <td class="p-4">

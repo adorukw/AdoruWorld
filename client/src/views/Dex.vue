@@ -89,14 +89,13 @@ const filteredEntries = computed(() => {
                         图鉴 Dex
                     </h1>
                     <p class="pixel-text text-2xl! max-w-xl mx-auto">
-                        记录我看过的动画、电影、剧集，玩过的游戏，读过的书籍，听过的音乐
+                        记录我的读、看、玩、听、做
                     </p>
                 </div>
             </div>
         </section>
 
         <section class="py-4 border-b-4  overflow-hidden relative">
-            <div class="absolute inset-0 sky-gradient"></div>
             <div class="max-w-6xl mx-auto px-4 relative z-10">
                 <div class="grid grid-cols-3 md:grid-cols-7 gap-3">
                     <div v-for="cat in dexCategories" :key="cat.id"
@@ -110,9 +109,7 @@ const filteredEntries = computed(() => {
                         <div class="text-xs  mt-1">{{ dexStats.byCategory[cat.slug] || 0 }}</div>
                     </div>
                 </div>
-                
             </div>
-            
         </section>
 
         <section class="py-8">
