@@ -6,30 +6,69 @@ import DropdownMenu from '@/components/ui/DropdownMenu.vue'
 import DexCard from '@/components/ui/DexCard.vue'
 import PixelButton from '@/components/ui/PixelButton.vue'
 import { dexCategories, dexStatuses } from '@/constants'
-import type { DexCategory, DexStatus } from '@/types'
+import type { DexCategory, DexStatus, DexResponse, DexStats } from '@/types'
 import { useDexStore } from '@/store'
-import { storeToRefs } from 'pinia'
 
 const dexStore = useDexStore()
 
-const { dexs, dexStats } = storeToRefs(dexStore)
+const dexs = ref<DexResponse[]>([])
+const dexStats = ref<DexStats>({
+    total: 0,
+    byCategory: {},
+    byStatus: {},
+    averageRating: 0,
+});
 
-onMounted(() => {
-    dexStore.getDexs({ limit: 12 })
-    dexStore.getDexStats()
+const pageSize = ref(12);
+const hasMore = ref(false);
+const loading = ref(false);
+const error = ref<string | null>(null);
+
+onMounted(async () => {
+    await dexStore.getDexs({ limit: pageSize.value })
+    hasMore.value = dexStore.dexs.length >= pageSize.value;
+    dexs.value = dexStore.dexs
+    await dexStore.getDexStats()
+    dexStats.value = dexStore.dexStats
 })
+
+const loadMore = async (category?: string, status?: string) => {
+    if (!hasMore.value || loading.value) return;
+    loading.value = true;
+    error.value = null;
+    try {
+        const params = {
+            category,
+            status,
+            skip: dexs.value.length,
+            limit: pageSize.value,
+        }
+        await dexStore.getDexs(params);
+        const newItems = dexStore.dexs
+        hasMore.value = newItems.length >= pageSize.value;
+        console.log(category, status);
+        console.log("newItems length: ", newItems.length);
+        dexs.value.push(...newItems);
+    } catch (err: any) {
+        error.value = err.message || "加载更多失败";
+    } finally {
+        loading.value = false;
+    }
+};
 
 const selectedCategory = ref<DexCategory | 'all'>('all')
 const selectedStatus = ref<DexStatus | 'all'>('all')
 const searchQuery = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
 
-watch([selectedCategory, selectedStatus], () => {
-    dexStore.getDexs({
+watch([selectedCategory, selectedStatus], async () => {
+    await dexStore.getDexs({
         category: selectedCategory.value === 'all' ? undefined : selectedCategory.value,
         status: selectedStatus.value === 'all' ? undefined : selectedStatus.value,
         limit: 12,
     })
+    dexs.value = dexStore.dexs
+    hasMore.value = dexStore.dexs.length >= pageSize.value
 })
 
 const statusOptions = computed(() => {
@@ -63,6 +102,8 @@ const filteredEntries = computed(() => {
             e.originalTitle?.toLowerCase().includes(query)
         )
     }
+
+
 
     return result
 })
@@ -169,13 +210,12 @@ const filteredEntries = computed(() => {
                         :view-mode="'list'" />
                 </div>
 
-                <div v-if="!searchQuery && dexStore.hasMore && dexStore.dexs.length > 0"
-                    class="flex justify-center mt-10 mb-4">
-                    <button class="px-8 py-3 ..." :disabled="dexStore.loading" @click="dexStore.loadMore(selectedCategory === 'all' ? undefined : selectedCategory,
+                <div v-if="!searchQuery && hasMore && dexs.length > 0" class="flex justify-center mt-10 mb-4">
+                    <button class="px-8 py-3 ..." :disabled="loading" @click="loadMore(selectedCategory === 'all' ? undefined : selectedCategory,
                         selectedStatus === 'all' ? undefined : selectedStatus)">
-                        <template v-if="dexStore.loading">🔄 <PixelButton>加载中…</PixelButton></template>
+                        <template v-if="loading">🔄 <PixelButton>加载中…</PixelButton></template>
                         <template v-else>
-                            <PixelButton>📦 加载更多（已显示 {{ dexStore.dexs.length }} 条）</PixelButton>
+                            <PixelButton>📦 加载更多（已显示 {{ dexs.length }} 条）</PixelButton>
                         </template>
                     </button>
                 </div>

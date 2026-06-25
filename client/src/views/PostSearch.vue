@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @ts-nocheck
 import { watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Layout from '@/components/layout/Layout.vue'

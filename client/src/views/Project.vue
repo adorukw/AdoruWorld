@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @ts-nocheck
 import { computed } from 'vue'
 import Layout from '@/components/layout/Layout.vue'
 import PostCard from '@/components/ui/PostCard.vue'

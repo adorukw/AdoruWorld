@@ -481,7 +481,7 @@ async def seed():
         await seed_posts(db, cat_map, tag_map, count=100)     # ← 改这里控制文章数量
 
         genre_map = await seed_dex_genres(db)
-        await seed_dex_entries(db, genre_map, count=80)       # ← 改这里控制图鉴数量
+        await seed_dex_entries(db, genre_map, count=700)       # ← 改这里控制图鉴数量
 
         mt_map = await seed_media_tags(db)
         await seed_media(db, mt_map, count=30)                # ← 改这里控制媒体数量

@@ -15,30 +15,6 @@ export const useDexStore = defineStore("dex", () => {
   });
   const loading = ref(false);
   const error = ref<string | null>(null);
-  const pageSize = ref(12);
-  const hasMore = ref(false);
-
-  const loadMore = async (category?: string, status?: string) => {
-    if (!hasMore.value || loading.value) return;
-    loading.value = true;
-    error.value = null;
-    try {
-      const newItems = await api.dexs.list({
-        category,
-        status,
-        skip: dexs.value.length,
-        limit: pageSize.value,
-      });
-      if (newItems.length < pageSize.value) hasMore.value = false;
-      console.log(category, status);
-      console.log("newItems length: ", newItems.length);
-      dexs.value.push(...newItems);
-    } catch (err: any) {
-      error.value = err.message || "加载更多失败";
-    } finally {
-      loading.value = false;
-    }
-  };
 
   const getDexs = async (params?: {
     category?: string;
@@ -48,10 +24,8 @@ export const useDexStore = defineStore("dex", () => {
   }) => {
     loading.value = true;
     error.value = null;
-    hasMore.value = true;
     try {
       dexs.value = await api.dexs.list(params);
-      if (dexs.value.length < pageSize.value) hasMore.value = false;
     } catch (err: any) {
       error.value = err.message || "获取图鉴列表失败";
     } finally {
@@ -166,9 +140,7 @@ export const useDexStore = defineStore("dex", () => {
     dexStats,
     loading,
     error,
-    hasMore,
 
-    loadMore,
     getDexs,
     getDexBySlug,
     getRelatedDexs,
