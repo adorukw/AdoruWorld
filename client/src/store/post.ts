@@ -30,9 +30,12 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      posts.value = await api.posts.list(params);
+      const res = await api.posts.list(params);
+      posts.value = res;
+      return res;
     } catch (err: any) {
       error.value = err.message || "获取文章列表失败";
+      throw err;
     } finally {
       loading.value = false;
     }

@@ -26,7 +26,6 @@ watch(() => route.params.slug, async (newSlug) => {
     if (!newSlug) return
     const slug = newSlug as string
 
-    post.value = null
     postStore.loading = true
 
     await postStore.getPostBySlug(slug)

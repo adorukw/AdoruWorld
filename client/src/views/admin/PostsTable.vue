@@ -4,17 +4,24 @@ import { usePostStore } from '@/store'
 import CrudModal from '@/components/common/CrudModal.vue'
 import PixelButton from '@/components/ui/PixelButton.vue'
 import type { PostResponse } from '@/types'
+import { useInfiniteList } from '@/composables'
 
-const store = usePostStore()
-const items = ref<PostResponse[] | null>(null)
+const postStore = usePostStore()
 
 const showModal = ref(false)
 const modalMode = ref<'create' | 'update'>('create')
 const editingItem = ref<PostResponse | null>(null)
 
+const { items: items, loading, hasMore, loadMore, refresh } = useInfiniteList({
+    fetchFn: (params: {
+        skip?: number;
+        limit?: number;
+    }) => postStore.getPosts(params),
+    pageSize: 5
+})
+
 onMounted(async () => {
-    await store.getPosts()
-    items.value = store.posts
+    await refresh()
 })
 
 async function openCreateModal() {
@@ -35,16 +42,16 @@ async function openEditModal(item: any) {
 
 async function handleModalSuccess() {
     showModal.value = false
-    await store.getPosts()
-    items.value = store.posts
+    await postStore.getPosts()
+    items.value = postStore.posts
 }
 
 async function handleDelete(item: any) {
     if (!confirm(`确定删除 "${item.title}" 吗？`)) return
     try {
-        await store.deletePost(item.id)
-        await store.getPosts()
-        items.value = store.posts
+        await postStore.deletePost(item.id)
+        await postStore.getPosts()
+        items.value = postStore.posts
     } catch (e) {
         alert('删除失败')
     }
@@ -108,6 +115,18 @@ async function handleDelete(item: any) {
                 <div class="text-6xl mb-4">📭</div>
                 <h3 class="pixel-text text-lg mb-2">暂无数据</h3>
                 <p class="text-gray-600 mb-6">点击上方按钮添加新内容</p>
+            </div>
+            
+            <div v-if="hasMore && items.length > 0" class="flex justify-center mt-10 mb-4">
+                <button class="px-8 py-3 ..." :disabled="loading" @click="loadMore()">
+                    <template v-if="loading">🔄 <PixelButton>加载中…</PixelButton></template>
+                    <template v-else>
+                        <PixelButton>📦 加载更多（已显示 {{ items.length }} 条）</PixelButton>
+                    </template>
+                </button>
+            </div>
+            <div v-else class="flex justify-center mt-10 mb-4">
+                <PixelButton>已经加载全部 {{ items.length }} 条</PixelButton>
             </div>
         </div>
     </div>

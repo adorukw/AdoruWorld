@@ -25,9 +25,12 @@ export const useDexStore = defineStore("dex", () => {
     loading.value = true;
     error.value = null;
     try {
-      dexs.value = await api.dexs.list(params);
+      const res = await api.dexs.list(params);
+      dexs.value = res;
+      return res;
     } catch (err: any) {
       error.value = err.message || "获取图鉴列表失败";
+      throw err;
     } finally {
       loading.value = false;
     }

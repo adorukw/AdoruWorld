@@ -6,12 +6,12 @@ import DropdownMenu from '@/components/ui/DropdownMenu.vue'
 import DexCard from '@/components/ui/DexCard.vue'
 import PixelButton from '@/components/ui/PixelButton.vue'
 import { dexCategories, dexStatuses } from '@/constants'
-import type { DexCategory, DexStatus, DexResponse, DexStats } from '@/types'
+import type { DexCategory, DexStatus, DexStats } from '@/types'
 import { useDexStore } from '@/store'
+import { useInfiniteList } from '@/composables'
 
 const dexStore = useDexStore()
 
-const dexs = ref<DexResponse[]>([])
 const dexStats = ref<DexStats>({
     total: 0,
     byCategory: {},
@@ -19,42 +19,21 @@ const dexStats = ref<DexStats>({
     averageRating: 0,
 });
 
-const pageSize = ref(12);
-const hasMore = ref(false);
-const loading = ref(false);
-const error = ref<string | null>(null);
+const { items: dexs, loading, hasMore, loadMore, refresh } = useInfiniteList({
+    fetchFn: (params: {
+        category?: string;
+        status?: string;
+        skip?: number;
+        limit?: number;
+    }) => dexStore.getDexs(params),
+    pageSize: 12
+})
 
 onMounted(async () => {
-    await dexStore.getDexs({ limit: pageSize.value })
-    hasMore.value = dexStore.dexs.length >= pageSize.value;
-    dexs.value = dexStore.dexs
+    await refresh()
     await dexStore.getDexStats()
     dexStats.value = dexStore.dexStats
 })
-
-const loadMore = async (category?: string, status?: string) => {
-    if (!hasMore.value || loading.value) return;
-    loading.value = true;
-    error.value = null;
-    try {
-        const params = {
-            category,
-            status,
-            skip: dexs.value.length,
-            limit: pageSize.value,
-        }
-        await dexStore.getDexs(params);
-        const newItems = dexStore.dexs
-        hasMore.value = newItems.length >= pageSize.value;
-        console.log(category, status);
-        console.log("newItems length: ", newItems.length);
-        dexs.value.push(...newItems);
-    } catch (err: any) {
-        error.value = err.message || "加载更多失败";
-    } finally {
-        loading.value = false;
-    }
-};
 
 const selectedCategory = ref<DexCategory | 'all'>('all')
 const selectedStatus = ref<DexStatus | 'all'>('all')
@@ -62,13 +41,10 @@ const searchQuery = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 watch([selectedCategory, selectedStatus], async () => {
-    await dexStore.getDexs({
+    refresh({
         category: selectedCategory.value === 'all' ? undefined : selectedCategory.value,
         status: selectedStatus.value === 'all' ? undefined : selectedStatus.value,
-        limit: 12,
     })
-    dexs.value = dexStore.dexs
-    hasMore.value = dexStore.dexs.length >= pageSize.value
 })
 
 const statusOptions = computed(() => {
@@ -82,30 +58,6 @@ const statusOptions = computed(() => {
         })
     })
     return options
-})
-
-const filteredEntries = computed(() => {
-    let result = dexs.value
-
-    if (selectedCategory.value !== 'all') {
-        result = result.filter(e => e.category === selectedCategory.value)
-    }
-
-    if (selectedStatus.value !== 'all') {
-        result = result.filter(e => e.status === selectedStatus.value)
-    }
-
-    if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase()
-        result = result.filter(e =>
-            e.title.toLowerCase().includes(query) ||
-            e.originalTitle?.toLowerCase().includes(query)
-        )
-    }
-
-
-
-    return result
 })
 
 // const getRatingStars = (rating: number) => {
@@ -200,27 +152,29 @@ const filteredEntries = computed(() => {
                 <!-- Grid 视图 -->
                 <div v-if="viewMode === 'grid'"
                     class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
-                    <DexCard v-for="(entry, index) in filteredEntries" :key="entry.id" :entry="entry" :index="index"
+                    <DexCard v-for="(entry, index) in dexs" :key="entry.id" :entry="entry" :index="index"
                         :view-mode="'grid'" />
                 </div>
 
                 <!-- List 视图 -->
                 <div v-else class="space-y-3">
-                    <DexCard v-for="(entry, index) in filteredEntries" :key="entry.id" :entry="entry" :index="index"
+                    <DexCard v-for="(entry, index) in dexs" :key="entry.id" :entry="entry" :index="index"
                         :view-mode="'list'" />
                 </div>
 
                 <div v-if="!searchQuery && hasMore && dexs.length > 0" class="flex justify-center mt-10 mb-4">
-                    <button class="px-8 py-3 ..." :disabled="loading" @click="loadMore(selectedCategory === 'all' ? undefined : selectedCategory,
-                        selectedStatus === 'all' ? undefined : selectedStatus)">
+                    <button class="px-8 py-3 ..." :disabled="loading" @click="loadMore()">
                         <template v-if="loading">🔄 <PixelButton>加载中…</PixelButton></template>
                         <template v-else>
                             <PixelButton>📦 加载更多（已显示 {{ dexs.length }} 条）</PixelButton>
                         </template>
                     </button>
                 </div>
+                <div v-else class="flex justify-center mt-10 mb-4">
+                    <PixelButton>已经加载全部 {{ dexs.length }} 条</PixelButton>
+                </div>
 
-                <div v-if="filteredEntries.length === 0" class="text-center py-16">
+                <div v-if="dexs.length === 0" class="text-center py-16">
                     <div class="text-6xl mb-4">🔍</div>
                     <h2 class="pixel-text text-lg ">没有找到记录</h2>
                     <p class="">尝试更换筛选条件或搜索其他关键词</p>

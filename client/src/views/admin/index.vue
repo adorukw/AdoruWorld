@@ -59,13 +59,27 @@ const tabs: TabItem[] = [
 
         <section class="py-8">
             <div class="max-w-6xl mx-auto px-4">
-                <PostsTable v-if="activeTab === 'posts'" />
-                <PostCategoriesTable v-if="activeTab === 'postCategories'" />
-                <PostTagsTable v-if="activeTab === 'postTags'" />
-                <DexsTable v-if="activeTab === 'dexs'" />
-                <DexGenresTable v-if="activeTab === 'dexGenres'" />
-                <MediasTable v-if="activeTab === 'medias'" />
-                <MediaTagsTable v-if="activeTab === 'mediaTags'" />
+                <div v-show="activeTab === 'posts'">
+                    <PostsTable />
+                </div>
+                <div v-show="activeTab === 'postCategories'">
+                    <PostCategoriesTable />
+                </div>
+                <div v-show="activeTab === 'postTags'">
+                    <PostTagsTable />
+                </div>
+                <div v-show="activeTab === 'dexs'">
+                    <DexsTable />
+                </div>
+                <div v-show="activeTab === 'dexGenres'">
+                    <DexGenresTable />
+                </div>
+                <div v-show="activeTab === 'medias'">
+                    <MediasTable />
+                </div>
+                <div v-show="activeTab === 'mediaTags'">
+                    <MediaTagsTable />
+                </div>
             </div>
         </section>
     </Layout>
