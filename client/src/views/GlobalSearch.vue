@@ -5,6 +5,7 @@ import Layout from '@/components/layout/Layout.vue'
 import SearchInput from '@/components/ui/SearchInput.vue'
 import SearchResultCard from '@/components/ui/SearchResultCard.vue'
 import { useSearchStore } from '@/store'
+import type { SearchResultItem } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -31,6 +32,20 @@ const doSearch = async () => {
             ...(selectedType.value ? { type: selectedType.value } : {}),
         },
     })
+}
+
+// const routerLink = computed(() => {
+//     const { type, slug } = props.item
+//     if (type === 'post') return `/posts/${slug}`
+//     if (type === 'dex') return `/dexes/${slug}`
+//     return '/admin/medias'
+// })
+
+const getRouterLink = (item: SearchResultItem) => {
+    const { type, slug } = item
+    if (type === 'post') return `/post/${slug}`
+    if (type === 'dex') return `/dex/${slug}`
+    return '/admin/medias'
 }
 
 const switchType = (type: string | undefined) => {
@@ -108,7 +123,9 @@ watch(
 
                 <!-- 结果列表 -->
                 <div v-if="store.items.length > 0" class="space-y-4">
-                    <SearchResultCard v-for="item in store.items" :key="item.id" :item="item" />
+                    <router-link v-for="item in store.items" :key="item.id" :to="getRouterLink(item)">
+                        <SearchResultCard :key="item.id" :item="item" />
+                    </router-link>
 
                     <!-- 加载更多 -->
                     <div v-if="store.items.length < store.total" class="text-center">

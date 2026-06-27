@@ -7,12 +7,14 @@ const props = defineProps<{
     item: SearchResultItem
 }>()
 
-const routerLink = computed(() => {
-    const { type, slug } = props.item
-    if (type === 'post') return { name: 'Post', params: { slug } }
-    if (type === 'dex') return { name: 'DexDetail', params: { slug } }
-    return '/admin/medias'
-})
+const routerLink = "/posts/全部-如果-标准-女人-使用-311"
+
+// const routerLink = computed(() => {
+//     const { type, slug } = props.item
+//     if (type === 'post') return `/posts/${slug}`
+//     if (type === 'dex') return `/dexes/${slug}`
+//     return '/admin/medias'
+// })
 
 // 从 entityData 里提取分类/标签用于展示
 const categoryName = computed(() => {
@@ -56,7 +58,7 @@ const typeLabel = computed(() => {
 
 <template>
     <div>
-        <div :to="routerLink"
+        <div
             class="block pixel-card bg-white p-4 hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.8)] transition-all group">
             <div class="flex gap-4">
                 <!-- 左侧封面区 -->
