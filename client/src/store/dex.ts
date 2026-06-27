@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { api } from "@/api";
+import { dexApi as api } from "@/api";
 import type { DexResponse, DexStats, DexCreate, DexUpdate } from "@/types";
 
 export const useDexStore = defineStore("dex", () => {
@@ -25,7 +25,7 @@ export const useDexStore = defineStore("dex", () => {
     loading.value = true;
     error.value = null;
     try {
-      const res = await api.dexs.list(params);
+      const res = await api.list(params);
       dexs.value = res;
       return res;
     } catch (err: any) {
@@ -40,7 +40,7 @@ export const useDexStore = defineStore("dex", () => {
     loading.value = true;
     error.value = null;
     try {
-      dexStats.value = await api.dexs.stats();
+      dexStats.value = await api.stats();
     } catch (err: any) {
       error.value = err.message || "获取图鉴统计失败";
     } finally {
@@ -52,7 +52,7 @@ export const useDexStore = defineStore("dex", () => {
     loading.value = true;
     error.value = null;
     try {
-      currentDex.value = await api.dexs.getBySlug(slug);
+      currentDex.value = await api.getBySlug(slug);
     } catch (err: any) {
       error.value = err.message || "获取图鉴详情失败";
     } finally {
@@ -64,7 +64,7 @@ export const useDexStore = defineStore("dex", () => {
     loading.value = true;
     error.value = null;
     try {
-      relatedDexs.value = await api.dexs.getRelated(slug);
+      relatedDexs.value = await api.getRelated(slug);
     } catch (err: any) {
       error.value = err.message || "获取相关图鉴失败";
     } finally {
@@ -76,7 +76,7 @@ export const useDexStore = defineStore("dex", () => {
     loading.value = true;
     error.value = null;
     try {
-      currentDex.value = await api.dexs.getById(id);
+      currentDex.value = await api.getById(id);
     } catch (err: any) {
       error.value = err.message || "获取图鉴详情失败";
     } finally {
@@ -88,7 +88,7 @@ export const useDexStore = defineStore("dex", () => {
     loading.value = true;
     error.value = null;
     try {
-      const newDex = await api.dexs.create(data);
+      const newDex = await api.create(data);
       dexs.value.unshift(newDex);
       return newDex;
     } catch (err: any) {
@@ -103,7 +103,7 @@ export const useDexStore = defineStore("dex", () => {
     loading.value = true;
     error.value = null;
     try {
-      const updateDex = await api.dexs.update(id, data);
+      const updateDex = await api.update(id, data);
       const index = dexs.value.findIndex((entry) => entry.id === id);
       if (index > -1) {
         dexs.value[index] = updateDex;
@@ -124,7 +124,7 @@ export const useDexStore = defineStore("dex", () => {
     loading.value = true;
     error.value = null;
     try {
-      await api.dexs.delete(id);
+      await api.delete(id);
       dexs.value = dexs.value.filter((entry) => entry.id !== id);
       if (currentDex.value?.id === id) {
         currentDex.value = null;

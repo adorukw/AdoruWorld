@@ -15,6 +15,10 @@
                     <span>{{ navItem.name }}</span>
                 </router-link>
             </div>
+            <router-link to="/search" class="hover:text-yellow-300 transition-colors no-underline">
+                <span>🔍</span>
+            </router-link>
+
             <!-- 移动端菜单按钮 -->
             <button class="md:hidden pixel-btn text-xs px-3 py-2">☰</button>
         </div>

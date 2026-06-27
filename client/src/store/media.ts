@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { api } from "@/api";
+import { mediaApi as api } from "@/api";
 import type {
   MediaResponse,
   MediaCreate,
@@ -18,7 +18,7 @@ export const useMediaStore = defineStore("media", () => {
     loading.value = true;
     error.value = null;
     try {
-      const res = await api.media.upload(file);
+      const res = await api.upload(file);
       return res;
     } catch (err: any) {
       error.value = err.message || "上传媒体失败";
@@ -37,7 +37,7 @@ export const useMediaStore = defineStore("media", () => {
     loading.value = true;
     error.value = null;
     try {
-      const res = await api.media.list(parms);
+      const res = await api.list(parms);
       medias.value = res;
       return res;
     } catch (err: any) {
@@ -52,7 +52,7 @@ export const useMediaStore = defineStore("media", () => {
     loading.value = true;
     error.value = null;
     try {
-      currentMedia.value = await api.media.getBySlug(slug);
+      currentMedia.value = await api.getBySlug(slug);
     } catch (err: any) {
       error.value = err.message || "获取媒体详情失败";
     } finally {
@@ -64,7 +64,7 @@ export const useMediaStore = defineStore("media", () => {
     loading.value = true;
     error.value = null;
     try {
-      currentMedia.value = await api.media.getById(id);
+      currentMedia.value = await api.getById(id);
     } catch (err: any) {
       error.value = err.message || "获取媒体详情失败";
     } finally {
@@ -76,7 +76,7 @@ export const useMediaStore = defineStore("media", () => {
     loading.value = true;
     error.value = null;
     try {
-      const newMedia = await api.media.create(data);
+      const newMedia = await api.create(data);
       medias.value.push(newMedia);
       return newMedia;
     } catch (err: any) {
@@ -91,7 +91,7 @@ export const useMediaStore = defineStore("media", () => {
     loading.value = true;
     error.value = null;
     try {
-      const updatedMedia = await api.media.update(id, data);
+      const updatedMedia = await api.update(id, data);
       const index = medias.value.findIndex((m) => m.id === id);
       if (index !== -1) {
         medias.value[index] = updatedMedia;
@@ -112,7 +112,7 @@ export const useMediaStore = defineStore("media", () => {
     loading.value = true;
     error.value = null;
     try {
-      await api.media.delete(id);
+      await api.delete(id);
       medias.value = medias.value.filter((item) => item.id !== id);
       if (currentMedia.value?.id === id) {
         currentMedia.value = null;
@@ -145,7 +145,7 @@ export const useMediaStore = defineStore("media", () => {
   //     error.value = null
   //     try {
   //         // 1. 上传文件
-  //         const uploadResult = await api.media.upload(file)
+  //         const uploadResult = await api.upload(file)
 
   //         // 2. 创建媒体记录
   //         const mediaData: MediaCreate = {
@@ -157,7 +157,7 @@ export const useMediaStore = defineStore("media", () => {
   //             extension: uploadResult.extension
   //         }
 
-  //         const newMedia = await api.media.create(mediaData)
+  //         const newMedia = await api.create(mediaData)
   //         mediaItems.value.unshift(newMedia)
   //         return newMedia
   //     }

@@ -10,7 +10,8 @@ from app.core.database import init_db
 from app.modules import (
     posts_router, post_categories_router, post_tags_router,
     dexs_router, dex_genres_router, system_router,
-    medias_router, media_tags_router
+    medias_router, media_tags_router,
+    search_router
 )
 
 
@@ -42,6 +43,7 @@ app.include_router(dex_genres_router, prefix=API_PREFIX)
 app.include_router(system_router, prefix=API_PREFIX)
 app.include_router(medias_router, prefix=API_PREFIX)
 app.include_router(media_tags_router, prefix=API_PREFIX)
+app.include_router(search_router, prefix=API_PREFIX)
 
 if not os.path.exists("uploads"):
     os.makedirs("uploads")

@@ -17,7 +17,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/post-search",
     name: "PostSearch",
-    component: () => import("@/views/PostSearch.vue"),
+    component: () => import("@/views/GlobalSearch.vue"),
     meta: { title: "搜索" },
   },
   {
@@ -49,6 +49,12 @@ const routes: RouteRecordRaw[] = [
     name: "Admin",
     component: () => import("@/views/admin/index.vue"),
     meta: { title: "后台管理" },
+  },
+  {
+    path: "/search",
+    name: "Search",
+    component: () => import("@/views/GlobalSearch.vue"),
+    meta: { title: "搜索" },
   },
 ];
 

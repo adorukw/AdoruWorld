@@ -72,7 +72,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { usePostStore } from '@/store'
 import { storeToRefs } from 'pinia'
-import { api } from '@/api'
+import { systemApi } from '@/api'
 import { socialLinks } from '@/constants/index'
 
 const postStore = usePostStore()
@@ -82,7 +82,7 @@ const { totalPostsCount, totalWordCount, totalViewsCount } = storeToRefs(postSto
 const launchDate = ref<Date>(new Date('2026-01-01T00:00:00Z'))
 
 const getLaunchDate = async () => {
-    const response = await api.system.systemInfo()
+    const response = await systemApi.systemInfo()
     launchDate.value = new Date(response.launch_date)
 }
 

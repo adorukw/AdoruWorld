@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { api } from "@/api";
+import { postApi as api } from "@/api";
 import type {
   PostResponse,
   ArchiveItem,
@@ -30,7 +30,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      const res = await api.posts.list(params);
+      const res = await api.list(params);
       posts.value = res;
       return res;
     } catch (err: any) {
@@ -45,7 +45,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      archives.value = await api.posts.archives();
+      archives.value = await api.archives();
     } catch (err: any) {
       error.value = err.message || "获取归档失败";
     } finally {
@@ -57,7 +57,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      currentPost.value = await api.posts.getBySlug(slug);
+      currentPost.value = await api.getBySlug(slug);
     } catch (err: any) {
       error.value = err.message || "获取文章失败";
     } finally {
@@ -69,7 +69,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      const res = await api.posts.getRelated(slug);
+      const res = await api.getRelated(slug);
       relatedPosts.value = res;
     } catch (err: any) {
       error.value = err.message || "获取相关文章失败";
@@ -82,7 +82,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      currentPost.value = await api.posts.getById(id);
+      currentPost.value = await api.getById(id);
     } catch (err: any) {
       error.value = err.message || "获取文章失败";
     } finally {
@@ -94,7 +94,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      const newPost = await api.posts.create(data);
+      const newPost = await api.create(data);
       posts.value.unshift(newPost);
       return newPost;
     } catch (err: any) {
@@ -109,7 +109,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      const updatedPost = await api.posts.update(id, data);
+      const updatedPost = await api.update(id, data);
       const index = posts.value.findIndex((p) => p.id === id);
       if (index !== -1) {
         posts.value[index] = updatedPost;
@@ -130,7 +130,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      await api.posts.delete(id);
+      await api.delete(id);
       posts.value = posts.value.filter((p) => p.id !== id);
       if (currentPost.value?.id === id) {
         currentPost.value = null;
@@ -147,7 +147,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      await api.posts.incrementViews(id);
+      await api.incrementViews(id);
     } catch (err: any) {
       error.value = err.message || "增加文章阅读量失败";
     } finally {
@@ -159,7 +159,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      const count = await api.posts.totalPostsCount();
+      const count = await api.totalPostsCount();
       totalPostsCount.value = count;
     } catch (err: any) {
       error.value = err.message || "获取文章数量失败";
@@ -172,7 +172,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      const count = await api.posts.totalWords();
+      const count = await api.totalWords();
       totalWordCount.value = count;
     } catch (err: any) {
       error.value = err.message || "获取文章总字数失败";
@@ -185,7 +185,7 @@ export const usePostStore = defineStore("post", () => {
     loading.value = true;
     error.value = null;
     try {
-      const count = await api.posts.totalViews();
+      const count = await api.totalViews();
       totalViewsCount.value = count;
     } catch (err: any) {
       error.value = err.message || "获取文章总阅读量失败";

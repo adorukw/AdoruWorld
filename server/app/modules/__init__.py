@@ -7,6 +7,7 @@ from app.modules.dex_genre.router import router as dex_genres_router
 from app.modules.system.router import router as system_router
 from app.modules.media.router import router as medias_router
 from app.modules.media_tag.router import router as media_tags_router
+from app.modules.search.router import router as search_router
 
 # models
 from app.modules.post.model import Post, post_to_post_tags
@@ -22,6 +23,7 @@ __all__ = [
     "posts_router", "post_categories_router", "post_tags_router",
     "dexs_router", "dex_genres_router", "system_router",
     "medias_router", "media_tags_router",
+    "search_router",
     # models
     "Post", "PostTag", "PostCategory", "post_to_post_tags",
     "Dex", "DexGenre", "dex_to_dex_genres",

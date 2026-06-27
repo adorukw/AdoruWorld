@@ -6,6 +6,7 @@ export * from "./dex-genre";
 export * from "./media";
 export * from "./media-tag";
 export * from "./form.ts";
+export * from "./search.ts";
 
 export interface TocItem {
   id: string;
