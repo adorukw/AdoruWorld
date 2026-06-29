@@ -3,8 +3,8 @@ import type { NavItem, SocialLink, DexCategoryInfo, DexStatusInfo, MediaTypeInfo
 export const navItems: NavItem[] = [
     { name: '首页', path: '/', icon: '🏠' },
     { name: '图鉴', path: '/dex', icon: '📖' },
-    { name: '归档', path: '/archives', icon: '📚' },
-    // { name: '项目', path: '/projects', icon: '🏗️' },
+    { name: '归档', path: '/archive', icon: '📚' },
+    { name: '项目', path: '/project', icon: '🏗️' },
     // { name: '我的', path: '/me', icon: '👤' },
     { name: '管理', path: '/admin', icon: '🛠️' },
     // { name: '编辑', path: '/edit', icon: '📝' }

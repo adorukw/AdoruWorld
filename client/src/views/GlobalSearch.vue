@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Layout from '@/components/layout/Layout.vue'
 import SearchInput from '@/components/ui/SearchInput.vue'
