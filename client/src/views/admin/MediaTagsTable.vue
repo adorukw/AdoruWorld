@@ -97,6 +97,6 @@ async function handleDelete(item: any) {
             </div>
         </div>
     </div>
-    <CrudModal v-if="showModal" module="posts" :mode="modalMode" :initial-data="editingItem"
+    <CrudModal v-if="showModal" module="mediaTags" :mode="modalMode" :initial-data="editingItem"
         @success="handleModalSuccess" @close="showModal = false" />
 </template>

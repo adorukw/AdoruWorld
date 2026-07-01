@@ -18,10 +18,6 @@ onMounted(async () => {
     featuredPosts.value = postStore.posts
     await postStore.getPosts({ published: true, limit: 6 })
     recentPosts.value = postStore.posts
-
-    const res = await fetch('https://api.github.com/users/adorukw/repos?sort=updated&per_page=10')
-    const repos = await res.json()
-    console.log(repos)
 })
 </script>
 
@@ -57,8 +53,6 @@ onMounted(async () => {
                 <div class="flex items-center gap-3 mb-8">
                     <span class="text-2xl">⭐</span>
                     <h2 class=" text-lg ">精选文章</h2>
-                    <!-- 年度贡献热图 -->
-                    <img src="https://ghchart.rshah.org/adorukw" />
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                     <router-link v-for="post in featuredPosts" :key="post.id" :to="`/post/${post.slug}`" class="block">
@@ -83,7 +77,7 @@ onMounted(async () => {
                             </router-link>
                         </div>
                         <div class="mt-8 text-center">
-                            <router-link to="/archives" class="text-white!">
+                            <router-link to="/archive">
                                 <PixelButton>
                                     查看全部文章
                                 </PixelButton>

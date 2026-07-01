@@ -54,7 +54,7 @@ async function handleDelete(item: any) {
 <template>
     <div class="flex justify-between items-center mb-6">
         <span class="">共 {{ items?.length }} 条记录</span>
-        <PixelButton @click="openCreateModal">➕ 新增文章</PixelButton>
+        <PixelButton @click="openCreateModal">➕ 新增</PixelButton>
     </div>
 
     <div class="pixel-card">
@@ -105,6 +105,6 @@ async function handleDelete(item: any) {
     </div>
 
     <!-- 这个子组件自己的 CrudModal -->
-    <CrudModal v-if="showModal" module="posts" :mode="modalMode" :initial-data="editingItem"
+    <CrudModal v-if="showModal" module="postTags" :mode="modalMode" :initial-data="editingItem"
         @success="handleModalSuccess" @close="showModal = false" />
 </template>
