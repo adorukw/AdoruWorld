@@ -2,6 +2,7 @@ import type { NavItem, SocialLink, DexCategoryInfo, DexStatusInfo, MediaTypeInfo
 
 export const navItems: NavItem[] = [
     { name: '首页', path: '/', icon: '🏠' },
+    { name: '笔记', path: '/notes', icon: '📓' },
     { name: '图鉴', path: '/dex', icon: '📖' },
     { name: '归档', path: '/archive', icon: '📚' },
     { name: '项目', path: '/project', icon: '🏗️' },

@@ -56,6 +56,18 @@ const routes: RouteRecordRaw[] = [
     component: () => import("@/views/GlobalSearch.vue"),
     meta: { title: "搜索" },
   },
+  {
+    path: "/notes",
+    name: "Notes",
+    component: () => import("@/views/Notes.vue"),
+    meta: { title: "笔记" },
+  },
+  {
+    path: "/notes/:path*",
+    name: "NoteDetail",
+    component: () => import("@/views/Notes.vue"),
+    meta: { title: "笔记" },
+  },
 ];
 
 const router = createRouter({
