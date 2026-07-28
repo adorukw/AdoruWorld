@@ -11,10 +11,9 @@ AdoruWorld 管理工具
     3. 导出全部数据
     4. 导入全部数据
 """
-import subprocess
-import sys
-from pathlib import Path
 
+import subprocess
+from pathlib import Path
 
 SCRIPTS = {
     "1": ("🚀  启动服务器", ["python", "-m", "scripts.run"]),
@@ -52,9 +51,9 @@ def main():
         if choice == "4":
             path = input("请输入导入文件路径: ").strip()
             cmd = ["python", "-m", "scripts.import_all", path]
-            
+
         print(f"\n{desc} ...\n")
-        result = subprocess.run(cmd, cwd=Path(__file__).parent)
+        result = subprocess.run(cmd, cwd=Path(__file__).parent, check=False)
         if result.returncode != 0:
             print(f"\n⚠️  命令退出码: {result.returncode}")
         input("\n按 Enter 继续...")

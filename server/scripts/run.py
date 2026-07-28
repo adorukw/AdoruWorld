@@ -1,7 +1,8 @@
-import uvicorn
+import subprocess
 import sys
 from pathlib import Path
-import subprocess
+
+import uvicorn
 from app.core.config import DATABASE_URL
 
 server_dir = Path(__file__).resolve().parent.parent
@@ -18,13 +19,21 @@ def start_sqlite_web():
             return
 
         subprocess.Popen(
-            [sys.executable, "-m", "sqlite_web",
-                str(db_file), "--port", "8081", "--host", "0.0.0.0"],
+            [
+                sys.executable,
+                "-m",
+                "sqlite_web",
+                str(db_file),
+                "--port",
+                "8081",
+                "--host",
+                "0.0.0.0",
+            ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
         print("✅ SQLite Web: http://127.0.0.1:8081")
-    except Exception as e:
+    except (FileNotFoundError, OSError) as e:
         print("⚠️  SQLite Web 启动失败:", e)
 
 
@@ -36,9 +45,5 @@ if __name__ == "__main__":
     print("Docs:   http://127.0.0.1:8000/docs")
     print("Redoc:  http://127.0.0.1:8000/redoc")
     uvicorn.run(
-        "app.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
+        "app.main:app", host="0.0.0.0", port=8000, reload=True, log_level="info"
     )

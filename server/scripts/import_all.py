@@ -9,10 +9,10 @@ import_all.py — AdoruWorld 全量数据导入脚本
     python import_all.py backup.zip --clear            # 清空数据库 + 文件后恢复
     python import_all.py backup.zip --clear --dry-run  # 预览模式，不实际写入
 """
+
 import argparse
 import asyncio
 import json
-import os
 import shutil
 import sys
 import zipfile
@@ -25,14 +25,22 @@ sys.path.insert(0, str(SERVER_DIR))
 
 from app.core.database import async_session, init_db
 from app.modules import (
-    Post, PostCategory, PostTag, post_to_post_tags,
-    Dex, DexGenre, dex_to_dex_genres,
-    Media, MediaTag, media_to_media_tags,
+    Dex,
+    DexGenre,
+    Media,
+    MediaTag,
+    Post,
+    PostCategory,
+    PostTag,
+    dex_to_dex_genres,
+    media_to_media_tags,
+    post_to_post_tags,
 )
-from sqlalchemy import insert, delete as sa_delete
-
+from sqlalchemy import delete as sa_delete
+from sqlalchemy import insert
 
 # ── 日志 ──────────────────────────────────────────────────────
+
 
 def info(msg: str):
     print(f"  ℹ️  {msg}")
@@ -48,6 +56,7 @@ def warn(msg: str):
 
 # ── 清空数据库 ────────────────────────────────────────────────
 
+
 async def clear_database(db):
     """按依赖顺序清空所有表数据"""
     info("清空关联表...")
@@ -56,15 +65,15 @@ async def clear_database(db):
     await db.execute(sa_delete(media_to_media_tags))
 
     info("清空主表（有依赖优先）...")
-    await db.execute(sa_delete(Post.__table__))
-    await db.execute(sa_delete(Dex.__table__))
-    await db.execute(sa_delete(Media.__table__))
+    await db.execute(sa_delete(Post))
+    await db.execute(sa_delete(Dex))
+    await db.execute(sa_delete(Media))
 
     info("清空主表（无依赖）...")
-    await db.execute(sa_delete(PostCategory.__table__))
-    await db.execute(sa_delete(PostTag.__table__))
-    await db.execute(sa_delete(DexGenre.__table__))
-    await db.execute(sa_delete(MediaTag.__table__))
+    await db.execute(sa_delete(PostCategory))
+    await db.execute(sa_delete(PostTag))
+    await db.execute(sa_delete(DexGenre))
+    await db.execute(sa_delete(MediaTag))
 
     await db.commit()
     ok("数据库已清空")
@@ -80,10 +89,11 @@ def clear_uploads():
             shutil.rmtree(item)
         else:
             item.unlink()
-    ok(f"已清空 uploads/ 目录")
+    ok("已清空 uploads/ 目录")
 
 
 # ── 提取 ZIP ──────────────────────────────────────────────────
+
 
 def read_manifest(zip_path: str) -> tuple[dict, list[str]]:
     """读取 ZIP 中的 manifest.json，返回 (data, members)"""
@@ -104,7 +114,9 @@ def read_manifest(zip_path: str) -> tuple[dict, list[str]]:
             warn(f"未知的导出版本: {version}，尝试继续导入...")
 
         # 收集需要解压的文件列表
-        members = [n for n in zf.namelist() if n != "manifest.json" and not n.startswith("__")]
+        members = [
+            n for n in zf.namelist() if n != "manifest.json" and not n.startswith("__")
+        ]
 
     return manifest["data"], members
 
@@ -124,6 +136,7 @@ def extract_media_files(zip_path: str, members: list[str]):
 
 
 # ── 导入逻辑 ──────────────────────────────────────────────────
+
 
 def _parse_dt(val):
     """字符串 → datetime，容错处理"""
@@ -257,13 +270,19 @@ async def import_data(db, data: dict, dry_run: bool):
 
 # ── 校验 ──────────────────────────────────────────────────────
 
+
 def validate_manifest(data: dict) -> list[str]:
     """验证 manifest 数据完整性，返回警告列表"""
     warnings = []
 
     required_keys = [
-        "postCategories", "postTags", "dexGenres", "mediaTags",
-        "posts", "dexs", "medias",
+        "postCategories",
+        "postTags",
+        "dexGenres",
+        "mediaTags",
+        "posts",
+        "dexs",
+        "medias",
     ]
     for key in required_keys:
         if key not in data:
@@ -275,24 +294,32 @@ def validate_manifest(data: dict) -> list[str]:
     for post in data.get("posts", []):
         cid = post.get("category_id")
         if cid and cid not in category_ids:
-            warnings.append(f"文章 '{post.get('title', '?')}' 引用了不存在的分类 ID: {cid}")
+            warnings.append(
+                f"文章 '{post.get('title', '?')}' 引用了不存在的分类 ID: {cid}"
+            )
         for tid in post.get("_tagIds", []):
             if tid not in tag_ids:
-                warnings.append(f"文章 '{post.get('title', '?')}' 引用了不存在的标签 ID: {tid}")
+                warnings.append(
+                    f"文章 '{post.get('title', '?')}' 引用了不存在的标签 ID: {tid}"
+                )
 
     # 检查 dexs 引用的 genre 是否存在
     genre_ids = {g["id"] for g in data.get("dexGenres", [])}
     for dex in data.get("dexs", []):
         for gid in dex.get("_genreIds", []):
             if gid not in genre_ids:
-                warnings.append(f"图鉴 '{dex.get('title', '?')}' 引用了不存在的题材 ID: {gid}")
+                warnings.append(
+                    f"图鉴 '{dex.get('title', '?')}' 引用了不存在的题材 ID: {gid}"
+                )
 
     # 检查 medias 引用的 tag 是否存在
     media_tag_ids = {t["id"] for t in data.get("mediaTags", [])}
     for media in data.get("medias", []):
         for tid in media.get("_tagIds", []):
             if tid not in media_tag_ids:
-                warnings.append(f"媒体 '{media.get('title', '?')}' 引用了不存在的标签 ID: {tid}")
+                warnings.append(
+                    f"媒体 '{media.get('title', '?')}' 引用了不存在的标签 ID: {tid}"
+                )
 
     return warnings
 
@@ -312,11 +339,12 @@ def print_stats(data: dict):
     print("\n📊 待导入数据统计：")
     for name, count in stats.items():
         print(f"   {name}: {count} 条")
-    print(f"   ──────────")
+    print("   ──────────")
     print(f"   总计: {total} 条记录")
 
 
 # ── 主入口 ────────────────────────────────────────────────────
+
 
 async def import_main(zip_path: str, clear: bool, dry_run: bool):
     print("⭐ AdoruWorld 数据导入工具 ⭐")
@@ -367,14 +395,18 @@ async def import_main(zip_path: str, clear: bool, dry_run: bool):
     if not dry_run:
         print(f"\n✅ 导入完成！共处理 {total} 条记录，媒体文件已恢复。")
     else:
-        print(f"\n🔍 预览完成，未写入任何数据。使用 --clear 实际执行导入。")
+        print("\n🔍 预览完成，未写入任何数据。使用 --clear 实际执行导入。")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AdoruWorld 全量数据导入")
     parser.add_argument("input", help="ZIP 文件路径（由 export_all.py 导出）")
-    parser.add_argument("--clear", action="store_true", help="导入前清空现有数据库和上传文件")
-    parser.add_argument("--dry-run", action="store_true", help="预览模式，不实际写入数据库")
+    parser.add_argument(
+        "--clear", action="store_true", help="导入前清空现有数据库和上传文件"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="预览模式，不实际写入数据库"
+    )
     args = parser.parse_args()
 
     asyncio.run(import_main(args.input, args.clear, args.dry_run))

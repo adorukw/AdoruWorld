@@ -8,10 +8,10 @@ export_all.py — AdoruWorld 全量数据导出脚本
     python export_all.py                        # 默认输出到 exports/ 目录
     python export_all.py -o my-backup.zip       # 指定输出路径
 """
+
 import argparse
 import asyncio
 import json
-import os
 import sys
 import zipfile
 from datetime import datetime, timezone
@@ -23,18 +23,22 @@ sys.path.insert(0, str(SERVER_DIR))
 
 from app.core.database import async_session, init_db
 from app.modules import (
-    Post, PostCategory, PostTag, post_to_post_tags,
-    Dex, DexGenre, dex_to_dex_genres,
-    Media, MediaTag, media_to_media_tags,
+    Dex,
+    DexGenre,
+    Media,
+    MediaTag,
+    Post,
+    PostCategory,
+    PostTag,
+    dex_to_dex_genres,
+    media_to_media_tags,
+    post_to_post_tags,
 )
-
 
 # ── 工具函数 ──────────────────────────────────────────────────
 
+
 def _row_to_dict(row):
-    """把 SQLAlchemy Core Row 转成可 JSON 序列化的 dict"""
-    if row is None:
-        return None
     d = dict(row._mapping)
     for k, v in d.items():
         if isinstance(v, datetime):
@@ -54,6 +58,7 @@ def _local_path(file_path: str) -> Path:
 
 
 # ── 核心导出逻辑 ──────────────────────────────────────────────
+
 
 async def collect_data() -> dict:
     """从数据库读取所有数据，按依赖顺序收集为 dict"""
@@ -102,9 +107,7 @@ async def collect_data() -> dict:
         data["posts"] = posts
 
         print("📦 正在导出图鉴条目...")
-        rows = await db.execute(
-            Dex.__table__.select().order_by(Dex.__table__.c.title)
-        )
+        rows = await db.execute(Dex.__table__.select().order_by(Dex.__table__.c.title))
         dexs = [_row_to_dict(r) for r in rows.fetchall()]
         for dex in dexs:
             genre_rows = await db.execute(
@@ -208,6 +211,7 @@ def count_stats(data: dict) -> dict:
 
 # ── 主入口 ────────────────────────────────────────────────────
 
+
 async def export(output_path: str):
     print("⭐ AdoruWorld 数据导出工具 ⭐")
     print("=" * 40)
@@ -222,7 +226,7 @@ async def export(output_path: str):
     for name, count in stats.items():
         print(f"   {name}: {count} 条")
     total = sum(stats.values())
-    print(f"   ──────────")
+    print("   ──────────")
     print(f"   总计: {total} 条记录")
 
     # 2. 构建 manifest
@@ -250,8 +254,13 @@ async def export(output_path: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AdoruWorld 全量数据导出")
     parser.add_argument(
-        "-o", "--output",
-        default=str(SERVER_DIR / "exports" / f"adoruworld-export-{datetime.now().strftime('%Y-%m-%d')}.zip"),
+        "-o",
+        "--output",
+        default=str(
+            SERVER_DIR
+            / "exports"
+            / f"adoruworld-export-{datetime.now(timezone.utc).strftime('%Y-%m-%d')}.zip"
+        ),
         help="输出 ZIP 文件路径",
     )
     args = parser.parse_args()

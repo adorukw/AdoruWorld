@@ -5,17 +5,23 @@ import re
 import uuid
 from datetime import datetime, timedelta, timezone
 
+from app.core.database import async_session, init_db
+from app.modules import (
+    Dex,
+    DexGenre,
+    Media,
+    MediaTag,
+    Post,
+    PostCategory,
+    PostTag,
+    dex_to_dex_genres,
+    media_to_media_tags,
+    post_to_post_tags,
+)
 from faker import Faker
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import async_session, init_db
-from app.modules import (
-    PostCategory, PostTag, Post, post_to_post_tags,
-    Dex, DexGenre, dex_to_dex_genres,
-    Media, MediaTag, media_to_media_tags
-)
-
-fake = Faker('zh_CN')
+fake = Faker("zh_CN")
 
 # ============================================================
 # 固定种子：分类、标签、题材（数量少且语义明确，手动定义）
@@ -79,11 +85,19 @@ DEX_GENRES = [
     {"name": "纪录片", "slug": "documentary", "color": "#2E8B57"},
 ]
 
-DEX_CATEGORIES = ['anime', 'movie', 'tv', 'game', 'book', 'music', 'other']
-DEX_STATUSES = ['completed', 'watching', 'playing',
-                'reading', 'listening', 'doing', 'dropped', 'planned']
+DEX_CATEGORIES = ["anime", "movie", "tv", "game", "book", "music", "other"]
+DEX_STATUSES = [
+    "completed",
+    "watching",
+    "playing",
+    "reading",
+    "listening",
+    "doing",
+    "dropped",
+    "planned",
+]
 
-MEDIA_TYPES = ['book', 'audio', 'image', 'video']
+MEDIA_TYPES = ["book", "audio", "image", "video"]
 
 MEDIA_TAGS = [
     {"name": "风景", "slug": "landscape", "color": "#4CAF50"},
@@ -105,20 +119,21 @@ MEDIA_TAGS = [
 # 辅助函数
 # ============================================================
 
+
 def random_date(start_year: int = 2023, end_year: int = 2026) -> str:
     """生成 YYYY-MM-DD 格式随机日期"""
     start = datetime(start_year, 1, 1, tzinfo=timezone.utc)
     end = datetime(end_year, 6, 1, tzinfo=timezone.utc)
     delta = end - start
     random_days = random.randint(0, delta.days)
-    return (start + timedelta(days=random_days)).strftime('%Y-%m-%d')
+    return (start + timedelta(days=random_days)).strftime("%Y-%m-%d")
 
 
 def generate_slug(text: str) -> str:
     """从中文标题生成英文 slug"""
     # 用 faker 生成英文词组的 slug，避免依赖 pypinyin
     words = fake.words(nb=random.randint(2, 5), unique=True)
-    return '-'.join(words).lower() + f'-{random.randint(100, 999)}'
+    return "-".join(words).lower() + f"-{random.randint(100, 999)}"
 
 
 def generate_markdown_content(min_sections: int = 3, max_sections: int = 6) -> str:
@@ -128,32 +143,46 @@ def generate_markdown_content(min_sections: int = 3, max_sections: int = 6) -> s
         heading = f"{'#' * random.randint(2, 3)} {fake.sentence(nb_words=4)}"
         paragraphs = []
         for _ in range(random.randint(2, 5)):
-            paragraphs.append(fake.paragraph(
-                nb_sentences=random.randint(3, 8)))
+            paragraphs.append(fake.paragraph(nb_sentences=random.randint(3, 8)))
 
         # 随机插入代码块、列表或引用
         extra = ""
         roll = random.random()
         if roll < 0.3:
             lang = random.choice(
-                ['python', 'typescript', 'javascript', 'rust', 'go', 'bash', 'css', 'html'])
-            code = '\n'.join(' '.join(fake.words(nb=random.randint(3, 8)))
-                             for _ in range(random.randint(3, 6)))
+                [
+                    "python",
+                    "typescript",
+                    "javascript",
+                    "rust",
+                    "go",
+                    "bash",
+                    "css",
+                    "html",
+                ]
+            )
+            code = "\n".join(
+                " ".join(fake.words(nb=random.randint(3, 8)))
+                for _ in range(random.randint(3, 6))
+            )
             extra = f"\n\n```{lang}\n{code}\n```\n"
         elif roll < 0.5:
-            items = '\n'.join(
-                f"- {fake.sentence(nb_words=4)}" for _ in range(random.randint(3, 6)))
+            items = "\n".join(
+                f"- {fake.sentence(nb_words=4)}" for _ in range(random.randint(3, 6))
+            )
             extra = f"\n\n{items}\n"
         elif roll < 0.6:
             extra = f"\n\n> {fake.paragraph(nb_sentences=2)}\n"
 
         sections.append(f"{heading}\n\n{chr(10).join(paragraphs)}{extra}")
 
-    result = '\n\n---\n\n'.join(sections)
+    result = "\n\n---\n\n".join(sections)
 
     # 可选：加一张随机图片
     if random.random() < 0.4:
-        result += f"\n\n![{fake.word()}](https://picsum.photos/seed/{fake.word()}/800/400)\n"
+        result += (
+            f"\n\n![{fake.word()}](https://picsum.photos/seed/{fake.word()}/800/400)\n"
+        )
 
     return result
 
@@ -162,21 +191,23 @@ def calculate_reading_time(content: str) -> int:
     """估算阅读时间（分钟）"""
     if not content:
         return 0
-    content_without_code = re.sub(r'```[\s\S]*?```', '', content)
-    text = re.sub(r'[#*`\[\]>\-]', '', content_without_code)
+    content_without_code = re.sub(r"```[\s\S]*?```", "", content)
+    text = re.sub(r"[#*`\[\]>\-]", "", content_without_code)
     char_count = len(text.strip())
-    return max(1, round(char_count / 300) + content.count('![') // 2)
+    return max(1, round(char_count / 300) + content.count("![") // 2)
 
 
 # ============================================================
 # 播种函数
 # ============================================================
 
+
 async def seed_categories(db: AsyncSession) -> dict[str, str]:
     cat_map = {}
     for c in CATEGORIES:
-        obj = PostCategory(name=c["name"], slug=c["slug"],
-                           icon=c.get("icon"), color=c.get("color"))
+        obj = PostCategory(
+            name=c["name"], slug=c["slug"], icon=c.get("icon"), color=c.get("color")
+        )
         db.add(obj)
         await db.flush()
         cat_map[c["name"]] = obj.id
@@ -197,14 +228,16 @@ async def seed_tags(db: AsyncSession) -> dict[str, str]:
     return tag_map
 
 
-async def seed_posts(db: AsyncSession, cat_map: dict[str, str], tag_map: dict[str, str], count: int = 100):
+async def seed_posts(
+    db: AsyncSession, cat_map: dict[str, str], tag_map: dict[str, str], count: int = 100
+):
     tag_names = list(tag_map.keys())
     post_titles = set()
 
     for i in range(count):
         # 生成不重复标题
         while True:
-            title = fake.sentence(nb_words=random.randint(4, 10)).rstrip('.')
+            title = fake.sentence(nb_words=random.randint(4, 10)).rstrip(".")
             if title not in post_titles:
                 post_titles.add(title)
                 break
@@ -228,8 +261,9 @@ async def seed_posts(db: AsyncSession, cat_map: dict[str, str], tag_map: dict[st
             description=description,
             content=content,
             cover_image=f"https://picsum.photos/seed/{slug}/800/400",
-            created_at=datetime.strptime(
-                created, '%Y-%m-%d').replace(tzinfo=timezone.utc),
+            created_at=datetime.strptime(created, "%Y-%m-%d").replace(
+                tzinfo=timezone.utc
+            ),
             published=published,
             featured=featured,
             reading_time=reading_time,
@@ -243,7 +277,8 @@ async def seed_posts(db: AsyncSession, cat_map: dict[str, str], tag_map: dict[st
         for tag_name in post_tags:
             await db.execute(
                 post_to_post_tags.insert().values(
-                    post_id=post.id, post_tag_id=tag_map[tag_name])
+                    post_id=post.id, post_tag_id=tag_map[tag_name]
+                )
             )
 
         if (i + 1) % 20 == 0:
@@ -266,20 +301,13 @@ async def seed_dex_genres(db: AsyncSession) -> dict[str, str]:
     return genre_map
 
 
-async def seed_dex_entries(db: AsyncSession, genre_map: dict[str, str], count: int = 50):
+async def seed_dex_entries(
+    db: AsyncSession, genre_map: dict[str, str], count: int = 50
+):
     genre_names = list(genre_map.keys())
     titles = set()
 
-    category_title_templates = {
-        'anime': ['{name}', '{name} 第二季', '{name} 剧场版', '{name} 特别篇'],
-        'movie': ['{name}', '{name} 2', '{name}：新篇章'],
-        'tv': ['{name}', '{name} 第二季', '{name} 第三季', '{name}：衍生剧'],
-        'game': ['{name}', '{name} 2', '{name}：重制版', '{name}：终极版'],
-        'book': ['{name}', '{name} 第二部', '{name} 第三部', '{name}：全本'],
-        'music': ['{name}', 'The Best of {name}', '{name} Live'],
-    }
-
-    fake_en = Faker('en_US')
+    fake_en = Faker("en_US")
 
     for i in range(count):
         while True:
@@ -292,13 +320,11 @@ async def seed_dex_entries(db: AsyncSession, genre_map: dict[str, str], count: i
         category = random.choice(DEX_CATEGORIES)
         slug = generate_slug(title)
         status = random.choice(DEX_STATUSES)
-        rating = 0 if status in (
-            'dropped', 'planned') else random.randint(1, 10)
+        rating = 0 if status in ("dropped", "planned") else random.randint(1, 10)
         year = random.randint(1990, 2026)
 
         start = random_date(max(2000, year), 2026)
-        finish = random_date(
-            max(2000, year), 2026) if status == 'completed' else None
+        finish = random_date(max(2000, year), 2026) if status == "completed" else None
 
         entry = Dex(
             slug=slug,
@@ -310,12 +336,10 @@ async def seed_dex_entries(db: AsyncSession, genre_map: dict[str, str], count: i
             rating=rating,
             start_date=start,
             finish_date=finish,
-            comment=fake.paragraph(
-                nb_sentences=2) if random.random() < 0.7 else None,
+            comment=fake.paragraph(nb_sentences=2) if random.random() < 0.7 else None,
             creator=fake.name() if random.random() < 0.8 else None,
             year=year,
-            summary=fake.paragraph(
-                nb_sentences=3) if random.random() < 0.5 else None,
+            summary=fake.paragraph(nb_sentences=3) if random.random() < 0.5 else None,
         )
         db.add(entry)
         await db.flush()
@@ -325,7 +349,8 @@ async def seed_dex_entries(db: AsyncSession, genre_map: dict[str, str], count: i
         for gn in entry_genres:
             await db.execute(
                 dex_to_dex_genres.insert().values(
-                    dex_id=entry.id, dex_genre_id=genre_map[gn])
+                    dex_id=entry.id, dex_genre_id=genre_map[gn]
+                )
             )
 
         if (i + 1) % 20 == 0:
@@ -351,7 +376,6 @@ async def seed_media_tags(db: AsyncSession) -> dict[str, str]:
 def _generate_placeholder_file(mtype: str, ext: str) -> tuple[str, int, str, dict]:
     """生成占位文件，返回 (相对路径, 文件大小, mime类型, 元数据)"""
     from PIL import Image
-    import mutagen
 
     year_dir = str(random.randint(2023, 2026))
     filename = f"{uuid.uuid4().hex}{ext}"
@@ -360,55 +384,67 @@ def _generate_placeholder_file(mtype: str, ext: str) -> tuple[str, int, str, dic
     save_path = os.path.join(rel_dir, filename)
 
     mime_map = {
-        '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
-        '.png': 'image/png', '.webp': 'image/webp',
-        '.gif': 'image/gif',
-        '.mp3': 'audio/mpeg', '.wav': 'audio/wav',
-        '.ogg': 'audio/ogg', '.flac': 'audio/flac',
-        '.mp4': 'video/mp4', '.webm': 'video/webm',
-        '.mov': 'video/quicktime',
-        '.pdf': 'application/pdf',
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".webp": "image/webp",
+        ".gif": "image/gif",
+        ".mp3": "audio/mpeg",
+        ".wav": "audio/wav",
+        ".ogg": "audio/ogg",
+        ".flac": "audio/flac",
+        ".mp4": "video/mp4",
+        ".webm": "video/webm",
+        ".mov": "video/quicktime",
+        ".pdf": "application/pdf",
     }
-    mime = mime_map.get(ext, 'application/octet-stream')
+    mime = mime_map.get(ext, "application/octet-stream")
     metadata = {}
 
-    if mtype == 'image':
+    if mtype == "image":
         # 生成 200×150 的随机颜色占位图
-        color = random.choice(['#EE1515', '#3B4CCA', '#FFDE00', '#4CAF50', '#FF7300', '#9CBB0F'])
-        img = Image.new('RGB', (200, 150), color)
+        color = random.choice(
+            ["#EE1515", "#3B4CCA", "#FFDE00", "#4CAF50", "#FF7300", "#9CBB0F"]
+        )
+        img = Image.new("RGB", (200, 150), color)
         img.save(save_path)
-        metadata = {'width': 200, 'height': 150, 'format': ext.lstrip('.').upper(), 'mode': 'RGB'}
+        metadata = {
+            "width": 200,
+            "height": 150,
+            "format": ext.lstrip(".").upper(),
+            "mode": "RGB",
+        }
 
-    elif mtype == 'audio':
+    elif mtype == "audio":
         # 生成极简 WAV 占位（1秒静音）
         import struct
         import wave
+
         sample_rate = 44100
         duration = 1
         num_samples = sample_rate * duration
         # 生成极小幅度的白噪声
         samples = [random.randint(-100, 100) for _ in range(num_samples)]
-        with wave.open(save_path, 'w') as wf:
+        with wave.open(save_path, "w") as wf:
             wf.setnchannels(1)
             wf.setsampwidth(2)
             wf.setframerate(sample_rate)
             for s in samples:
-                wf.writeframes(struct.pack('<h', s))
-        metadata = {'duration': duration, 'bitrate': sample_rate * 16, 'channels': 1}
+                wf.writeframes(struct.pack("<h", s))
+        metadata = {"duration": duration, "bitrate": sample_rate * 16, "channels": 1}
 
-    elif mtype == 'video':
+    elif mtype == "video":
         # 视频占位就生成一张图片（无法真正生成视频）
-        color = random.choice(['#333333', '#555555', '#777777'])
-        img = Image.new('RGB', (320, 240), color)
+        color = random.choice(["#333333", "#555555", "#777777"])
+        img = Image.new("RGB", (320, 240), color)
         img.save(save_path)
-        metadata = {'width': 320, 'height': 240, 'duration': 0}
+        metadata = {"width": 320, "height": 240, "duration": 0}
 
     else:  # book — 生成空白 PDF
-        from io import BytesIO
-        pdf_content = b'%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]>>endobj\nxref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n190\n%%EOF'
-        with open(save_path, 'wb') as f:
+        pdf_content = b"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]>>endobj\nxref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n190\n%%EOF"
+        with open(save_path, "wb") as f:
             f.write(pdf_content)
-        metadata = {'pages': 1}
+        metadata = {"pages": 1}
 
     file_size = os.path.getsize(save_path)
     return f"/{save_path}", file_size, mime, metadata
@@ -420,15 +456,17 @@ async def seed_media(db: AsyncSession, tag_map: dict[str, str], count: int = 30)
     for i in range(count):
         mtype = random.choice(MEDIA_TYPES)
         ext_map = {
-            'image': random.choice(['.jpg', '.png', '.webp', '.gif']),
-            'audio': random.choice(['.wav']),  # 只用 wav，其他格式需要编码器
-            'video': random.choice(['.jpg']),  # 假装视频，实际是图
-            'book': '.pdf',
+            "image": random.choice([".jpg", ".png", ".webp", ".gif"]),
+            "audio": random.choice([".wav"]),  # 只用 wav，其他格式需要编码器
+            "video": random.choice([".jpg"]),  # 假装视频，实际是图
+            "book": ".pdf",
         }
         ext = ext_map[mtype]
 
         title = f"{fake.word()}_{uuid.uuid4().hex[:8]}{ext}"
-        file_path, file_size, mime_type, metadata = _generate_placeholder_file(mtype, ext)
+        file_path, file_size, mime_type, metadata = _generate_placeholder_file(
+            mtype, ext
+        )
 
         media = Media(
             slug=generate_slug(title),
@@ -447,7 +485,8 @@ async def seed_media(db: AsyncSession, tag_map: dict[str, str], count: int = 30)
         for tag_name in random.sample(tag_names, k=random.randint(0, 3)):
             await db.execute(
                 media_to_media_tags.insert().values(
-                    media_id=media.id, media_tag_id=tag_map[tag_name])
+                    media_id=media.id, media_tag_id=tag_map[tag_name]
+                )
             )
 
         if (i + 1) % 20 == 0:
@@ -461,6 +500,7 @@ async def seed_media(db: AsyncSession, tag_map: dict[str, str], count: int = 30)
 # ============================================================
 # 主入口
 # ============================================================
+
 
 async def seed():
     await init_db()
@@ -478,13 +518,13 @@ async def seed():
         # --- 播种 ---
         cat_map = await seed_categories(db)
         tag_map = await seed_tags(db)
-        await seed_posts(db, cat_map, tag_map, count=100)     # ← 改这里控制文章数量
+        await seed_posts(db, cat_map, tag_map, count=100)  # ← 改这里控制文章数量
 
         genre_map = await seed_dex_genres(db)
-        await seed_dex_entries(db, genre_map, count=700)       # ← 改这里控制图鉴数量
+        await seed_dex_entries(db, genre_map, count=700)  # ← 改这里控制图鉴数量
 
         mt_map = await seed_media_tags(db)
-        await seed_media(db, mt_map, count=30)                # ← 改这里控制媒体数量
+        await seed_media(db, mt_map, count=30)  # ← 改这里控制媒体数量
 
         print("\n🎉 所有种子数据导入完成！")
 
