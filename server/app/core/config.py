@@ -4,7 +4,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 DATABASE_URL: str = os.getenv(
-    "DATABASE_URL", f"sqlite+aiosqlite:///{BASE_DIR}/adoruworld.db")
+    "DATABASE_URL", f"sqlite+aiosqlite:///{BASE_DIR}/adoruworld.db"
+)
 
 SITE_START_DATE: str = os.getenv("SITE_START_DATE", "2025-01-01")
 

@@ -18,7 +18,7 @@ class PostTagResponse(BaseModel):
     count: int = 0
 
     name: str
-    slug: str
+    slug: str | None
     color: str | None = None
 
     model_config = {"from_attributes": True}

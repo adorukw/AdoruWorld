@@ -62,4 +62,3 @@ async def delete_tag(tag_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     if not tag:
         raise HTTPException(status_code=404, detail="标签未找到")
     await crud.delete_tag(db, tag)
-    return None

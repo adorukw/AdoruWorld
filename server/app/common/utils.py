@@ -19,6 +19,8 @@ def format_post(post: PostModel) -> dict[str, Any]:
         "word_count": post.word_count,
         "views": post.views,
         "featured": post.featured,
-        "category": PostCategoryResponse.model_validate(post.category) if post.category else None,
+        "category": PostCategoryResponse.model_validate(post.category)
+        if post.category
+        else None,
         "tags": [PostTagResponse.model_validate(t) for t in post.tags],
     }

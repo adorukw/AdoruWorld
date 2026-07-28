@@ -89,7 +89,7 @@ async def create_dex(db: AsyncSession, data: DexCreate) -> Dex:
     if genre_ids:
         stmt = select(DexGenre).where(DexGenre.id.in_(genre_ids))
         result = await db.execute(stmt)
-        genres = result.scalars().all()
+        genres = list(result.scalars().all())
         entry.genres = genres  # 设置关联关系
 
     db.add(entry)

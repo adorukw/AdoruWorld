@@ -166,7 +166,7 @@ async def create_post(db: AsyncSession, data: PostCreate) -> Post:
     # 准备文章数据（不包含标签）
     post_data = data.model_dump(exclude={"tag_ids"})
 
-    if "content" in post_data and post_data["content"]:
+    if post_data.get("content"):
         reading_time = calculate_reading_time(post_data["content"])
         post_data["reading_time"] = reading_time
 
@@ -182,7 +182,7 @@ async def create_post(db: AsyncSession, data: PostCreate) -> Post:
         # 查询存在的标签
         stmt = select(PostTag).where(PostTag.id.in_(tag_ids))
         result = await db.execute(stmt)
-        tags = result.scalars().all()
+        tags = list(result.scalars().all())
         post.tags = tags  # 设置关联关系
 
     db.add(post)
@@ -207,7 +207,7 @@ async def update_post(db: AsyncSession, post: Post, data: PostUpdate) -> Post:
     # 单独处理标签
     tag_ids = update_data.pop("tag_ids", None)
 
-    if "content" in update_data and update_data["content"]:
+    if update_data.get("content"):
         reading_time = calculate_reading_time(update_data["content"])
         update_data["reading_time"] = reading_time
 
@@ -261,7 +261,7 @@ async def get_total_posts_count(db: AsyncSession, published_only: bool = True) -
     if published_only:
         stmt = stmt.where(Post.published == True)
     res = await db.execute(stmt)
-    return res.scalar_one_or_none()
+    return res.scalar_one_or_none() or 0
 
 
 async def get_total_words(db: AsyncSession) -> int:

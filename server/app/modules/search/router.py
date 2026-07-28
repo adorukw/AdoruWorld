@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import crud
-from .schema import SearchResponse
+from .schema import SearchResponse, SearchResultItem
 
 router = APIRouter(prefix="/search", tags=["search"])
 
@@ -28,4 +28,9 @@ async def global_search(
     items, total = await crud.search_all(
         db, q=q, entity_type=type, skip=skip, limit=limit
     )
-    return SearchResponse(items=items, total=total, skip=skip, limit=limit)
+    return SearchResponse(
+        items=[SearchResultItem(**item) for item in items],
+        total=total,
+        skip=skip,
+        limit=limit,
+    )

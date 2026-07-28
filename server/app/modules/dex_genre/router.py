@@ -87,4 +87,3 @@ async def delete_genre(genre_id: str, db: Annotated[AsyncSession, Depends(get_db
     if not genre:
         raise HTTPException(status_code=404, detail="题材未找到")
     await crud.delete_genre(db, genre)
-    return None

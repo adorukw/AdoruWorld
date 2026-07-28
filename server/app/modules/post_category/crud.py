@@ -1,8 +1,8 @@
+from app.modules.post.model import Post
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .model import PostCategory
-from app.modules.post.model import Post
 from .schema import PostCategoryCreate, PostCategoryUpdate
 
 
@@ -29,7 +29,9 @@ async def create_category(db: AsyncSession, data: PostCategoryCreate) -> PostCat
     return category
 
 
-async def update_category(db: AsyncSession, category: PostCategory, data: PostCategoryUpdate) -> PostCategory:
+async def update_category(
+    db: AsyncSession, category: PostCategory, data: PostCategoryUpdate
+) -> PostCategory:
     update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(category, key, value)

@@ -24,9 +24,7 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-# ---------------------------------------------------------------------------
-# 工具函数
-# ---------------------------------------------------------------------------
+Entity = Post | Dex | Media
 
 
 def _split_keywords(q: str) -> list[str]:
@@ -340,7 +338,7 @@ async def search_all(
         return [], 0
 
     # 收集 (sort_timestamp, type, entity) 三元组
-    raw: list[tuple[float, str, object]] = []
+    raw: list[tuple[float, str, Entity]] = []
 
     if entity_type in (None, "post"):
         posts, _ = await _search_posts(db, keywords, 0, 1000)
