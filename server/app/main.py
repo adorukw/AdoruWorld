@@ -1,18 +1,22 @@
-from contextlib import asynccontextmanager
 import os
+from contextlib import asynccontextmanager
 
+from app.core.config import API_PREFIX, DESCRIPTION, PROJECT_NAME, VERSION
+from app.core.database import init_db
+from app.modules import (
+    dex_genres_router,
+    dexs_router,
+    media_tags_router,
+    medias_router,
+    post_categories_router,
+    post_tags_router,
+    posts_router,
+    search_router,
+    system_router,
+)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-
-from app.core.config import API_PREFIX, PROJECT_NAME, VERSION, DESCRIPTION
-from app.core.database import init_db
-from app.modules import (
-    posts_router, post_categories_router, post_tags_router,
-    dexs_router, dex_genres_router, system_router,
-    medias_router, media_tags_router,
-    search_router
-)
 
 
 @asynccontextmanager
@@ -20,11 +24,9 @@ async def lifespan(app: FastAPI):
     await init_db()
     yield
 
+
 app = FastAPI(
-    title=PROJECT_NAME,
-    version=VERSION,
-    description=DESCRIPTION,
-    lifespan=lifespan
+    title=PROJECT_NAME, version=VERSION, description=DESCRIPTION, lifespan=lifespan
 )
 
 app.add_middleware(

@@ -1,9 +1,9 @@
+from app.core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
 from . import crud
-from .schema import PostTagResponse, PostTagCreate, PostTagUpdate
+from .schema import PostTagCreate, PostTagResponse, PostTagUpdate
 
 router = APIRouter(prefix="/post_tags", tags=["post_tags"])
 
@@ -14,9 +14,11 @@ async def list_tags(db: AsyncSession = Depends(get_db)):
     res = []
     for t in rows:
         count = await crud.get_tag_count(db, t.id)
-        res.append(PostTagResponse(
-            id=t.id, name=t.name, slug=t.slug, color=t.color, count=count
-        ))
+        res.append(
+            PostTagResponse(
+                id=t.id, name=t.name, slug=t.slug, color=t.color, count=count
+            )
+        )
     return res
 
 
@@ -51,7 +53,9 @@ async def create_tag(data: PostTagCreate, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/{tag_id}", response_model=PostTagResponse)
-async def update_tag(tag_id: str, data: PostTagUpdate, db: AsyncSession = Depends(get_db)):
+async def update_tag(
+    tag_id: str, data: PostTagUpdate, db: AsyncSession = Depends(get_db)
+):
     tag = await crud.get_tag_by_id(db, tag_id)
     if not tag:
         raise HTTPException(status_code=404, detail="Tag not found")

@@ -1,7 +1,8 @@
 import uuid
+
+from app.core.database import Base
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.core.database import Base
 
 
 def _uuid():
@@ -17,7 +18,5 @@ class PostTag(Base):
     color: Mapped[str | None] = mapped_column(String, nullable=True)
 
     posts: Mapped[list["Post"]] = relationship(
-        secondary="post_to_post_tags",
-        back_populates="tags",
-        lazy="selectin"
+        secondary="post_to_post_tags", back_populates="tags", lazy="selectin"
     )

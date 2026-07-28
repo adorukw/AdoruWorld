@@ -1,7 +1,6 @@
-from pydantic import BaseModel, Field
-
 from app.modules.post_category.schema import PostCategoryResponse
 from app.modules.post_tag.schema import PostTagResponse
+from pydantic import BaseModel, Field
 
 
 class PostCreate(BaseModel):
@@ -54,6 +53,7 @@ class PostResponse(BaseModel):
 
 class PostArchiveResponse(BaseModel):
     """归档列表用的轻量版，不含 content"""
+
     id: str
     slug: str
     title: str

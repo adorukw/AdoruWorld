@@ -1,14 +1,20 @@
 from collections import defaultdict
 
+from app.common.utils import format_post
+from app.core.database import get_db
+from app.modules.post_category.schema import PostCategoryResponse
+from app.modules.post_tag.schema import PostTagResponse
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
 from . import crud
-from .schema import PostResponse, PostCreate, PostUpdate, ArchiveItem, PostArchiveResponse
-from app.modules.post_category.schema import PostCategoryResponse
-from app.modules.post_tag.schema import PostTagResponse
-from app.common.utils import format_post
+from .schema import (
+    ArchiveItem,
+    PostArchiveResponse,
+    PostCreate,
+    PostResponse,
+    PostUpdate,
+)
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -21,9 +27,17 @@ async def list_posts(
     tag: str | None = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
-    row = await crud.get_posts(db, published=published, featured=featured, category_slug=category, tag_slug=tag, skip=skip, limit=limit)
+    row = await crud.get_posts(
+        db,
+        published=published,
+        featured=featured,
+        category_slug=category,
+        tag_slug=tag,
+        skip=skip,
+        limit=limit,
+    )
     return [PostResponse(**format_post(post)) for post in row]
 
 
@@ -66,8 +80,9 @@ async def list_archives(db: AsyncSession = Depends(get_db)):
                 word_count=post.word_count,
                 views=post.views,
                 featured=post.featured,
-                category=PostCategoryResponse.model_validate(
-                    post.category) if post.category else None,
+                category=PostCategoryResponse.model_validate(post.category)
+                if post.category
+                else None,
                 tags=[PostTagResponse.model_validate(t) for t in post.tags],
             )
         )
@@ -110,7 +125,9 @@ async def create_post(data: PostCreate, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/{post_id}", response_model=PostResponse)
-async def update_post(post_id: str, data: PostUpdate, db: AsyncSession = Depends(get_db)):
+async def update_post(
+    post_id: str, data: PostUpdate, db: AsyncSession = Depends(get_db)
+):
     post = await crud.get_post_by_id(db, post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")

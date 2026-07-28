@@ -1,17 +1,13 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import (String, Integer, DateTime,
-                        JSON, ForeignKey, Enum as SAEnum)
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Table, Column
-
 from app.core.database import Base
-from sqlalchemy import Enum as SAEnum
 from app.modules.media_tag.model import MediaTag
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Table
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-MediaTypeEnum = SAEnum("image", "audio", "book",
-                       "video",    name="media_type_enum")
+MediaTypeEnum = SAEnum("image", "audio", "book", "video", name="media_type_enum")
 
 
 def _uuid():
@@ -26,10 +22,15 @@ def _utcnow():
 media_to_media_tags = Table(
     "media_to_media_tags",
     Base.metadata,
-    Column("media_id", String, ForeignKey(
-        "media.id", ondelete="CASCADE"), primary_key=True),
-    Column("media_tag_id", String, ForeignKey(
-        "media_tags.id", ondelete="CASCADE"), primary_key=True)
+    Column(
+        "media_id", String, ForeignKey("media.id", ondelete="CASCADE"), primary_key=True
+    ),
+    Column(
+        "media_tag_id",
+        String,
+        ForeignKey("media_tags.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
 )
 
 
@@ -46,7 +47,8 @@ class Media(Base):
     media_type: Mapped[str] = mapped_column(MediaTypeEnum, nullable=False)
     mime_type: Mapped[str] = mapped_column(String, nullable=False)
     extension: Mapped[str] = mapped_column(
-        String, nullable=False)  # e.g. .jpg, .mp3, .pdf, .avi
+        String, nullable=False
+    )  # e.g. .jpg, .mp3, .pdf, .avi
 
     # 扩展元数据（按类型自由扩展）
     meta_data: Mapped[dict] = mapped_column(JSON, default=dict)
@@ -56,4 +58,8 @@ class Media(Base):
 
     # 关联标签
     tags: Mapped[list["MediaTag"]] = relationship(
-        "MediaTag", secondary=media_to_media_tags, back_populates="medias", lazy="selectin")
+        "MediaTag",
+        secondary=media_to_media_tags,
+        back_populates="medias",
+        lazy="selectin",
+    )

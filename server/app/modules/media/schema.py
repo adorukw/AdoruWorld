@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field
-from app.modules.media_tag.schema import MediaTagResponse
-from typing import Any
 from datetime import datetime
+from typing import Any
+
+from app.modules.media_tag.schema import MediaTagResponse
+from pydantic import BaseModel, Field
 
 
 class MediaCreate(BaseModel):
@@ -10,6 +11,7 @@ class MediaCreate(BaseModel):
     - file_path 由上传接口返回
     - metadata_ 按媒体类型动态填写
     """
+
     slug: str
     title: str
     file_path: str = Field(..., alias="filePath")
@@ -24,6 +26,7 @@ class MediaCreate(BaseModel):
 
 class MediaUpdate(BaseModel):
     """更新媒体（全字段可选）"""
+
     title: str | None = None
     meta_data: dict[str, Any] | None = Field(None, alias="metaData")
     tag_ids: list[str] | None = Field(None, alias="tagIds")
@@ -33,6 +36,7 @@ class MediaUpdate(BaseModel):
 
 class MediaResponse(BaseModel):
     """媒体详情响应"""
+
     id: str
     slug: str
     title: str
@@ -45,10 +49,7 @@ class MediaResponse(BaseModel):
     uploaded_at: datetime = Field(..., alias="uploadedAt")
     tags: list["MediaTagResponse"]
 
-    model_config = {
-        "from_attributes": True,
-        "populate_by_name": True
-    }
+    model_config = {"from_attributes": True, "populate_by_name": True}
 
 
 class MediaUploadResponse(BaseModel):

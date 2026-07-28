@@ -1,16 +1,18 @@
+from app.core.database import get_db
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
-from .schema import SearchResponse
 from . import crud
+from .schema import SearchResponse
 
 router = APIRouter(prefix="/search", tags=["search"])
 
 
 @router.get("", response_model=SearchResponse)
 async def global_search(
-    q: str = Query(..., min_length=1, description="搜索关键词，空格或逗号分隔多个词（AND 逻辑）"),
+    q: str = Query(
+        ..., min_length=1, description="搜索关键词，空格或逗号分隔多个词（AND 逻辑）"
+    ),
     type: str | None = Query(
         None,
         alias="type",

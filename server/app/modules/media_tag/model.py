@@ -1,7 +1,8 @@
 import uuid
+
+from app.core.database import Base
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.core.database import Base
 
 
 def _uuid():
@@ -17,4 +18,5 @@ class MediaTag(Base):
     color: Mapped[str | None] = mapped_column(String, nullable=True)
 
     medias: Mapped[list["Media"]] = relationship(
-        "Media", secondary="media_to_media_tags", back_populates="tags")
+        "Media", secondary="media_to_media_tags", back_populates="tags"
+    )

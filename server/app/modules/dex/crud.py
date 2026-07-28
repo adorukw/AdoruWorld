@@ -7,11 +7,11 @@ from .schema import DexCreate, DexUpdate
 
 
 async def get_dex(
-        db: AsyncSession,
-        category: str | None = None,
-        status: str | None = None,
-        skip: int = 0,
-        limit: int = 20
+    db: AsyncSession,
+    category: str | None = None,
+    status: str | None = None,
+    skip: int = 0,
+    limit: int = 20,
 ) -> list[Dex]:
     stmt = select(Dex)
     if category:
@@ -32,9 +32,7 @@ async def get_dex_stats(db: AsyncSession) -> dict:
     )
     by_category = {row[0]: row[1] for row in cat_res.all()}
 
-    status_res = await db.execute(
-        select(Dex.status, func.count()).group_by(Dex.status)
-    )
+    status_res = await db.execute(select(Dex.status, func.count()).group_by(Dex.status))
     by_status = {row[0]: row[1] for row in status_res.all()}
 
     avg_res = await db.execute(select(func.coalesce(func.avg(Dex.rating), 0.0)))
@@ -99,11 +97,7 @@ async def create_dex(db: AsyncSession, data: DexCreate) -> Dex:
     await db.refresh(entry)
 
     # 重新加载关联数据（确保返回的对象包含 genres）
-    stmt = (
-        select(Dex)
-        .options(selectinload(Dex.genres))
-        .where(Dex.id == entry.id)
-    )
+    stmt = select(Dex).options(selectinload(Dex.genres)).where(Dex.id == entry.id)
     result = await db.execute(stmt)
     return result.scalar_one()
 
@@ -136,11 +130,7 @@ async def update_dex(db: AsyncSession, entry: Dex, data: DexUpdate) -> Dex:
     await db.refresh(entry)
 
     # 重新加载关联数据
-    stmt = (
-        select(Dex)
-        .options(selectinload(Dex.genres))
-        .where(Dex.id == entry.id)
-    )
+    stmt = select(Dex).options(selectinload(Dex.genres)).where(Dex.id == entry.id)
     result = await db.execute(stmt)
     return result.scalar_one()
 

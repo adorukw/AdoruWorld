@@ -1,6 +1,7 @@
-from fastapi import APIRouter
-from datetime import datetime, timezone
 import time
+from datetime import datetime, timezone
+
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/system", tags=["system"])
 

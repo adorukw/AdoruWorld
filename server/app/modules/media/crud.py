@@ -1,19 +1,20 @@
 import os
+
+from app.modules.media_tag.model import MediaTag
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from .model import Media
-from app.modules.media_tag.model import MediaTag
 from .schema import MediaCreate, MediaUpdate
 
 
 async def get_media(
-        db: AsyncSession,
-        media_type: str | None = None,
-        tag_slug: str | None = None,
-        skip: int = 0,
-        limit: int = 100
+    db: AsyncSession,
+    media_type: str | None = None,
+    tag_slug: str | None = None,
+    skip: int = 0,
+    limit: int = 100,
 ) -> list[Media]:
     stmt = select(Media).options(selectinload(Media.tags))
 
@@ -27,15 +28,13 @@ async def get_media(
 
 
 async def get_media_by_slug(db: AsyncSession, slug: str) -> Media | None:
-    stmt = select(Media).options(selectinload(
-        Media.tags)).where(Media.slug == slug)
+    stmt = select(Media).options(selectinload(Media.tags)).where(Media.slug == slug)
     res = await db.execute(stmt)
     return res.scalar_one_or_none()
 
 
 async def get_media_by_id(db: AsyncSession, media_id: str) -> Media | None:
-    stmt = select(Media).options(selectinload(
-        Media.tags)).where(Media.id == media_id)
+    stmt = select(Media).options(selectinload(Media.tags)).where(Media.id == media_id)
     res = await db.execute(stmt)
     return res.scalar_one_or_none()
 
@@ -60,8 +59,7 @@ async def create_media(db: AsyncSession, data: MediaCreate) -> Media:
     await db.commit()
     await db.refresh(media)
 
-    stmt = select(Media).options(selectinload(
-        Media.tags)).where(Media.id == media.id)
+    stmt = select(Media).options(selectinload(Media.tags)).where(Media.id == media.id)
     res = await db.execute(stmt)
     return res.scalar_one()
 
@@ -85,8 +83,7 @@ async def update_media(db: AsyncSession, media: Media, data: MediaUpdate) -> Med
     await db.commit()
     await db.refresh(media)
 
-    stmt = select(Media).options(selectinload(
-        Media.tags)).where(Media.id == media.id)
+    stmt = select(Media).options(selectinload(Media.tags)).where(Media.id == media.id)
     result = await db.execute(stmt)
     return result.scalar_one()
 

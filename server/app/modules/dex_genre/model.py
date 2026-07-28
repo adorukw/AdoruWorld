@@ -1,7 +1,8 @@
+import uuid
+
+from app.core.database import Base
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.core.database import Base
-import uuid
 
 
 def _uuid():
@@ -17,4 +18,5 @@ class DexGenre(Base):
     color: Mapped[str | None] = mapped_column(String, nullable=False)
 
     dexs: Mapped[list["Dex"]] = relationship(
-        "Dex", secondary="dex_to_dex_genres", back_populates="genres")
+        "Dex", secondary="dex_to_dex_genres", back_populates="genres"
+    )

@@ -1,9 +1,9 @@
+from app.core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
 from . import crud
-from .schema import DexResponse, DexCreate, DexUpdate, DexStats
+from .schema import DexCreate, DexResponse, DexStats, DexUpdate
 
 router = APIRouter(prefix="/dexs", tags=["dex"])
 
@@ -14,7 +14,7 @@ async def list_dex(
     status: str | None = None,
     skip: int = 0,
     limit: int = 20,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     return await crud.get_dex(db, category, status, skip, limit)
 
@@ -55,7 +55,9 @@ async def create_dex(data: DexCreate, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/{entry_id}", response_model=DexResponse)
-async def update_dex(entry_id: str, data: DexUpdate, db: AsyncSession = Depends(get_db)):
+async def update_dex(
+    entry_id: str, data: DexUpdate, db: AsyncSession = Depends(get_db)
+):
     entry = await crud.get_dex_by_id(db, entry_id)
     if not entry:
         raise HTTPException(status_code=404, detail="图鉴未找到")

@@ -1,31 +1,37 @@
 import uuid
 
-from sqlalchemy import Float, Integer, String, Text, Enum as SAEnum, Table, Column, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from app.core.database import Base
 from app.modules.dex_genre.model import DexGenre
+from sqlalchemy import Column, Float, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 def _uuid():
     return str(uuid.uuid4())
 
 
-DexCategoryEnum = SAEnum("anime", "movie", "tv", "game",
-                         "book", "music", "other", name="dex_category_enum")
+DexCategoryEnum = SAEnum(
+    "anime", "movie", "tv", "game", "book", "music", "other", name="dex_category_enum"
+)
 
 DexStatusEnum = SAEnum(
-    "completed", "watching", "playing", "reading", "listening", "doing", "dropped", "planned",
+    "completed",
+    "watching",
+    "playing",
+    "reading",
+    "listening",
+    "doing",
+    "dropped",
+    "planned",
     name="dex_status_enum",
 )
 
 dex_to_dex_genres = Table(
     "dex_to_dex_genres",
     Base.metadata,
-    Column("dex_id", String, ForeignKey(
-        "dex.id"), primary_key=True),
-    Column("dex_genre_id", String, ForeignKey(
-        "dex_genres.id"), primary_key=True)
+    Column("dex_id", String, ForeignKey("dex.id"), primary_key=True),
+    Column("dex_genre_id", String, ForeignKey("dex_genres.id"), primary_key=True),
 )
 
 
@@ -48,4 +54,5 @@ class Dex(Base):
     year: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     genres: Mapped[list[DexGenre]] = relationship(
-        "DexGenre", secondary=dex_to_dex_genres, back_populates="dexs", lazy="selectin")
+        "DexGenre", secondary=dex_to_dex_genres, back_populates="dexs", lazy="selectin"
+    )

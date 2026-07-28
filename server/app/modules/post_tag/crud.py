@@ -1,8 +1,8 @@
+from app.modules.post.model import post_to_post_tags
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .model import PostTag
-from app.modules.post.model import post_to_post_tags
 from .schema import PostTagCreate, PostTagUpdate
 
 
@@ -44,7 +44,10 @@ async def delete_tag(db: AsyncSession, tag: PostTag) -> None:
 
 
 async def get_tag_count(db: AsyncSession, tag_id: str) -> int:
-    stmt = select(func.count()).select_from(
-        post_to_post_tags).where(post_to_post_tags.c.post_tag_id == tag_id)
+    stmt = (
+        select(func.count())
+        .select_from(post_to_post_tags)
+        .where(post_to_post_tags.c.post_tag_id == tag_id)
+    )
     res = await db.execute(stmt)
     return res.scalar_one() or 0

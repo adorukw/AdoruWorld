@@ -1,13 +1,14 @@
-from sqlalchemy import func, select
-from app.modules.post.model import post_to_post_tags
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload, load_only
+import re
 
-from .model import Post
+from app.modules.post.model import post_to_post_tags
 from app.modules.post_category.model import PostCategory
 from app.modules.post_tag.model import PostTag
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import load_only, selectinload
+
+from .model import Post
 from .schema import PostCreate, PostUpdate
-import re
 
 
 def calculate_reading_time(content: str) -> int:
@@ -26,27 +27,27 @@ def calculate_reading_time(content: str) -> int:
         return 0
 
     # 1. 移除 Markdown 代码块
-    content_without_code = re.sub(r'```[\s\S]*?```', '', content)
-    content_without_code = re.sub(r'`[^`]+`', '', content_without_code)
+    content_without_code = re.sub(r"```[\s\S]*?```", "", content)
+    content_without_code = re.sub(r"`[^`]+`", "", content_without_code)
 
     # 2. 统计图片数量（Markdown 图片语法 ![alt](url)）
-    image_count = len(re.findall(r'!\[.*?\]\(.*?\)', content))
+    image_count = len(re.findall(r"!\[.*?\]\(.*?\)", content))
 
     # 3. 统计纯文本字符数（移除 Markdown 标记）
     # 移除标题标记 #
-    text = re.sub(r'^#+\s*', '', content_without_code, flags=re.MULTILINE)
+    text = re.sub(r"^#+\s*", "", content_without_code, flags=re.MULTILINE)
     # 移除粗体、斜体标记
-    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)
-    text = re.sub(r'\*(.*?)\*', r'\1', text)
-    text = re.sub(r'__(.*?)__', r'\1', text)
-    text = re.sub(r'_(.*?)_', r'\1', text)
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
+    text = re.sub(r"\*(.*?)\*", r"\1", text)
+    text = re.sub(r"__(.*?)__", r"\1", text)
+    text = re.sub(r"_(.*?)_", r"\1", text)
     # 移除链接标记
-    text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)
+    text = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", text)
     # 移除列表标记
-    text = re.sub(r'^\s*[-*+]\s+', '', text, flags=re.MULTILINE)
-    text = re.sub(r'^\s*\d+\.\s+', '', text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*[-*+]\s+", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*\d+\.\s+", "", text, flags=re.MULTILINE)
     # 移除引用标记
-    text = re.sub(r'^\s*>\s+', '', text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*>\s+", "", text, flags=re.MULTILINE)
 
     # 4. 计算字符数（中文字符算 1 个，英文字符也算 1 个）
     char_count = len(text.strip())
@@ -73,19 +74,15 @@ async def get_posts(
     category_slug: str | None = None,
     tag_slug: str | None = None,
     skip: int = 0,
-    limit: int = 20
+    limit: int = 20,
 ) -> list[Post]:
-    stmt = select(Post).options(
-        selectinload(Post.category),
-        selectinload(Post.tags)
-    )
+    stmt = select(Post).options(selectinload(Post.category), selectinload(Post.tags))
     if published is not None:
         stmt = stmt.where(Post.published == published)
     if featured is not None:
         stmt = stmt.where(Post.featured == featured)
     if category_slug:
-        stmt = stmt.join(Post.category).where(
-            PostCategory.slug == category_slug)
+        stmt = stmt.join(Post.category).where(PostCategory.slug == category_slug)
     if tag_slug:
         stmt = stmt.join(Post.tags).where(PostTag.slug == tag_slug)
     stmt = stmt.order_by(Post.created_at.desc()).offset(skip).limit(limit)
@@ -99,10 +96,18 @@ async def get_archive_posts(db: AsyncSession) -> list[Post]:
         select(Post)
         .options(
             load_only(
-                Post.id, Post.slug, Post.title, Post.description,
-                Post.cover_image, Post.created_at, Post.updated_at,
-                Post.published, Post.reading_time, Post.word_count,
-                Post.views, Post.featured,
+                Post.id,
+                Post.slug,
+                Post.title,
+                Post.description,
+                Post.cover_image,
+                Post.created_at,
+                Post.updated_at,
+                Post.published,
+                Post.reading_time,
+                Post.word_count,
+                Post.views,
+                Post.featured,
             ),
             selectinload(Post.category),
             selectinload(Post.tags),
@@ -115,10 +120,11 @@ async def get_archive_posts(db: AsyncSession) -> list[Post]:
 
 
 async def get_post_by_slug(db: AsyncSession, slug: str) -> Post | None:
-    stmt = select(Post).options(
-        selectinload(Post.category),
-        selectinload(Post.tags)
-    ).where(Post.slug == slug)
+    stmt = (
+        select(Post)
+        .options(selectinload(Post.category), selectinload(Post.tags))
+        .where(Post.slug == slug)
+    )
     res = await db.execute(stmt)
     return res.scalar_one_or_none()
 
@@ -143,10 +149,11 @@ async def get_related_posts(db: AsyncSession, post: Post, limit: int = 3):
 
 
 async def get_post_by_id(db: AsyncSession, post_id: str) -> Post | None:
-    stmt = select(Post).options(
-        selectinload(Post.category),
-        selectinload(Post.tags)
-    ).where(Post.id == post_id)
+    stmt = (
+        select(Post)
+        .options(selectinload(Post.category), selectinload(Post.tags))
+        .where(Post.id == post_id)
+    )
     res = await db.execute(stmt)
     return res.scalar_one_or_none()
 
@@ -159,13 +166,13 @@ async def create_post(db: AsyncSession, data: PostCreate) -> Post:
     # 准备文章数据（不包含标签）
     post_data = data.model_dump(exclude={"tag_ids"})
 
-    if 'content' in post_data and post_data['content']:
-        reading_time = calculate_reading_time(post_data['content'])
-        post_data['reading_time'] = reading_time
+    if "content" in post_data and post_data["content"]:
+        reading_time = calculate_reading_time(post_data["content"])
+        post_data["reading_time"] = reading_time
 
         # 同时计算字数（字符数）
-        word_count = len(post_data['content'].strip())
-        post_data['word_count'] = word_count
+        word_count = len(post_data["content"].strip())
+        post_data["word_count"] = word_count
 
     # 创建文章实例
     post = Post(**post_data)
@@ -258,14 +265,14 @@ async def get_total_posts_count(db: AsyncSession, published_only: bool = True) -
 
 
 async def get_total_words(db: AsyncSession) -> int:
-    stmt = select(func.coalesce(func.sum(Post.word_count),
-                  0)).where(Post.published == True)
+    stmt = select(func.coalesce(func.sum(Post.word_count), 0)).where(
+        Post.published == True
+    )
     res = await db.execute(stmt)
     return res.scalar_one()
 
 
 async def get_total_views(db: AsyncSession) -> int:
-    stmt = select(func.coalesce(func.sum(Post.views),
-                  0)).where(Post.published == True)
+    stmt = select(func.coalesce(func.sum(Post.views), 0)).where(Post.published == True)
     res = await db.execute(stmt)
     return res.scalar_one()

@@ -1,6 +1,5 @@
-from pydantic import BaseModel, Field
-
 from app.modules.dex_genre.schema import DexGenreResponse
+from pydantic import BaseModel, Field
 
 DexCategoryType = str
 DexStatusType = str

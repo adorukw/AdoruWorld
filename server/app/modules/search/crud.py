@@ -13,17 +13,16 @@ GlobalSearch CRUD — 跨 Post / Dex / Media 的关键词搜索。
 import re
 from datetime import datetime
 
-from sqlalchemy import and_, func, or_, select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-
-from app.modules.post.model import Post
-from app.modules.post_category.model import PostCategory
-from app.modules.post_tag.model import PostTag
 from app.modules.dex.model import Dex
 from app.modules.dex_genre.model import DexGenre
 from app.modules.media.model import Media
 from app.modules.media_tag.model import MediaTag
+from app.modules.post.model import Post
+from app.modules.post_category.model import PostCategory
+from app.modules.post_tag.model import PostTag
+from sqlalchemy import and_, func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 # ---------------------------------------------------------------------------
 # 工具函数
@@ -123,15 +122,15 @@ def _entity_to_dict(entity, etype: str) -> dict:
             word_count=entity.word_count,
             views=entity.views,
             category=(
-                {"id": entity.category.id, "name": entity.category.name,
-                 "slug": entity.category.slug}
+                {
+                    "id": entity.category.id,
+                    "name": entity.category.name,
+                    "slug": entity.category.slug,
+                }
                 if entity.category
                 else None
             ),
-            tags=[
-                {"id": t.id, "name": t.name, "slug": t.slug}
-                for t in entity.tags
-            ],
+            tags=[{"id": t.id, "name": t.name, "slug": t.slug} for t in entity.tags],
         )
     elif etype == "dex":
         base.update(
@@ -145,8 +144,7 @@ def _entity_to_dict(entity, etype: str) -> dict:
             creator=entity.creator,
             year=entity.year,
             genres=[
-                {"id": g.id, "name": g.name, "slug": g.slug}
-                for g in entity.genres
+                {"id": g.id, "name": g.name, "slug": g.slug} for g in entity.genres
             ],
         )
     elif etype == "media":
@@ -158,13 +156,11 @@ def _entity_to_dict(entity, etype: str) -> dict:
             extension=entity.extension,
             meta_data=entity.meta_data,
             uploaded_at=_dt_str(entity.uploaded_at),
-            tags=[
-                {"id": t.id, "name": t.name, "slug": t.slug}
-                for t in entity.tags
-            ],
+            tags=[{"id": t.id, "name": t.name, "slug": t.slug} for t in entity.tags],
         )
 
     return base
+
 
 # ---------------------------------------------------------------------------
 # 各实体搜索
@@ -308,6 +304,7 @@ async def _search_medias(
     result = await db.execute(stmt)
     return list(result.scalars().all()), total
 
+
 # ---------------------------------------------------------------------------
 # 统一搜索入口
 # ---------------------------------------------------------------------------
@@ -366,7 +363,7 @@ async def search_all(
     raw.sort(key=lambda x: (-x[0], x[2].title or ""))
 
     total = len(raw)
-    page = raw[skip: skip + limit]
+    page = raw[skip : skip + limit]
 
     items = [_build_item(it, keywords) for it in page]
     return items, total

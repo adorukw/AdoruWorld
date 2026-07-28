@@ -28,7 +28,9 @@ async def create_genre(db: AsyncSession, data: DexGenreCreate) -> DexGenre:
     return genre
 
 
-async def update_genre(db: AsyncSession, genre: DexGenre, data: DexGenreUpdate) -> DexGenre:
+async def update_genre(
+    db: AsyncSession, genre: DexGenre, data: DexGenreUpdate
+) -> DexGenre:
     update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(genre, key, value)
