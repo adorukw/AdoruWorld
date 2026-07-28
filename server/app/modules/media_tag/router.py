@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from app.core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +11,7 @@ router = APIRouter(prefix="/media_tags", tags=["media_tags"])
 
 
 @router.get("", response_model=list[MediaTagResponse])
-async def list_tags(db: AsyncSession = Depends(get_db)):
+async def list_tags(db: Annotated[AsyncSession, Depends(get_db)]):
     rows = await crud.get_tags(db)
     res = []
     for row in rows:
@@ -20,7 +22,7 @@ async def list_tags(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/slug/{slug}", response_model=MediaTagResponse)
-async def get_tag_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
+async def get_tag_by_slug(slug: str, db: Annotated[AsyncSession, Depends(get_db)]):
     tag = await crud.get_tag_by_slug(db, slug)
     if not tag:
         raise HTTPException(status_code=404, detail="标签未找到")
@@ -28,7 +30,7 @@ async def get_tag_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{id}", response_model=MediaTagResponse)
-async def get_tag_by_id(id: str, db: AsyncSession = Depends(get_db)):
+async def get_tag_by_id(id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     tag = await crud.get_tag_by_id(db, id)
     if not tag:
         raise HTTPException(status_code=404, detail="标签未找到")
@@ -36,14 +38,16 @@ async def get_tag_by_id(id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=MediaTagResponse)
-async def create_tag(data: MediaTagCreate, db: AsyncSession = Depends(get_db)):
+async def create_tag(
+    data: MediaTagCreate, db: Annotated[AsyncSession, Depends(get_db)]
+):
     tag = await crud.create_tag(db, data)
     return MediaTagResponse(id=tag.id, name=tag.name, slug=tag.slug, color=tag.color)
 
 
 @router.put("/{tag_id}", response_model=MediaTagResponse)
 async def update_tag(
-    tag_id: str, data: MediaTagUpdate, db: AsyncSession = Depends(get_db)
+    tag_id: str, data: MediaTagUpdate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
     tag = await crud.get_tag_by_id(db, tag_id)
     if not tag:
@@ -53,7 +57,7 @@ async def update_tag(
 
 
 @router.delete("/{tag_id}", status_code=204)
-async def delete_tag(tag_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_tag(tag_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     tag = await crud.get_tag_by_id(db, tag_id)
     if not tag:
         raise HTTPException(status_code=404, detail="标签未找到")

@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Annotated
 
 from app.common.utils import format_post
 from app.core.database import get_db
@@ -21,13 +22,13 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 
 @router.get("", response_model=list[PostResponse])
 async def list_posts(
+    db: Annotated[AsyncSession, Depends(get_db)],
     published: bool | None = None,
     featured: bool | None = None,
     category: str | None = None,
     tag: str | None = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    db: AsyncSession = Depends(get_db),
 ):
     row = await crud.get_posts(
         db,
@@ -42,25 +43,25 @@ async def list_posts(
 
 
 @router.get("/total-posts-count", response_model=int)
-async def total_posts_count(db: AsyncSession = Depends(get_db)):
+async def total_posts_count(db: Annotated[AsyncSession, Depends(get_db)]):
     count = await crud.get_total_posts_count(db)
     return count
 
 
 @router.get("/total-words", response_model=int)
-async def total_words_count(db: AsyncSession = Depends(get_db)):
+async def total_words_count(db: Annotated[AsyncSession, Depends(get_db)]):
     count = await crud.get_total_words(db)
     return count
 
 
 @router.get("/total-views", response_model=int)
-async def total_views_count(db: AsyncSession = Depends(get_db)):
+async def total_views_count(db: Annotated[AsyncSession, Depends(get_db)]):
     count = await crud.get_total_views(db)
     return count
 
 
 @router.get("/archives", response_model=list[ArchiveItem])
-async def list_archives(db: AsyncSession = Depends(get_db)):
+async def list_archives(db: Annotated[AsyncSession, Depends(get_db)]):
     rows = await crud.get_archive_posts(db)
     grouped: dict[tuple[int, int], list] = defaultdict(list)
     for post in rows:
@@ -93,7 +94,7 @@ async def list_archives(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/slug/{slug}", response_model=PostResponse)
-async def get_post_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
+async def get_post_by_slug(slug: str, db: Annotated[AsyncSession, Depends(get_db)]):
     post = await crud.get_post_by_slug(db, slug)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -102,7 +103,7 @@ async def get_post_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/slug/{slug}/related", response_model=list[PostResponse])
-async def get_related_posts(slug: str, db: AsyncSession = Depends(get_db)):
+async def get_related_posts(slug: str, db: Annotated[AsyncSession, Depends(get_db)]):
     post = await crud.get_post_by_slug(db, slug)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -111,7 +112,7 @@ async def get_related_posts(slug: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{post_id}", response_model=PostResponse)
-async def get_post(post_id: str, db: AsyncSession = Depends(get_db)):
+async def get_post(post_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     post = await crud.get_post_by_id(db, post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -119,14 +120,14 @@ async def get_post(post_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=PostResponse, status_code=201)
-async def create_post(data: PostCreate, db: AsyncSession = Depends(get_db)):
+async def create_post(data: PostCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     post = await crud.create_post(db, data)
     return PostResponse(**format_post(post))
 
 
 @router.put("/{post_id}", response_model=PostResponse)
 async def update_post(
-    post_id: str, data: PostUpdate, db: AsyncSession = Depends(get_db)
+    post_id: str, data: PostUpdate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
     post = await crud.get_post_by_id(db, post_id)
     if not post:
@@ -136,7 +137,7 @@ async def update_post(
 
 
 @router.delete("/{post_id}", status_code=204)
-async def delete_post(post_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_post(post_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     post = await crud.get_post_by_id(db, post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -144,7 +145,7 @@ async def delete_post(post_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/increment-views/{post_id}", status_code=204)
-async def increment_views(post_id: str, db: AsyncSession = Depends(get_db)):
+async def increment_views(post_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     post = await crud.get_post_by_id(db, post_id)
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")

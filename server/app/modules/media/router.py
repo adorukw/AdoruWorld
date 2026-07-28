@@ -1,5 +1,6 @@
 import os
 import uuid
+from typing import Annotated
 
 import mutagen
 from app.core.config import UPLOAD_URL_PREFIX
@@ -69,7 +70,8 @@ def analyze_file_metadata(file_path: str, media_type: str) -> dict:
 
 @router.post("/upload", response_model=MediaUploadResponse)
 async def upload_media(
-    file: UploadFile = File(...), db: AsyncSession = Depends(get_db)
+    db: Annotated[AsyncSession, Depends(get_db)],
+    file: UploadFile = File(...),
 ):
     allowed_extensions = {
         ".jpg",
@@ -118,17 +120,17 @@ async def upload_media(
 
 @router.get("", response_model=list[MediaResponse])
 async def list_media(
+    db: Annotated[AsyncSession, Depends(get_db)],
     media_type: str | None = None,
     tag_slug: str | None = None,
     skip: int = 0,
     limit: int = 100,
-    db: AsyncSession = Depends(get_db),
 ):
     return await crud.get_media(db, media_type, tag_slug, skip, limit)
 
 
 @router.get("/slug/{media_slug}", response_model=MediaResponse)
-async def get_media_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
+async def get_media_by_slug(slug: str, db: Annotated[AsyncSession, Depends(get_db)]):
     media = await crud.get_media_by_slug(db, slug)
     if not media:
         raise HTTPException(status_code=404, detail="媒体不存在")
@@ -136,7 +138,7 @@ async def get_media_by_slug(slug: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{media_id}", response_model=MediaResponse)
-async def get_media_by_id(media_id: str, db: AsyncSession = Depends(get_db)):
+async def get_media_by_id(media_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     media = await crud.get_media_by_id(db, media_id)
     if not media:
         raise HTTPException(status_code=404, detail="媒体不存在")
@@ -144,13 +146,13 @@ async def get_media_by_id(media_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("", response_model=MediaResponse, status_code=201)
-async def create_media(data: MediaCreate, db: AsyncSession = Depends(get_db)):
+async def create_media(data: MediaCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     return await crud.create_media(db, data)
 
 
 @router.put("/{media_id}", response_model=MediaResponse)
 async def update_media(
-    media_id: str, data: MediaUpdate, db: AsyncSession = Depends(get_db)
+    media_id: str, data: MediaUpdate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
     media = await crud.get_media_by_id(db, media_id)
     if not media:
@@ -159,7 +161,7 @@ async def update_media(
 
 
 @router.delete("/{media_id}", status_code=204)
-async def delete_media(media_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_media(media_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     media = await crud.get_media_by_id(db, media_id)
     if not media:
         raise HTTPException(status_code=404, detail="媒体未找到")

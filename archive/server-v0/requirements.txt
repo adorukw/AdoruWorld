@@ -1,8 +1,0 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
-aiosqlite
-pydantic
-python-multipart
-pillow
-mutagen
