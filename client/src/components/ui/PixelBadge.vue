@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from "vue";
 
 const props = defineProps<{
-    name: string
-    color?: string
-    count?: number
-    active?: boolean
-}>()
+    name: string;
+    color?: string;
+    count?: number;
+    active?: boolean;
+}>();
 
 const tagStyle = computed(() => ({
     backgroundColor: props.active ? props.color : `${props.color}20`,
     borderColor: props.color,
-    color: props.active ? '#fff' : props.color
-}))
+    color: props.active ? "#fff" : props.color,
+}));
 </script>
 
 <template>
@@ -27,18 +27,18 @@ const tagStyle = computed(() => ({
     display: inline-flex;
     align-items: center;
     padding: 4px 10px;
-    border: 2px solid #2C2C2C;
-    box-shadow: 3px 3px 0 0 #2C2C2C;
+    border: 2px solid #2c2c2c;
+    box-shadow: 3px 3px 0 0 #2c2c2c;
     transition: all 0.1s ease;
 }
 
 .tag:hover {
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 0 #2C2C2C;
+    box-shadow: 4px 4px 0 0 #2c2c2c;
 }
 
 .tag:active {
     transform: translate(1px, 1px);
-    box-shadow: 2px 2px 0 0 #2C2C2C;
+    box-shadow: 2px 2px 0 0 #2c2c2c;
 }
 </style>

@@ -1,145 +1,145 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: "ArkPixelCN";
-  src: url("./assets/fonts/ark-pixel-10px-monospaced-zh_cn.otf.woff2")
-    format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+    font-family: "ArkPixelCN";
+    src: url("./assets/fonts/ark-pixel-10px-monospaced-zh_cn.otf.woff2")
+        format("woff2");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
-  font-family: "FusionPixelCN";
-  src: url("./assets/fonts/fusion-pixel-10px-monospaced-zh_hans.otf.woff2")
-    format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+    font-family: "FusionPixelCN";
+    src: url("./assets/fonts/fusion-pixel-10px-monospaced-zh_hans.otf.woff2")
+        format("woff2");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
 * {
-  font-family: "FusionPixelCN", monospace;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+    font-family: "FusionPixelCN", monospace;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
 
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 
-  background-color: #5a94d4;
-  background-image:
-    linear-gradient(45deg, #4a84c4 25%, transparent 25%),
-    linear-gradient(-45deg, #4a84c4 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #4a84c4 75%),
-    linear-gradient(-45deg, transparent 75%, #4a84c4 75%);
-  background-size: 20px 20px;
-  background-position:
-    0 0,
-    0 10px,
-    10px -10px,
-    -10px 0px;
+    background-color: #5a94d4;
+    background-image:
+        linear-gradient(45deg, #4a84c4 25%, transparent 25%),
+        linear-gradient(-45deg, #4a84c4 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #4a84c4 75%),
+        linear-gradient(-45deg, transparent 75%, #4a84c4 75%);
+    background-size: 20px 20px;
+    background-position:
+        0 0,
+        0 10px,
+        10px -10px,
+        -10px 0px;
 }
 
 /* 像素动画 */
 @keyframes pixelate {
-  0% {
-    background-position: 0% 0%;
-  }
+    0% {
+        background-position: 0% 0%;
+    }
 
-  100% {
-    background-position: 20px 20px;
-  }
+    100% {
+        background-position: 20px 20px;
+    }
 }
 
 body {
-  animation: pixelate 5s linear infinite;
+    animation: pixelate 5s linear infinite;
 }
 
 /* 滚动条像素风 */
 ::-webkit-scrollbar {
-  width: 16px;
+    width: 16px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #c8c8c8;
-  border-left: 4px solid #000;
+    background: #c8c8c8;
+    border-left: 4px solid #000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ee1515;
-  border: 4px solid #000;
-  box-shadow:
-    inset -2px -2px 0 0 #9a2208,
-    inset 2px 2px 0 0 #ff6b4a;
+    background: #ee1515;
+    border: 4px solid #000;
+    box-shadow:
+        inset -2px -2px 0 0 #9a2208,
+        inset 2px 2px 0 0 #ff6b4a;
 }
 
 .line-clamp-2 {
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .pixel-box {
-  border: 2px solid #1f2937;
-  background: white;
-  padding: 20px;
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
+    border: 2px solid #1f2937;
+    background: white;
+    padding: 20px;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
 }
 
 .pixel-card {
-  background: white;
-  border: 4px solid #2c2c2c;
-  position: relative;
-  box-shadow: 4px 4px 0 0 #2c2c2c;
+    background: white;
+    border: 4px solid #2c2c2c;
+    position: relative;
+    box-shadow: 4px 4px 0 0 #2c2c2c;
 }
 
 .pixel-card-interactive {
-  transition: all 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
-  cursor: pointer;
+    transition: all 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    cursor: pointer;
 }
 
 .pixel-card-interactive:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 0 #2c2c2c;
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 0 #2c2c2c;
 }
 
 .pixel-card-interactive:active {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 0 #2c2c2c;
-  transition-duration: 0.03s;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 0 #2c2c2c;
+    transition-duration: 0.03s;
 }
 
 .pixel-input {
-  background: #ffffff;
-  border: 4px solid #000000;
-  box-shadow:
-    inset 4px 4px 0px 0px #b0b0b0,
-    inset -4px -4px 0px 0px #ffffff,
-    4px 4px 0px 0px #000000;
-  outline: none;
-  transition: all 0.1s;
+    background: #ffffff;
+    border: 4px solid #000000;
+    box-shadow:
+        inset 4px 4px 0px 0px #b0b0b0,
+        inset -4px -4px 0px 0px #ffffff,
+        4px 4px 0px 0px #000000;
+    outline: none;
+    transition: all 0.1s;
 }
 
 .pixel-input:focus {
-  background: #fffbe6;
-  box-shadow:
-    inset 4px 4px 0px 0px #d0c0a0,
-    inset -4px -4px 0px 0px #ffffff,
-    4px 4px 0px 0px #000000;
+    background: #fffbe6;
+    box-shadow:
+        inset 4px 4px 0px 0px #d0c0a0,
+        inset -4px -4px 0px 0px #ffffff,
+        4px 4px 0px 0px #000000;
 }
 
 .pixel-input:disabled {
-  background: #f0f0f0;
-  color: #999;
-  cursor: not-allowed;
+    background: #f0f0f0;
+    color: #999;
+    cursor: not-allowed;
 }
 
 /* .pixel-card {

@@ -9,11 +9,15 @@ Learn more about the recommended Project Setup and IDE Support in the [Vue Docs 
 ## 开发记录
 
 ### 1. 初始化项目
+
 1. 创建前端框架
+
 ```bash
 npm create vite@latest AdoruWorld --template vue-ts
 ```
+
 2. 安装依赖
+
 ```bash
 # 核心依赖
 npm install vue-router pinia marked highlight.js
@@ -26,56 +30,65 @@ npm install -D @types/node
 ```
 
 3. 修改`vite.config.ts`文件，添加以下内容：
+
 ```typescript
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import tailwindcss from '@tailwindcss/vite'
-import { fileURLToPath, URL } from 'node:url'
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import tailwindcss from "@tailwindcss/vite";
+import { fileURLToPath, URL } from "node:url";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(),tailwindcss()],
+  plugins: [vue(), tailwindcss()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
   },
   server: {
     proxy: {
-      '/api': {
-        target: 'http://localhost:3002',
-        changeOrigin: true
+      "/api": {
+        target: "http://localhost:3002",
+        changeOrigin: true,
       },
-      '/uploads': {
-        target: 'http://localhost:3002',
-        changeOrigin: true
-      }
-    }
-  }
-})
+      "/uploads": {
+        target: "http://localhost:3002",
+        changeOrigin: true,
+      },
+    },
+  },
+});
 ```
 
 4. 配置tailwindcss
-在 `src/style.css` 顶部引入 Tailwind：
+   在 `src/style.css` 顶部引入 Tailwind：
+
 ```css
 @import "tailwindcss";
 ```
 
 5. 配置入口html
-在 `index.html` 的 `<head>` 中引入像素字体：
+   在 `index.html` 的 `<head>` 中引入像素字体：
+
 ```html
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=ZCOOL+KuaiLe&display=swap"
+  rel="stylesheet"
+/>
 ```
 
 6. 创建后端框架
+
 ```bash
 mkdir server
 cd server
 npm init -y
 ```
+
 修改 `server/package.json` 中的关键字段：
+
 ```json
 {
   "type": "commonjs",
@@ -92,6 +105,7 @@ npm init -y
 ```
 
 7. 安装后端依赖
+
 ```bash
 cd server
 
@@ -103,6 +117,7 @@ npm install -D typescript tsx @types/express @types/cors @types/multer @types/uu
 ```
 
 8. 初始化Prisma + SQLite
+
 ```bash
 cd server
 

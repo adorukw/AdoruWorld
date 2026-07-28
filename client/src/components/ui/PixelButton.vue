@@ -199,8 +199,5 @@ const sizeClass = computed(() => {
     background: #ffd633;
 }
 
-/* 自定义按钮 */
-.pixel-btn-custom {
-    /* 通过内联样式或计算属性设置颜色 */
-}
+
 </style>

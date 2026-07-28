@@ -1,106 +1,136 @@
 <!-- DropdownMenu.vue -->
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 
 interface Props {
-    options: Array<{ label: string; value: string }>
-    modelValue?: string
-    placeholder?: string
-    disabled?: boolean
-    autoFocus?: boolean
-    width?: string
+    options: Array<{ label: string; value: string }>;
+    modelValue?: string;
+    placeholder?: string;
+    disabled?: boolean;
+    autoFocus?: boolean;
+    width?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    placeholder: '请选择...',
+    placeholder: "请选择...",
     options: () => [],
-    modelValue: '',
+    modelValue: "",
     disabled: false,
     autoFocus: false,
-    width: 'w-full'
-})
+    width: "w-full",
+});
 
 const emit = defineEmits<{
-    'update:modelValue': [value: string]
-    'change': [value: string, option: { label: string; value: string }]
-}>()
+    "update:modelValue": [value: string];
+    change: [value: string, option: { label: string; value: string }];
+}>();
 
-const isOpen = ref(false)
-const dropdownRef = ref<HTMLDivElement | null>(null)
+const isOpen = ref(false);
+const dropdownRef = ref<HTMLDivElement | null>(null);
 const selectedOption = ref<{ label: string; value: string } | null>(
-    props.options.find(option => option.value === props.modelValue) || null
-)
+    props.options.find((option) => option.value === props.modelValue) || null,
+);
 
 // 计算显示文本
 const displayText = computed(() => {
-    return selectedOption.value ? selectedOption.value.label : props.placeholder
-})
+    return selectedOption.value
+        ? selectedOption.value.label
+        : props.placeholder;
+});
 
 // 切换下拉菜单
 const toggleDropdown = () => {
     if (!props.disabled) {
-        isOpen.value = !isOpen.value
+        isOpen.value = !isOpen.value;
     }
-}
+};
 
 // 选择选项
 const selectOption = (option: { label: string; value: string }) => {
-    selectedOption.value = option
-    emit('update:modelValue', option.value)
-    emit('change', option.value, option)
-    isOpen.value = false
-}
+    selectedOption.value = option;
+    emit("update:modelValue", option.value);
+    emit("change", option.value, option);
+    isOpen.value = false;
+};
 
 // 点击外部关闭下拉菜单
 const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
-        isOpen.value = false
+    if (
+        dropdownRef.value &&
+        !dropdownRef.value.contains(event.target as Node)
+    ) {
+        isOpen.value = false;
     }
-}
+};
 
 // 监听外部 modelValue 变化
-watch(() => props.modelValue, (newValue) => {
-    selectedOption.value = props.options.find(option => option.value === newValue) || null
-})
+watch(
+    () => props.modelValue,
+    (newValue) => {
+        selectedOption.value =
+            props.options.find((option) => option.value === newValue) || null;
+    },
+);
 
 // 键盘事件处理
 const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-        isOpen.value = false
+    if (event.key === "Escape") {
+        isOpen.value = false;
     }
-}
+};
 
 // 自动聚焦
 onMounted(() => {
     if (props.autoFocus) {
         // 可以在这里添加聚焦逻辑
     }
-    document.addEventListener('click', handleClickOutside)
-    document.addEventListener('keydown', handleKeydown)
-})
+    document.addEventListener("click", handleClickOutside);
+    document.addEventListener("keydown", handleKeydown);
+});
 
 onUnmounted(() => {
-    document.removeEventListener('click', handleClickOutside)
-    document.removeEventListener('keydown', handleKeydown)
-})
+    document.removeEventListener("click", handleClickOutside);
+    document.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 <template>
     <div class="dropdown-container" :class="width">
-        <div ref="dropdownRef" class="relative" :class="{ 'pointer-events-none': props.disabled }">
+        <div
+            ref="dropdownRef"
+            class="relative"
+            :class="{ 'pointer-events-none': props.disabled }"
+        >
             <!-- 下拉按钮 -->
-            <button @click="toggleDropdown" :disabled="disabled"
+            <button
+                @click="toggleDropdown"
+                :disabled="disabled"
                 class="pixel-dropdown w-full px-4 py-3 text-xs md:text-sm text-left flex items-center justify-between"
-                :class="{ 'opacity-50 cursor-not-allowed': disabled }">
-                <span :class="{ 'text-gray-500': !selectedOption }">{{ displayText }}</span>
-                <span class="dropdown-arrow ml-2">{{ isOpen ? '▲' : '▼' }}</span>
+                :class="{ 'opacity-50 cursor-not-allowed': disabled }"
+            >
+                <span :class="{ 'text-gray-500': !selectedOption }">{{
+                    displayText
+                }}</span>
+                <span class="dropdown-arrow ml-2">{{
+                    isOpen ? "▲" : "▼"
+                }}</span>
             </button>
 
             <!-- 下拉选项列表 -->
-            <div v-show="isOpen" class="absolute left-0 right-0 mt-1 z-50 pixel-dropdown-list"
-                :class="{ 'pointer-events-none': !isOpen }">
-                <div v-for="option in props.options" :key="option.value" @click="selectOption(option)"
-                    class="pixel-dropdown-item" :class="{ 'selected': selectedOption?.value === option.value }">
+            <div
+                v-show="isOpen"
+                class="absolute left-0 right-0 mt-1 z-50 pixel-dropdown-list"
+                :class="{ 'pointer-events-none': !isOpen }"
+            >
+                <div
+                    v-for="option in props.options"
+                    :key="option.value"
+                    @click="selectOption(option)"
+                    class="pixel-dropdown-item"
+                    :class="{
+                        selected: selectedOption?.value === option.value,
+                    }"
+                >
                     {{ option.label }}
                 </div>
             </div>

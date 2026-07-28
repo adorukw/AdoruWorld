@@ -1,64 +1,67 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { marked } from 'marked'
-import hljs from 'highlight.js'
-import 'highlight.js/styles/atom-one-dark.css'
-import Layout from '@/components/layout/Layout.vue'
-import PostCard from '@/components/ui/PostCard.vue'
-import PixelButton from '@/components/ui/PixelButton.vue'
-import TocTree from '@/components/ui/TocTree.vue'
-import { usePostStore } from '@/store'
-import type { PostResponse } from '@/types'
-import type { TocItem } from '@/types'
+import { ref, computed, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
+import { marked } from "marked";
+import hljs from "highlight.js";
+import "highlight.js/styles/atom-one-dark.css";
+import Layout from "@/components/layout/Layout.vue";
+import PostCard from "@/components/ui/PostCard.vue";
+import PixelButton from "@/components/ui/PixelButton.vue";
+import TocTree from "@/components/ui/TocTree.vue";
+import { usePostStore } from "@/store";
+import type { PostResponse } from "@/types";
+import type { TocItem } from "@/types";
 
+const postStore = usePostStore();
 
-const postStore = usePostStore()
+const route = useRoute();
 
-const route = useRoute()
+const readingProgress = ref(0);
 
-const readingProgress = ref(0)
+const post = ref<PostResponse | null>(null);
+const relatedPosts = ref<PostResponse[]>([]);
 
-const post = ref<PostResponse | null>(null)
-const relatedPosts = ref<PostResponse[]>([])
+watch(
+    () => route.params.slug,
+    async (newSlug) => {
+        if (!newSlug) return;
+        const slug = newSlug as string;
 
-watch(() => route.params.slug, async (newSlug) => {
-    if (!newSlug) return
-    const slug = newSlug as string
+        postStore.loading = true;
 
-    postStore.loading = true
+        await postStore.getPostBySlug(slug);
+        post.value = postStore.currentPost;
 
-    await postStore.getPostBySlug(slug)
-    post.value = postStore.currentPost
-
-    await postStore.getRelatedPosts(route.params.slug as string)
-    relatedPosts.value = postStore.relatedPosts
-}, { immediate: true })
+        await postStore.getRelatedPosts(route.params.slug as string);
+        relatedPosts.value = postStore.relatedPosts;
+    },
+    { immediate: true },
+);
 
 const slugify = (text: string) => {
-    return text.
-        toLowerCase()
-        .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-}
+    return text
+        .toLowerCase()
+        .replace(/[^\w\u4e00-\u9fa5]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+};
 
 marked.use({
     breaks: true,
     gfm: true,
     renderer: {
         heading({ text, depth }) {
-            const id = slugify(text)
-            return `<h${depth} id="${id}" style="scroll-margin-top: 130px">${text}</h${depth}>`
+            const id = slugify(text);
+            return `<h${depth} id="${id}" style="scroll-margin-top: 130px">${text}</h${depth}>`;
         },
         code({ text, lang }) {
-            const language = lang || ''
-            const validLang = !!(language && hljs.getLanguage(language))
+            const language = lang || "";
+            const validLang = !!(language && hljs.getLanguage(language));
             const highlighted = validLang
                 ? hljs.highlight(text, { language }).value
-                : hljs.highlightAuto(text).value
+                : hljs.highlightAuto(text).value;
 
-            const encodedCode = encodeURIComponent(text)
-            const langText = language ? language.toUpperCase() : 'CODE'
+            const encodedCode = encodeURIComponent(text);
+            const langText = language ? language.toUpperCase() : "CODE";
 
             return `
                 <div class="code-wrapper">
@@ -70,131 +73,162 @@ marked.use({
                     </div>
                     <pre><code class="hljs ${language}">${highlighted}</code></pre>
                 </div>
-            `
-        }
-    }
-})
+            `;
+        },
+    },
+});
 
 function buildTree(items: TocItem[]): TocItem[] {
-    const root: TocItem[] = []
-    const stack: { level: number; list: TocItem[] }[] = [{ level: 0, list: root }]
+    const root: TocItem[] = [];
+    const stack: { level: number; list: TocItem[] }[] = [
+        { level: 0, list: root },
+    ];
 
     for (const item of items) {
         // 弹出层级 >= 当前项层级的栈顶
-        while (stack.length > 0 && stack[stack.length - 1].level >= item.level) {
-            stack.pop()
+        while (
+            stack.length > 0 &&
+            stack[stack.length - 1].level >= item.level
+        ) {
+            stack.pop();
         }
 
-        const parent = stack[stack.length - 1]
-        const newNode: TocItem = { ...item, children: [] }
-        parent.list.push(newNode)
-        stack.push({ level: item.level, list: newNode.children })
+        const parent = stack[stack.length - 1];
+        const newNode: TocItem = { ...item, children: [] };
+        parent.list.push(newNode);
+        stack.push({ level: item.level, list: newNode.children });
     }
 
-    return root
+    return root;
 }
 
 const tocItems = computed<TocItem[]>(() => {
-    if (!post.value) return []
+    if (!post.value) return [];
 
     // 注意：content 里的 \n 有被转义的问题，先处理
-    const rawContent = post.value.content.replace(/\\n/g, '\n')
-    const lines = rawContent.split('\n')
+    const rawContent = post.value.content.replace(/\\n/g, "\n");
+    const lines = rawContent.split("\n");
 
-    const items: TocItem[] = []
-    const headingRegex = /^(#{1,6})\s+(.+)$/
-    let insideCodeBlock = false
+    const items: TocItem[] = [];
+    const headingRegex = /^(#{1,6})\s+(.+)$/;
+    let insideCodeBlock = false;
 
     for (const line of lines) {
         // 跳过代码块内部的标题（防止 ``` 里的 # 被误抓）
-        if (line.trimStart().startsWith('```')) {
-            insideCodeBlock = !insideCodeBlock
-            continue
+        if (line.trimStart().startsWith("```")) {
+            insideCodeBlock = !insideCodeBlock;
+            continue;
         }
-        if (insideCodeBlock) continue
+        if (insideCodeBlock) continue;
 
-        const match = line.match(headingRegex)
+        const match = line.match(headingRegex);
         if (match) {
             items.push({
                 id: slugify(match[2]),
                 text: match[2].trim(),
                 level: match[1].length,
                 children: [],
-            })
+            });
         }
     }
 
-    return buildTree(items)
-})
+    return buildTree(items);
+});
 
 const renderedContent = computed(() => {
-    if (!post.value) return ''
+    if (!post.value) return "";
 
-    const safeContent = post.value.content.replace(/\\n/g, '\n')
+    const safeContent = post.value.content.replace(/\\n/g, "\n");
 
-    return marked.parse(safeContent) as string
-})
+    return marked.parse(safeContent) as string;
+});
 
 const handleContentClick = async (e: MouseEvent) => {
-    const target = e.target as HTMLElement
+    const target = e.target as HTMLElement;
 
-    if (target.classList.contains('copy-btn')) {
-        const encodedCode = target.getAttribute('data-code')
+    if (target.classList.contains("copy-btn")) {
+        const encodedCode = target.getAttribute("data-code");
         if (encodedCode) {
             try {
-                const code = decodeURIComponent(encodedCode)
-                await navigator.clipboard.writeText(code)
+                const code = decodeURIComponent(encodedCode);
+                await navigator.clipboard.writeText(code);
 
-                const originalText = target.innerText
-                target.innerText = '已复制!'
-                target.classList.add('copied')
+                const originalText = target.innerText;
+                target.innerText = "已复制!";
+                target.classList.add("copied");
 
                 setTimeout(() => {
-                    target.innerText = originalText
-                    target.classList.remove('copied')
-                }, 2000)
+                    target.innerText = originalText;
+                    target.classList.remove("copied");
+                }, 2000);
             } catch (err) {
-                console.error('复制失败:', err)
-                target.innerText = '失败'
+                console.error("复制失败:", err);
+                target.innerText = "失败";
             }
         }
     }
-}
+};
 
 const handleScroll = () => {
-    const scrollTop = window.scrollY
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight
-    readingProgress.value = Math.min(100, Math.round((scrollTop / docHeight) * 100))
-}
+    const scrollTop = window.scrollY;
+    const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+    readingProgress.value = Math.min(
+        100,
+        Math.round((scrollTop / docHeight) * 100),
+    );
+};
 
 const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-}
+    window.scrollTo({ top: 0, behavior: "smooth" });
+};
 
 onMounted(() => {
-    window.addEventListener('scroll', handleScroll)
-})
+    window.addEventListener("scroll", handleScroll);
+});
 
-watch(() => route.params.slug, () => {
-    window.scrollTo(0, 0)
-    readingProgress.value = 0
-})
+watch(
+    () => route.params.slug,
+    () => {
+        window.scrollTo(0, 0);
+        readingProgress.value = 0;
+    },
+);
 </script>
 
 <template>
     <Layout>
         <template v-if="post">
-            <div class="sticky top-20 left-0 right-0 z-40 px-4 py-2 bg-white border-b-4 border-black">
-                <div class="relative w-full h-6 bg-gray-200 border-2 border-black">
-                    <div class="absolute top-0 left-0 h-full bg-yellow-400 transition-all duration-150 ease-out"
-                        :style="{ width: `${readingProgress}%` }"></div>
+            <div
+                class="sticky top-20 left-0 right-0 z-40 px-4 py-2 bg-white border-b-4 border-black"
+            >
+                <div
+                    class="relative w-full h-6 bg-gray-200 border-2 border-black"
+                >
+                    <div
+                        class="absolute top-0 left-0 h-full bg-yellow-400 transition-all duration-150 ease-out"
+                        :style="{ width: `${readingProgress}%` }"
+                    ></div>
 
-                    <div class="absolute inset-0 opacity-20" style="background-image: repeating-linear-gradient(
-                        45deg,transparent, transparent 4px,rgba(0,0,0,0.1) 4px,rgba(0,0,0,0.1) 8px)">
-                    </div>
+                    <div
+                        class="absolute inset-0 opacity-20"
+                        style="
+                            background-image: repeating-linear-gradient(
+                                45deg,
+                                transparent,
+                                transparent 4px,
+                                rgba(0, 0, 0, 0.1) 4px,
+                                rgba(0, 0, 0, 0.1) 8px
+                            );
+                        "
+                    ></div>
 
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="text-xs font-bold text-black! mix-blend-difference">
+                    <div
+                        class="absolute inset-0 flex items-center justify-center"
+                    >
+                        <span
+                            class="text-xs font-bold text-black! mix-blend-difference"
+                        >
                             {{ readingProgress }}%
                         </span>
                     </div>
@@ -203,22 +237,35 @@ watch(() => route.params.slug, () => {
 
             <article>
                 <header class="relative py-4 overflow-hidden pb-24">
-
-                    <div class="max-w-4xl mx-auto px-4 relative z-10 text-center">
-                        <div class="pixel-text text-3xl md:text-4xl mb-6 leading-relaxed text-black drop-shadow-md">
+                    <div
+                        class="max-w-4xl mx-auto px-4 relative z-10 text-center"
+                    >
+                        <div
+                            class="pixel-text text-3xl md:text-4xl mb-6 leading-relaxed text-black drop-shadow-md"
+                        >
                             {{ post.title }}
                         </div>
-                        <div class="flex flex-wrap justify-center items-center gap-4 font-medium text-gray-800 ">
-                            <span class="flex items-center gap-1 bg-white/70 px-2 py-1 rounded border border-black/20">
+                        <div
+                            class="flex flex-wrap justify-center items-center gap-4 font-medium text-gray-800"
+                        >
+                            <span
+                                class="flex items-center gap-1 bg-white/70 px-2 py-1 rounded border border-black/20"
+                            >
                                 📅 {{ post.createdAt }}
                             </span>
-                            <span class="flex items-center gap-1 bg-white/70 px-2 py-1 rounded border border-black/20">
+                            <span
+                                class="flex items-center gap-1 bg-white/70 px-2 py-1 rounded border border-black/20"
+                            >
                                 👀 {{ post.wordCount }} 字
                             </span>
-                            <span class="flex items-center gap-1 bg-white/70 px-2 py-1 rounded border border-black/20">
+                            <span
+                                class="flex items-center gap-1 bg-white/70 px-2 py-1 rounded border border-black/20"
+                            >
                                 ⏳ {{ post.readingTime }} 分钟阅读
                             </span>
-                            <span class="flex items-center gap-1 bg-white/70 px-2 py-1 rounded border border-black/20">
+                            <span
+                                class="flex items-center gap-1 bg-white/70 px-2 py-1 rounded border border-black/20"
+                            >
                                 👀 {{ post.views }} 次阅读
                             </span>
                         </div>
@@ -226,53 +273,74 @@ watch(() => route.params.slug, () => {
                 </header>
 
                 <div class="max-w-6xl mx-auto px-4 -mt-16 relative z-20 pb-12">
-                    <div class="max-w-6xl mx-auto px-4 -mt-16 relative z-20 pb-12">
+                    <div
+                        class="max-w-6xl mx-auto px-4 -mt-16 relative z-20 pb-12"
+                    >
                         <!-- 改成 flex 布局 -->
                         <div class="flex gap-8">
                             <!-- 左列：正文 -->
                             <div class="flex-1 min-w-0">
                                 <div
-                                    class=" bg-white border-4 border-black rounded-xl p-6 md:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-
+                                    class="bg-white border-4 border-black rounded-xl p-6 md:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+                                >
                                     <div v-if="post.coverImage" class="mb-8">
-                                        <img :src="post.coverImage" :alt="post.title"
-                                            class="w-full h-64 md:h-96 object-cover border-4 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]" />
+                                        <img
+                                            :src="post.coverImage"
+                                            :alt="post.title"
+                                            class="w-full h-64 md:h-96 object-cover border-4 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]"
+                                        />
                                     </div>
 
-                                    <div class="flex flex-wrap gap-2 mb-8 border-b-2 border-gray-100 pb-6">
-                                        <span v-for="tag in (post.tags.map(tag => tag.name))" :key="tag"
-                                            class="tag bg-sky-100 border-2 border-black hover:bg-sky-500 hover:text-white cursor-pointer transition-colors px-3 py-1 font-bold rounded">
+                                    <div
+                                        class="flex flex-wrap gap-2 mb-8 border-b-2 border-gray-100 pb-6"
+                                    >
+                                        <span
+                                            v-for="tag in post.tags.map(
+                                                (tag) => tag.name,
+                                            )"
+                                            :key="tag"
+                                            class="tag bg-sky-100 border-2 border-black hover:bg-sky-500 hover:text-white cursor-pointer transition-colors px-3 py-1 font-bold rounded"
+                                        >
                                             #{{ tag }}
                                         </span>
                                     </div>
 
-
-                                    <div class="prose prose-lg max-w-none article-content" v-html="renderedContent"
-                                        @click="handleContentClick" />
+                                    <div
+                                        class="prose prose-lg max-w-none article-content"
+                                        v-html="renderedContent"
+                                        @click="handleContentClick"
+                                    />
                                 </div>
-
                             </div>
 
                             <!-- 右列：侧边栏目录 -->
                             <aside class="hidden lg:block w-72 shrink-0">
                                 <div
-                                    class="sticky top-32 bg-white border-4 border-black rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                    class="sticky top-32 bg-white border-4 border-black rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                                >
                                     <h3
-                                        class="pixel-text text-lg font-bold mb-4 flex items-center gap-2 border-b-2 border-black pb-2">
+                                        class="pixel-text text-lg font-bold mb-4 flex items-center gap-2 border-b-2 border-black pb-2"
+                                    >
                                         📑 目录
                                     </h3>
-                                    <nav class="text-sm max-h-[70vh] overflow-y-auto">
+                                    <nav
+                                        class="text-sm max-h-[70vh] overflow-y-auto"
+                                    >
                                         <TocTree :items="tocItems" />
                                     </nav>
                                 </div>
                             </aside>
                         </div>
 
-                        <div class="mt-12 pt-8 border-t-4 border-black border-dashed">
+                        <div
+                            class="mt-12 pt-8 border-t-4 border-black border-dashed"
+                        >
                             <div
-                                class="bg-gray-100 border-4 border-black p-4 rounded-lg mb-8 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]">
+                                class="bg-gray-100 border-4 border-black p-4 rounded-lg mb-8 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]"
+                            >
                                 <p class="pixel-text text-sm mb-0">
-                                    感谢阅读！如果这篇文章对你有帮助，欢迎分享给更多人。 🚀
+                                    感谢阅读！如果这篇文章对你有帮助，欢迎分享给更多人。
+                                    🚀
                                 </p>
                             </div>
 
@@ -281,28 +349,39 @@ watch(() => route.params.slug, () => {
                                     返回顶部
                                 </PixelButton>
                                 <PixelButton>
-                                    <router-link to="/">
-                                        返回首页
-                                    </router-link>
+                                    <router-link to="/"> 返回首页 </router-link>
                                 </PixelButton>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <section v-if="relatedPosts.length" class="py-12 overflow-hidden relative border-t-4 border-black ">
+                <section
+                    v-if="relatedPosts.length"
+                    class="py-12 overflow-hidden relative border-t-4 border-black"
+                >
                     <div class="absolute inset-0 gold-pattern opacity-10"></div>
                     <div class="max-w-6xl mx-auto px-4 relative z-10">
-                        <h2 class="pixel-text text-2xl mb-8 flex items-center justify-center gap-3">
+                        <h2
+                            class="pixel-text text-2xl mb-8 flex items-center justify-center gap-3"
+                        >
                             <span>📖</span> 相关文章
                         </h2>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <router-link v-for="relatedPost in relatedPosts" :key="relatedPost.id"
+                            <router-link
+                                v-for="relatedPost in relatedPosts"
+                                :key="relatedPost.id"
                                 :to="`/post/${relatedPost.slug}`"
-                                class="block transform transition-transform hover:-translate-y-2">
-                                <PostCard :title="relatedPost.title" :cover-image="relatedPost.coverImage"
-                                    :tags="relatedPost.tags" :category="relatedPost.category"
-                                    :date="relatedPost.createdAt" :reading-time="relatedPost.readingTime" />
+                                class="block transform transition-transform hover:-translate-y-2"
+                            >
+                                <PostCard
+                                    :title="relatedPost.title"
+                                    :cover-image="relatedPost.coverImage"
+                                    :tags="relatedPost.tags"
+                                    :category="relatedPost.category"
+                                    :date="relatedPost.createdAt"
+                                    :reading-time="relatedPost.readingTime"
+                                />
                             </router-link>
                         </div>
                     </div>
@@ -311,28 +390,40 @@ watch(() => route.params.slug, () => {
         </template>
 
         <template v-else-if="postStore.loading">
-            <div class="min-h-[60vh] flex items-center justify-center bg-gray-50">
+            <div
+                class="min-h-[60vh] flex items-center justify-center bg-gray-50"
+            >
                 <div
-                    class="text-center bg-white border-4 border-black p-10 rounded-xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                    class="text-center bg-white border-4 border-black p-10 rounded-xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+                >
                     <div class="text-6xl mb-4">🔍</div>
-                    <h2 class="pixel-text text-2xl mb-4 font-bold">文章正在加载中...</h2>
+                    <h2 class="pixel-text text-2xl mb-4 font-bold">
+                        文章正在加载中...
+                    </h2>
                     <p class="mb-8 text-gray-600 font-medium">请耐心等待...</p>
                 </div>
             </div>
         </template>
 
         <template v-else>
-            <div class="min-h-[60vh] flex items-center justify-center bg-gray-50">
+            <div
+                class="min-h-[60vh] flex items-center justify-center bg-gray-50"
+            >
                 <div
-                    class="text-center bg-white border-4 border-black p-10 rounded-xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                    class="text-center bg-white border-4 border-black p-10 rounded-xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+                >
                     <div class="text-6xl mb-4">🔍</div>
-                    <h2 class="pixel-text text-2xl mb-4 font-bold">文章未找到</h2>
-                    <p class="mb-8 text-gray-600 font-medium">看起来这篇文章不存在或已被丢进了异次元。</p>
-                    <router-link to="/"
-                        class="pixel-btn bg-sky text-white border-4 border-black px-6 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-sky-600 transition-all">
-                        <PixelButton>
-                            返回首页
-                        </PixelButton>
+                    <h2 class="pixel-text text-2xl mb-4 font-bold">
+                        文章未找到
+                    </h2>
+                    <p class="mb-8 text-gray-600 font-medium">
+                        看起来这篇文章不存在或已被丢进了异次元。
+                    </p>
+                    <router-link
+                        to="/"
+                        class="pixel-btn bg-sky text-white border-4 border-black px-6 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-sky-600 transition-all"
+                    >
+                        <PixelButton> 返回首页 </PixelButton>
                     </router-link>
                 </div>
             </div>
@@ -369,18 +460,18 @@ watch(() => route.params.slug, () => {
 }
 
 .article-content :deep(h2)::before {
-    content: '';
+    content: "";
     display: inline-block;
     width: 12px;
     height: 12px;
-    background-color: #FFDE00;
+    background-color: #ffde00;
     border: 2px solid #000;
     margin-right: 10px;
 }
 
 .article-content :deep(h3) {
     font-size: 1.25rem;
-    color: #3C5AA6;
+    color: #3c5aa6;
     margin: 1.5rem 0 0.75rem;
 }
 
@@ -391,16 +482,16 @@ watch(() => route.params.slug, () => {
 }
 
 .article-content :deep(a) {
-    color: #3C5AA6 !important;
+    color: #3c5aa6 !important;
     text-decoration: none;
-    border-bottom: 2px solid #3C5AA6;
+    border-bottom: 2px solid #3c5aa6;
     font-weight: bold;
     transition: all 0.2s ease;
 }
 
 .article-content :deep(a:hover) {
-    color: #FF7300 !important;
-    border-bottom-color: #FF7300;
+    color: #ff7300 !important;
+    border-bottom-color: #ff7300;
     background-color: #fff4ec;
 }
 
@@ -427,7 +518,7 @@ watch(() => route.params.slug, () => {
 .article-content :deep(blockquote) {
     margin: 1.5rem 0;
     padding: 1rem 1.5rem;
-    border-left: 6px solid #FFDE00;
+    border-left: 6px solid #ffde00;
     background: #fafafa;
     border-radius: 0 8px 8px 0;
     color: #555;
@@ -449,7 +540,7 @@ watch(() => route.params.slug, () => {
 }
 
 .article-content :deep(th) {
-    background: #FFDE00;
+    background: #ffde00;
     font-size: 1rem;
     font-weight: bold;
 }
@@ -518,7 +609,7 @@ watch(() => route.params.slug, () => {
 
 .article-content :deep(code) {
     font-size: 0.9rem;
-    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
     line-height: 1.5;
 }
 

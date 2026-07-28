@@ -1,56 +1,59 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import PixelBadge from '@/components/ui/PixelBadge.vue'
-import { usePostStore, usePostTagStore, usePostCategoryStore } from '@/store'
-import type { PostResponse, PostTagResponse, PostCategoryResponse } from '@/types'
+import { onMounted, ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import PixelBadge from "@/components/ui/PixelBadge.vue";
+import { usePostStore, usePostTagStore, usePostCategoryStore } from "@/store";
+import type {
+    PostResponse,
+    PostTagResponse,
+    PostCategoryResponse,
+} from "@/types";
 
-const postStore = usePostStore()
-const tagStore = usePostTagStore()
-const categoryStore = usePostCategoryStore()
-const recentPosts = ref<PostResponse[] | null>(null)
-const postTags = ref<PostTagResponse[] | null>(null)
-const postCategories = ref<PostCategoryResponse[] | null>(null)
+const postStore = usePostStore();
+const tagStore = usePostTagStore();
+const categoryStore = usePostCategoryStore();
+const recentPosts = ref<PostResponse[] | null>(null);
+const postTags = ref<PostTagResponse[] | null>(null);
+const postCategories = ref<PostCategoryResponse[] | null>(null);
 
 onMounted(async () => {
-    await postStore.getPosts({ published: true, limit: 6 })
-    recentPosts.value = postStore.posts
+    await postStore.getPosts({ published: true, limit: 6 });
+    recentPosts.value = postStore.posts;
 
-    await tagStore.getPostTags()
-    postTags.value = tagStore.postTags
+    await tagStore.getPostTags();
+    postTags.value = tagStore.postTags;
 
-    await categoryStore.getPostCategories()
-    postCategories.value = categoryStore.postCategories
-})
+    await categoryStore.getPostCategories();
+    postCategories.value = categoryStore.postCategories;
+});
 
 const sortedCategories = computed(() => {
     return postCategories.value
         ? [...postCategories.value].sort((a, b) => b.count - a.count)
-        : []
-})
+        : [];
+});
 
 const sortedTags = computed(() => {
     return postTags.value
         ? [...postTags.value].sort((a, b) => b.count - a.count).slice(0, 10)
-        : []
-})
+        : [];
+});
 
-
-const router = useRouter()
+const router = useRouter();
 
 const handleTagClick = (tagSlug: string) => {
     router.push({
-        path: '/post-search',
-        query: { tag: tagSlug }
-    })
-}
+        path: "/post-search",
+        query: { tag: tagSlug },
+    });
+};
 
 const handleCategoryClick = (categorySlug: string) => {
     router.push({
-        path: '/post-search',
-        query: { category: categorySlug }
-    })
-}
+        path: "/post-search",
+        query: { category: categorySlug },
+    });
+};
 </script>
 
 <template>
@@ -64,11 +67,13 @@ const handleCategoryClick = (categorySlug: string) => {
             class="w-16 h-16 rounded-full border-4 border-gray-800 shadow-md"
           /> -->
                     <div
-                        class="absolute inset-0 rounded-full bg-linear-to-b from-white/40 to-transparent pointer-events-none">
-                    </div>
+                        class="absolute inset-0 rounded-full bg-linear-to-b from-white/40 to-transparent pointer-events-none"
+                    ></div>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-900 text-xl font-mono">王</h3>
+                    <h3 class="font-bold text-gray-900 text-xl font-mono">
+                        王
+                    </h3>
                     <p class="text-xl text-gray-600">中国</p>
                 </div>
             </div>
@@ -78,18 +83,25 @@ const handleCategoryClick = (categorySlug: string) => {
         </div>
 
         <div class="pixel-box">
-            <h3 class="font-bold text-gray-900 text-xl mb-4 flex items-center gap-2 font-mono">
+            <h3
+                class="font-bold text-gray-900 text-xl mb-4 flex items-center gap-2 font-mono"
+            >
                 <span class="text-blue-600">📁</span> 热门分类
             </h3>
             <div class="space-y-2">
-                <div v-for="category in sortedCategories" :key="category.id"
+                <div
+                    v-for="category in sortedCategories"
+                    :key="category.id"
                     class="flex items-center justify-between p-2 border-2 border-transparent hover:border-gray-800 hover:bg-yellow-100/50 cursor-pointer transition-all duration-100 rounded"
-                    @click="handleCategoryClick(category.slug)">
+                    @click="handleCategoryClick(category.slug)"
+                >
                     <div class="flex items-center gap-2">
                         <span>{{ category.icon }}</span>
                         <span class="text-xl">{{ category.name }}</span>
                     </div>
-                    <span class="text-xl text-gray-600 bg-gray-200 px-2 py-1 border-2 border-gray-800 shadow-sm">
+                    <span
+                        class="text-xl text-gray-600 bg-gray-200 px-2 py-1 border-2 border-gray-800 shadow-sm"
+                    >
                         {{ category.count }}
                     </span>
                 </div>
@@ -97,12 +109,20 @@ const handleCategoryClick = (categorySlug: string) => {
         </div>
 
         <div class="pixel-box">
-            <h3 class="font-bold text-gray-900 text-xl mb-4 flex items-center gap-2 font-mono">
+            <h3
+                class="font-bold text-gray-900 text-xl mb-4 flex items-center gap-2 font-mono"
+            >
                 <span class="text-yellow-600">🏷️</span> 热门标签
             </h3>
             <div class="flex flex-wrap gap-2">
-                <PixelBadge v-for="tag in sortedTags" :key="tag.id" :name="tag.name" :color="tag.color"
-                    :count="tag.count" @click="handleTagClick(tag.slug)" />
+                <PixelBadge
+                    v-for="tag in sortedTags"
+                    :key="tag.id"
+                    :name="tag.name"
+                    :color="tag.color"
+                    :count="tag.count"
+                    @click="handleTagClick(tag.slug)"
+                />
             </div>
         </div>
 

@@ -34,7 +34,7 @@ export function useInfiniteList<T, P extends Record<string, any> = {}>(
       loading.value = false;
     }
   }
-  
+
   async function refresh(newParams?: P) {
     items.value = [];
     hasMore.value = true;

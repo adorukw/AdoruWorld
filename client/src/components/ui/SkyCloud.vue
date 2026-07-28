@@ -1,28 +1,34 @@
 <template>
     <div class="absolute inset-0 sky-gradient"></div>
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="cloud cloud-1 absolute w-24 h-12 bg-white rounded-full"></div>
-        <div class="cloud cloud-2 absolute w-32 h-16 bg-white rounded-full"></div>
-        <div class="cloud cloud-3 absolute w-20 h-10 bg-white rounded-full"></div>
-        <div class="cloud cloud-4 absolute w-28 h-14 bg-white rounded-full"></div>
-        <div class="cloud cloud-5 absolute w-36 h-18 bg-white rounded-full"></div>
+        <div
+            class="cloud cloud-1 absolute w-24 h-12 bg-white rounded-full"
+        ></div>
+        <div
+            class="cloud cloud-2 absolute w-32 h-16 bg-white rounded-full"
+        ></div>
+        <div
+            class="cloud cloud-3 absolute w-20 h-10 bg-white rounded-full"
+        ></div>
+        <div
+            class="cloud cloud-4 absolute w-28 h-14 bg-white rounded-full"
+        ></div>
+        <div
+            class="cloud cloud-5 absolute w-36 h-18 bg-white rounded-full"
+        ></div>
     </div>
 </template>
 
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 
 <style scoped>
 .sky-gradient {
-    background: linear-gradient(to bottom,
-            #87CEEB 0%,
-            /* 天空蓝 */
-            #E0F6FF 50%,
-            /* 浅蓝 */
-            #87CEEB 100%
-            /* 白色 */
-        );
+    background: linear-gradient(
+        to bottom,
+        #87ceeb 0%,
+        /* 天空蓝 */ #e0f6ff 50%,
+        /* 浅蓝 */ #87ceeb 100% /* 白色 */
+    );
 }
 
 .cloud {
@@ -34,7 +40,7 @@
 
 .cloud::before,
 .cloud::after {
-    content: '';
+    content: "";
     position: absolute;
     background: white;
     border-radius: 50%;

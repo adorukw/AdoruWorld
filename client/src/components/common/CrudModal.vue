@@ -1,76 +1,93 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch, computed } from 'vue'
-import type { FormConfig, FormField } from '@/types'
-import MediaPicker from '@/components/common/MediaPicker.vue'
+import { ref, reactive, onMounted, watch, computed } from "vue";
+import type { FormConfig, FormField } from "@/types";
+import MediaPicker from "@/components/common/MediaPicker.vue";
 import {
-    postCreateConfig, postUpdateConfig,
-    postCategoryCreateConfig, postCategoryUpdateConfig,
-    postTagCreateConfig, postTagUpdateConfig,
-    dexCreateConfig, dexUpdateConfig,
-    dexGenreCreateConfig, dexGenreUpdateConfig,
-    mediaTagCreateConfig, mediaTagUpdateConfig,
-    mediaCreateConfig, mediaUpdateConfig,
-} from '@/config'
+    postCreateConfig,
+    postUpdateConfig,
+    postCategoryCreateConfig,
+    postCategoryUpdateConfig,
+    postTagCreateConfig,
+    postTagUpdateConfig,
+    dexCreateConfig,
+    dexUpdateConfig,
+    dexGenreCreateConfig,
+    dexGenreUpdateConfig,
+    mediaTagCreateConfig,
+    mediaTagUpdateConfig,
+    mediaCreateConfig,
+    mediaUpdateConfig,
+} from "@/config";
 
 const props = defineProps<{
-    module: string
-    mode: 'create' | 'update'
-    initialData?: any
-}>()
+    module: string;
+    mode: "create" | "update";
+    initialData?: any;
+}>();
 
-const emit = defineEmits(['success', 'close'])
+const emit = defineEmits(["success", "close"]);
 
 // 根据 module 和 mode 获取对应配置
 const config = computed<FormConfig<any>>(() => {
-    const configMap: Record<string, Record<'create' | 'update', FormConfig<any>>> = {
+    const configMap: Record<
+        string,
+        Record<"create" | "update", FormConfig<any>>
+    > = {
         posts: {
-            create: postCreateConfig, update: postUpdateConfig
+            create: postCreateConfig,
+            update: postUpdateConfig,
         },
         postCategories: {
-            create: postCategoryCreateConfig, update: postCategoryUpdateConfig
+            create: postCategoryCreateConfig,
+            update: postCategoryUpdateConfig,
         },
         postTags: {
-            create: postTagCreateConfig, update: postTagUpdateConfig
+            create: postTagCreateConfig,
+            update: postTagUpdateConfig,
         },
         dexs: {
-            create: dexCreateConfig, update: dexUpdateConfig
+            create: dexCreateConfig,
+            update: dexUpdateConfig,
         },
         dexGenres: {
-            create: dexGenreCreateConfig, update: dexGenreUpdateConfig
+            create: dexGenreCreateConfig,
+            update: dexGenreUpdateConfig,
         },
         mediaTags: {
-            create: mediaTagCreateConfig, update: mediaTagUpdateConfig
+            create: mediaTagCreateConfig,
+            update: mediaTagUpdateConfig,
         },
         medias: {
-            create: mediaCreateConfig, update: mediaUpdateConfig
-        }
-    }
+            create: mediaCreateConfig,
+            update: mediaUpdateConfig,
+        },
+    };
 
     // 安全检查
-    const moduleConfig = configMap[props.module]
+    const moduleConfig = configMap[props.module];
     if (!moduleConfig) {
-        throw new Error(`找不到模块配置: ${props.module}`)
+        throw new Error(`找不到模块配置: ${props.module}`);
     }
 
-    return moduleConfig[props.mode]
-})
+    return moduleConfig[props.mode];
+});
 
-const loading = ref(false)
-const errorMsg = ref('')
+const loading = ref(false);
+const errorMsg = ref("");
 
 // 表单数据
-const form = reactive<any>({})
+const form = reactive<any>({});
 
 // 选项缓存
-const optionsMap = ref<Record<string, any[]>>({})
+const optionsMap = ref<Record<string, any[]>>({});
 
 // 初始化表单
 function initForm() {
     // 清空表单
-    Object.keys(form).forEach(key => delete form[key])
+    Object.keys(form).forEach((key) => delete form[key]);
 
-    if (props.mode === 'update' && props.initialData) {
-        Object.assign(form, props.initialData)
+    if (props.mode === "update" && props.initialData) {
+        Object.assign(form, props.initialData);
 
         // ✅ 关键修复：手动映射关联字段
         // if (props.module === 'posts') {
@@ -89,32 +106,34 @@ function initForm() {
         // }
 
         // 原有类型修正逻辑
-        config.value.fields.forEach(field => {
-            if (field.type === 'select' || field.type === 'multiSelect') {
-                if (field.type === 'multiSelect') {
+        config.value.fields.forEach((field) => {
+            if (field.type === "select" || field.type === "multiSelect") {
+                if (field.type === "multiSelect") {
                     if (!Array.isArray(form[field.key])) {
-                        form[field.key] = form[field.key] ? [form[field.key]] : []
+                        form[field.key] = form[field.key]
+                            ? [form[field.key]]
+                            : [];
                     }
-                } else if (field.type === 'select' && !form[field.key]) {
-                    form[field.key] = ''
+                } else if (field.type === "select" && !form[field.key]) {
+                    form[field.key] = "";
                 }
-            } else if (field.type === 'switch') {
-                form[field.key] = Boolean(form[field.key])
+            } else if (field.type === "switch") {
+                form[field.key] = Boolean(form[field.key]);
             }
-        })
+        });
     } else {
         // 创建模式：设置默认值（根据字段类型）
-        config.value.fields.forEach(field => {
-            if (field.type === 'switch') {
-                form[field.key] = false
-            } else if (field.type === 'multiSelect') {
-                form[field.key] = []
-            } else if (field.type === 'number') {
-                form[field.key] = 0
+        config.value.fields.forEach((field) => {
+            if (field.type === "switch") {
+                form[field.key] = false;
+            } else if (field.type === "multiSelect") {
+                form[field.key] = [];
+            } else if (field.type === "number") {
+                form[field.key] = 0;
             } else {
-                form[field.key] = ''
+                form[field.key] = "";
             }
-        })
+        });
     }
 }
 
@@ -123,116 +142,123 @@ async function loadOptions() {
     for (const field of config.value.fields) {
         if (field.optionsGetter) {
             try {
-                optionsMap.value[field.key] = await field.optionsGetter()
+                optionsMap.value[field.key] = await field.optionsGetter();
             } catch (error) {
-                console.error(`加载 ${field.label} 选项失败:`, error)
-                optionsMap.value[field.key] = []
+                console.error(`加载 ${field.label} 选项失败:`, error);
+                optionsMap.value[field.key] = [];
             }
         }
     }
 }
 
 onMounted(async () => {
-    await loadOptions()  // 先加载选项
-    initForm()           // 再初始化表单
-})
+    await loadOptions(); // 先加载选项
+    initForm(); // 再初始化表单
+});
 
 // 监听 initialData 变化，重新初始化表单
-watch(() => props.initialData, () => {
-    initForm()
-}, { deep: true })
+watch(
+    () => props.initialData,
+    () => {
+        initForm();
+    },
+    { deep: true },
+);
 
 // 提交
 async function handleSubmit() {
-    loading.value = true
-    errorMsg.value = ''
+    loading.value = true;
+    errorMsg.value = "";
 
     for (const field of config.value.fields) {
         if (field.required) {
-            const val = form[field.key]
-            let isEmpty = false
+            const val = form[field.key];
+            let isEmpty = false;
 
             if (val === null || val === undefined) {
-                isEmpty = true
-            } else if (typeof val === 'string') {
-                isEmpty = val.trim() === ''
+                isEmpty = true;
+            } else if (typeof val === "string") {
+                isEmpty = val.trim() === "";
             } else if (Array.isArray(val)) {
-                isEmpty = val.length === 0
+                isEmpty = val.length === 0;
             }
 
             if (isEmpty) {
-                errorMsg.value = `${field.label} 不能为空`
-                loading.value = false
-                return   // ← 直接返回，不提交
+                errorMsg.value = `${field.label} 不能为空`;
+                loading.value = false;
+                return; // ← 直接返回，不提交
             }
         }
     }
     try {
-        if (props.mode === 'create') {
-            await config.value.saveApi(form)
+        if (props.mode === "create") {
+            await config.value.saveApi(form);
         } else {
-            await config.value.saveApi(form, props.initialData.id)
+            await config.value.saveApi(form, props.initialData.id);
         }
-        emit('success')
+        emit("success");
     } catch (err: any) {
-        errorMsg.value = err.message || '操作失败'
+        errorMsg.value = err.message || "操作失败";
     } finally {
-        loading.value = false
+        loading.value = false;
     }
 }
 
-const uploadingFiles = reactive<Record<string, boolean>>({})
+const uploadingFiles = reactive<Record<string, boolean>>({});
 
 async function handleFileUpload(field: FormField, event: Event) {
-    const input = event.target as HTMLInputElement
-    if (!input.files?.length) return
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
 
-    const file = input.files[0]
+    const file = input.files[0];
     if (!field.uploadApi) {
-        console.error('缺少上传API')
-        return
+        console.error("缺少上传API");
+        return;
     }
 
-    uploadingFiles[field.key] = true
-    errorMsg.value = ''
+    uploadingFiles[field.key] = true;
+    errorMsg.value = "";
 
     try {
-        const res = await field.uploadApi(file)
+        const res = await field.uploadApi(file);
 
-        if (typeof res === 'string') {
-            form[field.key] = res
-        }
-        else if (res && typeof res === 'object') {
+        if (typeof res === "string") {
+            form[field.key] = res;
+        } else if (res && typeof res === "object") {
             // 填充文件路径
-            form[field.key] = res.filePath
+            form[field.key] = res.filePath;
 
             // 自动填充其他字段（这些是后端自动分析的，不需要用户填写）
-            form['filePath'] = res.filePath
-            form['fileSize'] = res.fileSize
-            form['mimeType'] = res.mimeType
-            form['mediaType'] = res.mediaType
-            form['extension'] = res.extension
+            form["filePath"] = res.filePath;
+            form["fileSize"] = res.fileSize;
+            form["mimeType"] = res.mimeType;
+            form["mediaType"] = res.mediaType;
+            form["extension"] = res.extension;
 
             // 自动填充元数据（如果有的话）
             if (res.metadata && Object.keys(res.metadata).length > 0) {
-                form['metaData'] = res.metadata
+                form["metaData"] = res.metadata;
             }
         }
     } catch (err: any) {
-        errorMsg.value = err.message || '文件上传失败'
+        errorMsg.value = err.message || "文件上传失败";
     } finally {
-        uploadingFiles[field.key] = false
+        uploadingFiles[field.key] = false;
     }
 }
 </script>
 
 <template>
-    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white border-4 border-black w-full max-w-3xl max-h-[90vh] overflow-y-auto pixel-card">
+    <div
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+    >
+        <div
+            class="bg-white border-4 border-black w-full max-w-3xl max-h-[90vh] overflow-y-auto pixel-card"
+        >
             <!-- Header -->
             <div class="p-6 border-b-4 border-black">
                 <h2 class="pixel-text text-xl">
-                    {{ mode === 'create' ? '➕ 新建' : '✏️ 编辑' }} {{ module }}
+                    {{ mode === "create" ? "➕ 新建" : "✏️ 编辑" }} {{ module }}
                 </h2>
             </div>
 
@@ -241,62 +267,111 @@ async function handleFileUpload(field: FormField, event: Event) {
                 <div v-for="field in config.fields" :key="field.key">
                     <label class="block mb-2 pixel-text text-sm">
                         {{ field.label }}
-                        <span v-if="field.required" class="text-red-500">*</span>
+                        <span v-if="field.required" class="text-red-500"
+                            >*</span
+                        >
                     </label>
 
                     <!-- Text / Number -->
-                    <input v-if="['text', 'number'].includes(field.type)" v-model="form[field.key]"
+                    <input
+                        v-if="['text', 'number'].includes(field.type)"
+                        v-model="form[field.key]"
                         class="w-full p-3 border-4 border-black focus:outline-none focus:ring-2 focus:ring-sky"
-                        :type="field.type" :placeholder="field.placeholder" />
+                        :type="field.type"
+                        :placeholder="field.placeholder"
+                    />
 
                     <!-- Textarea -->
-                    <textarea v-else-if="field.type === 'textarea'" v-model="form[field.key]"
+                    <textarea
+                        v-else-if="field.type === 'textarea'"
+                        v-model="form[field.key]"
                         class="w-full p-3 border-4 border-black focus:outline-none focus:ring-2 focus:ring-sky"
-                        :rows="field.rows || 4" :placeholder="field.placeholder"></textarea>
+                        :rows="field.rows || 4"
+                        :placeholder="field.placeholder"
+                    ></textarea>
 
                     <!-- Select -->
-                    <select v-else-if="field.type === 'select'" v-model="form[field.key]"
-                        class="w-full p-3 border-4 border-black bg-white">
-                        <option disabled value="">请选择 {{ field.label }}</option>
-                        <option v-for="opt in optionsMap[field.key]" :key="opt.value" :value="opt.value">
+                    <select
+                        v-else-if="field.type === 'select'"
+                        v-model="form[field.key]"
+                        class="w-full p-3 border-4 border-black bg-white"
+                    >
+                        <option disabled value="">
+                            请选择 {{ field.label }}
+                        </option>
+                        <option
+                            v-for="opt in optionsMap[field.key]"
+                            :key="opt.value"
+                            :value="opt.value"
+                        >
                             {{ opt.label }}
                         </option>
                     </select>
 
                     <!-- Multi Select -->
-                    <div v-else-if="field.type === 'multiSelect'" class="flex flex-wrap gap-2">
-                        <label v-for="opt in optionsMap[field.key]" :key="opt.value"
-                            class="flex items-center gap-2 px-3 py-2 border-2 border-black cursor-pointer hover:bg-gray-50">
-                            <input type="checkbox" :value="opt.value" v-model="form[field.key]" />
+                    <div
+                        v-else-if="field.type === 'multiSelect'"
+                        class="flex flex-wrap gap-2"
+                    >
+                        <label
+                            v-for="opt in optionsMap[field.key]"
+                            :key="opt.value"
+                            class="flex items-center gap-2 px-3 py-2 border-2 border-black cursor-pointer hover:bg-gray-50"
+                        >
+                            <input
+                                type="checkbox"
+                                :value="opt.value"
+                                v-model="form[field.key]"
+                            />
                             {{ opt.label }}
                         </label>
                     </div>
 
                     <!-- Switch -->
-                    <label v-else-if="field.type === 'switch'" class="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" v-model="form[field.key]" class="w-5 h-5 border-2 border-black" />
+                    <label
+                        v-else-if="field.type === 'switch'"
+                        class="inline-flex items-center cursor-pointer"
+                    >
+                        <input
+                            type="checkbox"
+                            v-model="form[field.key]"
+                            class="w-5 h-5 border-2 border-black"
+                        />
                         <span class="ml-2 pixel-text text-sm">
-                            {{ form[field.key] ? 'True' : 'False' }}
+                            {{ form[field.key] ? "True" : "False" }}
                         </span>
                     </label>
 
                     <div v-else-if="field.type === 'file'" class="space-y-2">
-                        <input type="file" :accept="field.accept" @change="(e) => handleFileUpload(field, e)"
+                        <input
+                            type="file"
+                            :accept="field.accept"
+                            @change="(e) => handleFileUpload(field, e)"
                             class="w-full p-3 border-4 border-black focus:outline-none focus:ring-2 focus:ring-sky"
-                            :disabled="uploadingFiles[field.key]" />
+                            :disabled="uploadingFiles[field.key]"
+                        />
 
                         <!-- 上传进度/状态 -->
-                        <div v-if="uploadingFiles[field.key]" class="text-sm text-blue-600">
+                        <div
+                            v-if="uploadingFiles[field.key]"
+                            class="text-sm text-blue-600"
+                        >
                             ⏳ 上传中...
                         </div>
 
                         <!-- 显示已上传的文件 -->
-                        <div v-if="form[field.key]" class="text-sm text-green-600">
+                        <div
+                            v-if="form[field.key]"
+                            class="text-sm text-green-600"
+                        >
                             ✅ 已上传: {{ form[field.key] }}
                         </div>
                     </div>
                     <!-- Media Picker -->
-                    <div v-else-if="field.type === 'mediaPicker'" class="space-y-2">
+                    <div
+                        v-else-if="field.type === 'mediaPicker'"
+                        class="space-y-2"
+                    >
                         <MediaPicker v-model="form[field.key]" />
                     </div>
                 </div>
@@ -307,12 +382,22 @@ async function handleFileUpload(field: FormField, event: Event) {
                 </div>
 
                 <!-- Footer -->
-                <div class="flex justify-end gap-4 pt-4 border-t-4 border-black">
-                    <button type="button" @click="emit('close')" class="pixel-btn bg-gray-300">
+                <div
+                    class="flex justify-end gap-4 pt-4 border-t-4 border-black"
+                >
+                    <button
+                        type="button"
+                        @click="emit('close')"
+                        class="pixel-btn bg-gray-300"
+                    >
                         取消
                     </button>
-                    <button type="submit" :disabled="loading" class="pixel-btn bg-sky ">
-                        {{ loading ? '保存中...' : '保存' }}
+                    <button
+                        type="submit"
+                        :disabled="loading"
+                        class="pixel-btn bg-sky"
+                    >
+                        {{ loading ? "保存中..." : "保存" }}
                     </button>
                 </div>
             </form>
