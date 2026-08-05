@@ -21,7 +21,7 @@ class DexGenre(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
     name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     slug: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    color: Mapped[str | None] = mapped_column(String, nullable=False)
+    color: Mapped[str | None] = mapped_column(String, nullable=True)
 
     dexs: Mapped[list[Dex]] = relationship(
         "Dex", secondary="dex_to_dex_genres", back_populates="genres"

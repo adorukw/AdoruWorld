@@ -20,7 +20,7 @@ class PostTag(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    slug: Mapped[str | None] = mapped_column(String, nullable=True)
+    slug: Mapped[str | None] = mapped_column(String, nullable=False, unique=True)
     color: Mapped[str | None] = mapped_column(String, nullable=True)
 
     posts: Mapped[list[Post]] = relationship(
