@@ -19,7 +19,7 @@ async def global_search(
     type: str | None = Query(
         None,
         alias="type",
-        regex="^(post|dex|media)$",
+        pattern="^(post|dex|media)$",
         description="筛选实体类型：post / dex / media，不传则搜全部",
     ),
     skip: int = Query(0, ge=0, description="分页偏移"),
