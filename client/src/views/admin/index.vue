@@ -1,37 +1,47 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import Layout from "@/components/layout/Layout.vue";
+import { useAuthStore } from "@/store";
 import PostsTable from "./PostsTable.vue";
 import PostCategoriesTable from "./PostCategoriesTable.vue";
 import PostTagsTable from "./PostTagsTable.vue";
+import SeriesTable from "./SeriesTable.vue";
 import DexsTable from "./DexsTable.vue";
 import DexGenresTable from "./DexGenresTable.vue";
 import MediasTable from "./MediasTable.vue";
 import MediaTagsTable from "./MediaTagsTable.vue";
+import UsersTable from "./UsersTable.vue";
 type TabId =
     | "posts"
     | "postCategories"
     | "postTags"
+    | "series"
     | "dexs"
     | "dexGenres"
     | "medias"
-    | "mediaTags";
+    | "mediaTags"
+    | "users";
 interface TabItem {
     id: TabId;
     icon: string;
     label: string;
+    adminOnly?: boolean;
 }
 
+const auth = useAuthStore();
 const activeTab = ref<TabId>("posts");
 const tabs: TabItem[] = [
     { id: "posts", icon: "📝", label: "文章" },
     { id: "postCategories", icon: "📁", label: "文章分类" },
     { id: "postTags", icon: "🏷️", label: "文章标签" },
+    { id: "series", icon: "📚", label: "系列" },
     { id: "dexs", icon: "📖", label: "图鉴" },
     { id: "dexGenres", icon: "🎭", label: "图鉴题材" },
     { id: "medias", icon: "🖼️", label: "媒体库" },
     { id: "mediaTags", icon: "🏷️", label: "媒体标签" },
+    { id: "users", icon: "👥", label: "用户", adminOnly: true },
 ];
+const visibleTabs = tabs.filter((t) => !t.adminOnly || auth.isAdmin);
 </script>
 
 <template>
@@ -67,7 +77,7 @@ const tabs: TabItem[] = [
                     class="flex flex-wrap gap-2 p-4 bg-white/80 border-4 border-black"
                 >
                     <button
-                        v-for="tab in tabs"
+                        v-for="tab in visibleTabs"
                         :key="tab.id"
                         @click="activeTab = tab.id"
                         class="pixel-btn px-4 py-2 transition-all"
@@ -94,6 +104,9 @@ const tabs: TabItem[] = [
                 <div v-show="activeTab === 'postTags'">
                     <PostTagsTable />
                 </div>
+                <div v-show="activeTab === 'series'">
+                    <SeriesTable />
+                </div>
                 <div v-show="activeTab === 'dexs'">
                     <DexsTable />
                 </div>
@@ -105,6 +118,9 @@ const tabs: TabItem[] = [
                 </div>
                 <div v-show="activeTab === 'mediaTags'">
                     <MediaTagsTable />
+                </div>
+                <div v-if="auth.isAdmin" v-show="activeTab === 'users'">
+                    <UsersTable />
                 </div>
             </div>
         </section>

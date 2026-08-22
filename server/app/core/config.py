@@ -3,9 +3,49 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+
+def _load_env_file() -> None:
+    """极简 .env 加载器：KEY=VALUE 逐行读入，已存在的环境变量不覆盖"""
+    env_file = BASE_DIR / ".env"
+    if not env_file.exists():
+        return
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key, value = key.strip(), value.strip()
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+_load_env_file()
+
 DATABASE_URL: str = os.getenv(
     "DATABASE_URL", f"sqlite+aiosqlite:///{BASE_DIR}/adoruworld.db"
 )
+
+# ============================================================
+# 认证配置（JWT）
+# ============================================================
+SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-only-insecure-key")
+ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+
+# 初始管理员密码（仅 scripts/create_admin.py 使用，用后即弃）
+INITIAL_ADMIN_PASSWORD: str = os.getenv("INITIAL_ADMIN_PASSWORD", "")
+
+# ============================================================
+# 邮件发送（注册验证码）
+# console 模式打印到后端日志（开发零依赖）；smtp 模式真实发信
+# QQ 邮箱：SMTP_HOST=smtp.qq.com PORT=465 USER=邮箱 PASSWORD=授权码
+# ============================================================
+MAIL_MODE: str = os.getenv("MAIL_MODE", "console")
+SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.qq.com")
+SMTP_PORT: int = int(os.getenv("SMTP_PORT", "465"))
+SMTP_USER: str = os.getenv("SMTP_USER", "")
+SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+SMTP_FROM: str = os.getenv("SMTP_FROM", "") or os.getenv("SMTP_USER", "")
 
 SITE_START_DATE: str = os.getenv("SITE_START_DATE", "2025-01-01")
 

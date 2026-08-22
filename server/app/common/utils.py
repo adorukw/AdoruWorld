@@ -2,6 +2,7 @@ from typing import Any
 
 from app.modules.post.model import Post as PostModel
 from app.modules.post.schema import PostCategoryResponse, PostTagResponse
+from app.modules.series.schema import SeriesResponse
 
 
 def format_post(post: PostModel) -> dict[str, Any]:
@@ -23,4 +24,6 @@ def format_post(post: PostModel) -> dict[str, Any]:
         if post.category
         else None,
         "tags": [PostTagResponse.model_validate(t) for t in post.tags],
+        "series": SeriesResponse.model_validate(post.series) if post.series else None,
+        "series_order": post.series_order,
     }

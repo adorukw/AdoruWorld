@@ -15,6 +15,7 @@ from app.modules import (
     PostCategory,
     PostTag,
     dex_to_dex_genres,
+    dex_to_media,
     media_to_media_tags,
     post_to_post_tags,
 )
@@ -301,6 +302,26 @@ async def seed_dex_genres(db: AsyncSession) -> dict[str, str]:
     return genre_map
 
 
+# 图鉴外部链接模板（豆瓣/网易云/Bangumi/Steam 等假数据）
+EXTERNAL_URL_TEMPLATES = {
+    "book": "https://book.douban.com/subject/{id}/",
+    "movie": "https://movie.douban.com/subject/{id}/",
+    "tv": "https://movie.douban.com/subject/{id}/",
+    "anime": "https://bangumi.tv/subject/{id}",
+    "music": "https://music.163.com/album?id={id}",
+    "game": "https://store.steampowered.com/app/{id}/",
+    "other": "https://www.example.com/works/{id}",
+}
+
+
+def generate_external_url(category: str) -> str | None:
+    """70% 的条目带外部链接"""
+    if random.random() > 0.7:
+        return None
+    template = EXTERNAL_URL_TEMPLATES.get(category, EXTERNAL_URL_TEMPLATES["other"])
+    return template.format(id=random.randint(100000, 999999))
+
+
 async def seed_dex_entries(
     db: AsyncSession, genre_map: dict[str, str], count: int = 50
 ):
@@ -340,6 +361,7 @@ async def seed_dex_entries(
             creator=fake.name() if random.random() < 0.8 else None,
             year=year,
             summary=fake.paragraph(nb_sentences=3) if random.random() < 0.5 else None,
+            external_url=generate_external_url(category),
         )
         db.add(entry)
         await db.flush()
@@ -447,7 +469,11 @@ def _generate_placeholder_file(mtype: str, ext: str) -> tuple[str, int, str, dic
         metadata = {"pages": 1}
 
     file_size = os.path.getsize(save_path)
-    return f"/{save_path}", file_size, mime, metadata
+    # 与上传接口保持一致：存储路径带 UPLOAD_URL_PREFIX，
+    # 前端通过该前缀反代到后端静态文件
+    from app.core.config import UPLOAD_URL_PREFIX
+
+    return f"{UPLOAD_URL_PREFIX}/{save_path}", file_size, mime, metadata
 
 
 async def seed_media(db: AsyncSession, tag_map: dict[str, str], count: int = 30):
@@ -497,6 +523,38 @@ async def seed_media(db: AsyncSession, tag_map: dict[str, str], count: int = 30)
     print(f"✅ 导入 {count} 个媒体文件（含磁盘占位文件）")
 
 
+async def seed_dex_media_links(db: AsyncSession):
+    """把 book/audio 媒体文件挂到同分类的图鉴条目上（书籍挂书、音频挂音乐）"""
+    from sqlalchemy import select
+
+    book_dex_ids = (
+        (await db.execute(select(Dex.id).where(Dex.category == "book"))).scalars().all()
+    )
+    music_dex_ids = (
+        (await db.execute(select(Dex.id).where(Dex.category == "music")))
+        .scalars()
+        .all()
+    )
+
+    links = 0
+    for mtype, dex_ids in (("book", book_dex_ids), ("audio", music_dex_ids)):
+        media_rows = (
+            await db.execute(
+                select(Media.id, Media.title).where(Media.media_type == mtype)
+            )
+        ).all()
+        for media_id, _ in media_rows:
+            # 每个文件挂 1~2 个条目
+            for dex_id in random.sample(dex_ids, k=min(len(dex_ids), random.randint(1, 2))):
+                await db.execute(
+                    dex_to_media.insert().values(dex_id=dex_id, media_id=media_id)
+                )
+                links += 1
+
+    await db.commit()
+    print(f"✅ 建立 {links} 条图鉴↔媒体关联")
+
+
 # ============================================================
 # 主入口
 # ============================================================
@@ -509,6 +567,7 @@ async def seed():
         print("🧹 清空现有数据...")
         await db.execute(post_to_post_tags.delete())
         await db.execute(dex_to_dex_genres.delete())
+        await db.execute(dex_to_media.delete())
         await db.execute(media_to_media_tags.delete())
         for tbl in [Post, PostTag, PostCategory, Dex, DexGenre, Media, MediaTag]:
             await db.execute(tbl.__table__.delete())
@@ -525,6 +584,7 @@ async def seed():
 
         mt_map = await seed_media_tags(db)
         await seed_media(db, mt_map, count=30)  # ← 改这里控制媒体数量
+        await seed_dex_media_links(db)
 
         print("\n🎉 所有种子数据导入完成！")
 

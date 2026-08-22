@@ -63,3 +63,8 @@ class Media(Base):
         back_populates="medias",
         lazy="selectin",
     )
+
+    # 关联图鉴条目（作为可下载资源挂到书籍/音乐等条目上）
+    dexs: Mapped[list["Dex"]] = relationship(
+        "Dex", secondary="dex_to_media", back_populates="medias", lazy="selectin"
+    )

@@ -34,6 +34,16 @@ dex_to_dex_genres = Table(
     Column("dex_genre_id", String, ForeignKey("dex_genres.id"), primary_key=True),
 )
 
+# 图鉴条目 ↔ 媒体文件（书籍/音乐等可下载资源）
+dex_to_media = Table(
+    "dex_to_media",
+    Base.metadata,
+    Column("dex_id", String, ForeignKey("dex.id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "media_id", String, ForeignKey("media.id", ondelete="CASCADE"), primary_key=True
+    ),
+)
+
 
 class Dex(Base):
     __tablename__ = "dex"
@@ -52,7 +62,12 @@ class Dex(Base):
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     creator: Mapped[str | None] = mapped_column(String, nullable=True)
     year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    external_url: Mapped[str | None] = mapped_column(String, nullable=True)
 
     genres: Mapped[list[DexGenre]] = relationship(
         "DexGenre", secondary=dex_to_dex_genres, back_populates="dexs", lazy="selectin"
+    )
+
+    medias: Mapped[list["Media"]] = relationship(
+        "Media", secondary=dex_to_media, back_populates="dexs", lazy="selectin"
     )

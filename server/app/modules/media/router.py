@@ -6,6 +6,7 @@ import mutagen
 from app.core.config import UPLOAD_URL_PREFIX
 from app.core.database import get_db
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from app.modules.auth.dependency import require_role
 from PIL import Image
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -68,7 +69,7 @@ def analyze_file_metadata(file_path: str, media_type: str) -> dict:
     return metadata
 
 
-@router.post("/upload", response_model=MediaUploadResponse)
+@router.post("/upload", response_model=MediaUploadResponse, dependencies=[Depends(require_role('admin', 'editor'))])
 async def upload_media(
     db: Annotated[AsyncSession, Depends(get_db)],
     file: UploadFile = File(...),
@@ -145,12 +146,12 @@ async def get_media_by_id(media_id: str, db: Annotated[AsyncSession, Depends(get
     return media
 
 
-@router.post("", response_model=MediaResponse, status_code=201)
+@router.post("", response_model=MediaResponse, status_code=201, dependencies=[Depends(require_role('admin', 'editor'))])
 async def create_media(data: MediaCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     return await crud.create_media(db, data)
 
 
-@router.put("/{media_id}", response_model=MediaResponse)
+@router.put("/{media_id}", response_model=MediaResponse, dependencies=[Depends(require_role('admin', 'editor'))])
 async def update_media(
     media_id: str, data: MediaUpdate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
@@ -160,7 +161,7 @@ async def update_media(
     return await crud.update_media(db, media, data)
 
 
-@router.delete("/{media_id}", status_code=204)
+@router.delete("/{media_id}", status_code=204, dependencies=[Depends(require_role('admin', 'editor'))])
 async def delete_media(media_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     media = await crud.get_media_by_id(db, media_id)
     if not media:

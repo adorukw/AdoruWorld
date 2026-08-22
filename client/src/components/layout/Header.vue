@@ -34,6 +34,36 @@
                 <span>🔍</span>
             </router-link>
 
+            <!-- 登录状态 -->
+            <div v-if="auth.isLoggedIn" class="flex items-center gap-2">
+                <span
+                    class="text-white text-xs pixel-text hidden sm:inline max-w-24 truncate"
+                    :title="auth.user?.displayName || auth.user?.username"
+                >
+                    👤 {{ auth.user?.displayName || auth.user?.username }}
+                </span>
+                <button
+                    v-if="auth.canWrite"
+                    class="pixel-btn text-xs px-3 py-2 !bg-white !text-black"
+                    @click="$router.push('/admin')"
+                >
+                    ⚙️
+                </button>
+                <button
+                    class="pixel-btn text-xs px-3 py-2"
+                    @click="handleLogout"
+                >
+                    登出
+                </button>
+            </div>
+            <router-link
+                v-else
+                to="/login"
+                class="pixel-btn text-xs px-3 py-2 no-underline !text-white"
+            >
+                登录
+            </router-link>
+
             <!-- 移动端菜单按钮 -->
             <button class="md:hidden pixel-btn text-xs px-3 py-2">☰</button>
         </div>
@@ -41,7 +71,23 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { navItems } from "@/constants";
+import { useAuthStore } from "@/store";
+
+const auth = useAuthStore();
+const router = useRouter();
+
+onMounted(() => {
+    // 刷新页面后恢复用户信息（token 在 localStorage，用户对象需要拉取）
+    auth.fetchMe();
+});
+
+async function handleLogout() {
+    await auth.logout();
+    router.push("/");
+}
 </script>
 
 <style scoped>

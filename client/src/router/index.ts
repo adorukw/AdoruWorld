@@ -48,7 +48,19 @@ const routes: RouteRecordRaw[] = [
     path: "/admin",
     name: "Admin",
     component: () => import("@/views/admin/index.vue"),
-    meta: { title: "后台管理" },
+    meta: { title: "后台管理", requiresAuth: true, roles: ["admin", "editor"] },
+  },
+  {
+    path: "/login",
+    name: "Login",
+    component: () => import("@/views/Login.vue"),
+    meta: { title: "登录" },
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: () => import("@/views/Register.vue"),
+    meta: { title: "注册" },
   },
   {
     path: "/search",
@@ -79,9 +91,27 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const title = to.meta.title as string;
   document.title = title ? `${title} | AdoruWorld` : "AdoruWorld";
+
+  // 路由守卫只是体验层优化；真正的安全边界在后端 Depends
+  if (to.meta.requiresAuth) {
+    const { useAuthStore } = await import("@/store");
+    const auth = useAuthStore();
+    if (!auth.isLoggedIn) {
+      return { name: "Login", query: { redirect: to.fullPath } };
+    }
+    // 首次进入守卫路由时拉取用户信息判断角色
+    if (!auth.user) {
+      const user = await auth.fetchMe();
+      if (!user) return { name: "Login" };
+    }
+    const roles = (to.meta.roles as string[]) ?? [];
+    if (roles.length && !roles.includes(auth.user!.role)) {
+      return { name: "Home" };
+    }
+  }
 });
 
 export default router;

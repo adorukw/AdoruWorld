@@ -148,6 +148,32 @@ async def get_related_posts(db: AsyncSession, post: Post, limit: int = 3):
     return result.scalars().all()
 
 
+async def get_series_navigation(
+    db: AsyncSession, post: Post
+) -> tuple[Post | None, Post | None]:
+    """系列内上下篇：按 series_order 排序取相邻文章（仅已发布）"""
+    if not post.series_id:
+        return None, None
+    stmt = (
+        select(Post.id, Post.slug, Post.title)
+        .where(Post.series_id == post.series_id)
+        .where(Post.published == True)  # noqa: E712
+        .order_by(Post.series_order.asc().nulls_last(), Post.created_at.asc())
+    )
+    res = await db.execute(stmt)
+    rows = res.all()
+
+    prev_row, next_row = None, None
+    for i, row in enumerate(rows):
+        if row.id == post.id:
+            if i > 0:
+                prev_row = rows[i - 1]
+            if i < len(rows) - 1:
+                next_row = rows[i + 1]
+            break
+    return prev_row, next_row
+
+
 async def get_post_by_id(db: AsyncSession, post_id: str) -> Post | None:
     stmt = (
         select(Post)

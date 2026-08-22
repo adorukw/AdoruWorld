@@ -20,6 +20,7 @@ SCRIPTS = {
     "2": ("🌱  导入种子数据", ["python", "-m", "scripts.seed_data"]),
     "3": ("📦  导出全部数据", ["python", "-m", "scripts.export_all"]),
     "4": ("📥  导入全部数据", ["python", "-m", "scripts.import_all"]),
+    "5": ("🔐  创建/重置管理员", ["python", "-m", "scripts.create_admin"]),
 }
 
 

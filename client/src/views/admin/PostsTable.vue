@@ -40,6 +40,8 @@ async function openEditModal(item: any) {
         ...item,
         categoryId: item.category?.id,
         tagIds: item.tags?.map((t: any) => t.id) || [],
+        seriesId: item.series?.id ?? "",
+        seriesOrder: item.seriesOrder ?? "",
     };
     showModal.value = true;
 }

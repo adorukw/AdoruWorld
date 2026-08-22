@@ -2,6 +2,7 @@ from typing import Annotated
 
 from app.core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
+from app.modules.auth.dependency import require_role
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import crud
@@ -46,7 +47,7 @@ async def get_tag_by_id(tag_id: str, db: Annotated[AsyncSession, Depends(get_db)
     )
 
 
-@router.post("", response_model=PostTagResponse, status_code=201)
+@router.post("", response_model=PostTagResponse, status_code=201, dependencies=[Depends(require_role('admin', 'editor'))])
 async def create_tag(data: PostTagCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     tag = await crud.create_tag(db, data)
     return PostTagResponse(
@@ -54,7 +55,7 @@ async def create_tag(data: PostTagCreate, db: Annotated[AsyncSession, Depends(ge
     )
 
 
-@router.put("/{tag_id}", response_model=PostTagResponse)
+@router.put("/{tag_id}", response_model=PostTagResponse, dependencies=[Depends(require_role('admin', 'editor'))])
 async def update_tag(
     tag_id: str, data: PostTagUpdate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
@@ -68,7 +69,7 @@ async def update_tag(
     )
 
 
-@router.delete("/{tag_id}", status_code=204)
+@router.delete("/{tag_id}", status_code=204, dependencies=[Depends(require_role('admin', 'editor'))])
 async def delete_tag(tag_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     tag = await crud.get_tag_by_id(db, tag_id)
     if not tag:

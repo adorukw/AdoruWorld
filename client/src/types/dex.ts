@@ -1,4 +1,5 @@
 import type { DexGenreResponse } from "./dex-genre";
+import type { MediaResponse } from "./media";
 
 export type DexCategory =
   "anime" | "movie" | "tv" | "game" | "book" | "music" | "other";
@@ -45,7 +46,9 @@ export interface DexResponse {
   summary?: string;
   creator?: string;
   year?: number;
+  externalUrl?: string;
   genres?: DexGenreResponse[];
+  medias?: MediaResponse[];
 }
 
 export interface DexCreate {
@@ -62,7 +65,9 @@ export interface DexCreate {
   summary?: string;
   creator?: string;
   year?: number;
+  externalUrl?: string;
   genreIds?: string[];
+  mediaIds?: string[];
 }
 
 export interface DexUpdate {
@@ -79,7 +84,9 @@ export interface DexUpdate {
   summary?: string;
   creator?: string;
   year?: number;
+  externalUrl?: string;
   genreIds?: string[];
+  mediaIds?: string[];
 }
 
 export interface DexStats {

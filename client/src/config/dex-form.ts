@@ -1,5 +1,5 @@
 import type { DexCreate, DexUpdate } from '@/types'
-import { useDexStore, useDexGenreStore } from '@/store'
+import { useDexStore, useDexGenreStore, useMediaStore } from '@/store'
 import { dexCategories, dexStatuses } from '@/constants'
 import type { FormConfig } from '@/types'
 export const dexCreateConfig: FormConfig<DexCreate> = {
@@ -107,6 +107,13 @@ export const dexCreateConfig: FormConfig<DexCreate> = {
             placeholder: '请输入作品年份'
         },
         {
+            key: 'externalUrl',
+            label: '外部链接',
+            type: 'text',
+            required: false,
+            placeholder: '豆瓣/官网/购买页/网易云等链接'
+        },
+        {
             key: 'genreIds',
             label: '作品类型',
             type: 'multiSelect',
@@ -117,6 +124,20 @@ export const dexCreateConfig: FormConfig<DexCreate> = {
                 return store.dexGenres.map(g => ({
                     label: g.name,
                     value: g.id
+                }))
+            },
+        },
+        {
+            key: 'mediaIds',
+            label: '关联资源',
+            type: 'multiSelect',
+            required: false,
+            optionsGetter: async () => {
+                const store = useMediaStore()
+                await store.getMedias?.()
+                return store.medias.map(m => ({
+                    label: `[${m.mediaType}] ${m.title}`,
+                    value: m.id
                 }))
             },
         }
@@ -229,6 +250,13 @@ export const dexUpdateConfig: FormConfig<DexUpdate> = {
             placeholder: '请输入作品年份'
         },
         {
+            key: 'externalUrl',
+            label: '外部链接',
+            type: 'text',
+            required: false,
+            placeholder: '豆瓣/官网/购买页/网易云等链接'
+        },
+        {
             key: 'genreIds',
             label: '作品类型',
             type: 'multiSelect',
@@ -239,6 +267,20 @@ export const dexUpdateConfig: FormConfig<DexUpdate> = {
                 return store.dexGenres.map(g => ({
                     label: g.name,
                     value: g.id
+                }))
+            },
+        },
+        {
+            key: 'mediaIds',
+            label: '关联资源',
+            type: 'multiSelect',
+            required: false,
+            optionsGetter: async () => {
+                const store = useMediaStore()
+                await store.getMedias?.()
+                return store.medias.map(m => ({
+                    label: `[${m.mediaType}] ${m.title}`,
+                    value: m.id
                 }))
             },
         }

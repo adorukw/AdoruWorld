@@ -1,0 +1,12 @@
+# 环境变量（含密钥，禁止提交）
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 前端构建产物
+node_modules/
+dist/

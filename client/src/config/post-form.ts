@@ -1,5 +1,5 @@
 import type { PostCreate, PostUpdate } from '@/types'
-import { usePostStore, usePostCategoryStore, usePostTagStore } from '@/store'
+import { usePostStore, usePostCategoryStore, usePostTagStore, useSeriesStore } from '@/store'
 import type { FormConfig } from '@/types'
 
 export const postCreateConfig: FormConfig<PostCreate> = {
@@ -65,6 +65,30 @@ export const postCreateConfig: FormConfig<PostCreate> = {
                     value: c.id
                 }))
             }
+        },
+        {
+            key: 'seriesId',
+            label: '系列',
+            type: 'select',
+            required: false,
+            optionsGetter: async () => {
+                const store = useSeriesStore()
+                await store.getSeriesList?.()
+                return [
+                    { label: '无系列', value: '' },
+                    ...store.seriesList.map(s => ({
+                        label: s.name,
+                        value: s.id
+                    }))
+                ]
+            }
+        },
+        {
+            key: 'seriesOrder',
+            label: '系列内序号',
+            type: 'number',
+            required: false,
+            placeholder: '第几篇，从 1 开始'
         },
         {
             key: 'tagIds',
@@ -148,6 +172,30 @@ export const postUpdateConfig: FormConfig<PostUpdate> = {
                     value: c.id
                 }))
             }
+        },
+        {
+            key: 'seriesId',
+            label: '系列',
+            type: 'select',
+            required: false,
+            optionsGetter: async () => {
+                const store = useSeriesStore()
+                await store.getSeriesList?.()
+                return [
+                    { label: '无系列', value: '' },
+                    ...store.seriesList.map(s => ({
+                        label: s.name,
+                        value: s.id
+                    }))
+                ]
+            }
+        },
+        {
+            key: 'seriesOrder',
+            label: '系列内序号',
+            type: 'number',
+            required: false,
+            placeholder: '第几篇，从 1 开始'
         },
         {
             key: 'tagIds',

@@ -45,6 +45,33 @@ const getRatingStars = (rating: number) => {
     if (rating === 0) return "☆☆☆☆☆☆☆☆☆☆";
     return "★".repeat(rating) + "☆".repeat(10 - rating);
 };
+
+const externalUrlLabel = computed(() => {
+    const url = dex.value?.externalUrl ?? "";
+    if (url.includes("douban.com")) return "豆瓣";
+    if (url.includes("music.163.com")) return "网易云";
+    if (url.includes("bilibili.com")) return "哔哩哔哩";
+    if (url.includes("bangumi")) return "Bangumi";
+    if (url.includes("steampowered")) return "Steam";
+    return "外部链接";
+});
+
+const formatFileSize = (bytes: number) => {
+    if (!bytes) return "0 B";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+};
+
+const mediaTypeIcon = (type: string) => {
+    const icons: Record<string, string> = {
+        book: "📕",
+        audio: "🎵",
+        video: "🎬",
+        image: "🖼️",
+    };
+    return icons[type] ?? "📄";
+};
 </script>
 
 <template>
@@ -216,6 +243,16 @@ const getRatingStars = (rating: number) => {
                                         </span>
                                     </div>
                                 </div>
+
+                                <a
+                                    v-if="dex.externalUrl"
+                                    :href="dex.externalUrl"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="inline-flex items-center gap-2 px-4 py-2 border-4 border-black bg-sky text-white pixel-text text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform"
+                                >
+                                    🔗 去哪里看/买 · {{ externalUrlLabel }}
+                                </a>
                             </div>
 
                             <div v-if="dex.comment" class="pixel-card p-6 mb-6">
@@ -225,6 +262,42 @@ const getRatingStars = (rating: number) => {
                                     <span>💬</span> 短评
                                 </h2>
                                 <p class="leading-relaxed">{{ dex.comment }}</p>
+                            </div>
+
+                            <div
+                                v-if="dex.medias?.length"
+                                class="pixel-card p-6 mb-6"
+                            >
+                                <h2
+                                    class="text-sm mb-4 flex items-center gap-2"
+                                >
+                                    <span>📎</span> 相关资源
+                                </h2>
+                                <div class="space-y-3">
+                                    <a
+                                        v-for="m in dex.medias"
+                                        :key="m.id"
+                                        :href="m.filePath"
+                                        :download="m.title"
+                                        class="flex items-center justify-between gap-3 p-3 bg-white border-2 border-black rounded hover:bg-sky-50 transition-colors group"
+                                    >
+                                        <span
+                                            class="flex items-center gap-2 min-w-0"
+                                        >
+                                            <span>{{ mediaTypeIcon(m.mediaType) }}</span>
+                                            <span
+                                                class="text-sm truncate group-hover:text-sky-dark"
+                                            >
+                                                {{ m.title }}
+                                            </span>
+                                        </span>
+                                        <span
+                                            class="text-xs text-gray-500 shrink-0"
+                                        >
+                                            {{ formatFileSize(m.fileSize) }} ⬇
+                                        </span>
+                                    </a>
+                                </div>
                             </div>
 
                             <div

@@ -1,4 +1,5 @@
 from app.modules.dex_genre.schema import DexGenreResponse
+from app.modules.media.schema import MediaResponse
 from pydantic import BaseModel, Field
 
 DexCategoryType = str
@@ -19,7 +20,9 @@ class DexCreate(BaseModel):
     summary: str | None = None
     creator: str | None = None
     year: int | None = None
+    external_url: str | None = Field(None, alias="externalUrl")
     genre_ids: list[str] = Field(default_factory=list, alias="genreIds")
+    media_ids: list[str] = Field(default_factory=list, alias="mediaIds")
 
     model_config = {"populate_by_name": True}
 
@@ -37,7 +40,9 @@ class DexUpdate(BaseModel):
     comment: str | None = None
     creator: str | None = None
     year: int | None = None
+    external_url: str | None = Field(None, alias="externalUrl")
     genre_ids: list[str] | None = Field(None, alias="genreIds")
+    media_ids: list[str] | None = Field(None, alias="mediaIds")
 
     model_config = {"populate_by_name": True}
 
@@ -57,7 +62,9 @@ class DexResponse(BaseModel):
     summary: str | None = None
     creator: str | None = None
     year: int | None = None
+    external_url: str | None = Field(None, alias="externalUrl")
     genres: list[DexGenreResponse] = Field(default_factory=list)
+    medias: list[MediaResponse] = Field(default_factory=list)
 
     model_config = {"from_attributes": True, "populate_by_name": True}
 

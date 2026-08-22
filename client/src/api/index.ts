@@ -1,7 +1,10 @@
 export { systemApi } from "./system.ts";
+export { authApi } from "./auth.ts";
+export { userApi } from "./user.ts";
 export { postApi } from "./post.ts";
 export { postTagApi } from "./post-tag.ts";
 export { postCategoryApi } from "./post-category.ts";
+export { seriesApi } from "./series.ts";
 export { dexApi } from "./dex.ts";
 export { dexGenreApi } from "./dex-genre.ts";
 export { mediaApi } from "./media.ts";

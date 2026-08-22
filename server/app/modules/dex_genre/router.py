@@ -2,6 +2,7 @@ from typing import Annotated
 
 from app.core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
+from app.modules.auth.dependency import require_role
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import crud
@@ -52,7 +53,7 @@ async def get_genre_by_id(genre_id: str, db: Annotated[AsyncSession, Depends(get
     )
 
 
-@router.post("", response_model=DexGenreResponse, status_code=201)
+@router.post("", response_model=DexGenreResponse, status_code=201, dependencies=[Depends(require_role('admin', 'editor'))])
 async def create_genre(
     data: DexGenreCreate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
@@ -65,7 +66,7 @@ async def create_genre(
     )
 
 
-@router.put("/{genre_id}", response_model=DexGenreResponse)
+@router.put("/{genre_id}", response_model=DexGenreResponse, dependencies=[Depends(require_role('admin', 'editor'))])
 async def update_genre(
     genre_id: str, data: DexGenreUpdate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
@@ -81,7 +82,7 @@ async def update_genre(
     )
 
 
-@router.delete("/{genre_id}", status_code=204)
+@router.delete("/{genre_id}", status_code=204, dependencies=[Depends(require_role('admin', 'editor'))])
 async def delete_genre(genre_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     genre = await crud.get_genre_by_id(db, genre_id)
     if not genre:

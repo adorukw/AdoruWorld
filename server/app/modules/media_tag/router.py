@@ -2,6 +2,7 @@ from typing import Annotated
 
 from app.core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
+from app.modules.auth.dependency import require_role
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import crud
@@ -37,7 +38,7 @@ async def get_tag_by_id(id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     return MediaTagResponse(id=tag.id, name=tag.name, slug=tag.slug, color=tag.color)
 
 
-@router.post("", response_model=MediaTagResponse)
+@router.post("", response_model=MediaTagResponse, dependencies=[Depends(require_role('admin', 'editor'))])
 async def create_tag(
     data: MediaTagCreate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
@@ -45,7 +46,7 @@ async def create_tag(
     return MediaTagResponse(id=tag.id, name=tag.name, slug=tag.slug, color=tag.color)
 
 
-@router.put("/{tag_id}", response_model=MediaTagResponse)
+@router.put("/{tag_id}", response_model=MediaTagResponse, dependencies=[Depends(require_role('admin', 'editor'))])
 async def update_tag(
     tag_id: str, data: MediaTagUpdate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
@@ -56,7 +57,7 @@ async def update_tag(
     return MediaTagResponse(id=tag.id, name=tag.name, slug=tag.slug, color=tag.color)
 
 
-@router.delete("/{tag_id}", status_code=204)
+@router.delete("/{tag_id}", status_code=204, dependencies=[Depends(require_role('admin', 'editor'))])
 async def delete_tag(tag_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     tag = await crud.get_tag_by_id(db, tag_id)
     if not tag:

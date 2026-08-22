@@ -6,6 +6,7 @@ from app.core.database import get_db
 from app.modules.post_category.schema import PostCategoryResponse
 from app.modules.post_tag.schema import PostTagResponse
 from fastapi import APIRouter, Depends, HTTPException, Query
+from app.modules.auth.dependency import require_role
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import crud
@@ -99,7 +100,11 @@ async def get_post_by_slug(slug: str, db: Annotated[AsyncSession, Depends(get_db
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     await crud.increment_views(db, post)
-    return PostResponse(**format_post(post))
+    data = format_post(post)
+    prev_post, next_post = await crud.get_series_navigation(db, post)
+    data["prev_post"] = prev_post
+    data["next_post"] = next_post
+    return PostResponse(**data)
 
 
 @router.get("/slug/{slug}/related", response_model=list[PostResponse])
@@ -119,13 +124,13 @@ async def get_post(post_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     return PostResponse(**format_post(post))
 
 
-@router.post("", response_model=PostResponse, status_code=201)
+@router.post("", response_model=PostResponse, status_code=201, dependencies=[Depends(require_role('admin', 'editor'))])
 async def create_post(data: PostCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     post = await crud.create_post(db, data)
     return PostResponse(**format_post(post))
 
 
-@router.put("/{post_id}", response_model=PostResponse)
+@router.put("/{post_id}", response_model=PostResponse, dependencies=[Depends(require_role('admin', 'editor'))])
 async def update_post(
     post_id: str, data: PostUpdate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
@@ -136,7 +141,7 @@ async def update_post(
     return PostResponse(**format_post(post))
 
 
-@router.delete("/{post_id}", status_code=204)
+@router.delete("/{post_id}", status_code=204, dependencies=[Depends(require_role('admin', 'editor'))])
 async def delete_post(post_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     post = await crud.get_post_by_id(db, post_id)
     if not post:

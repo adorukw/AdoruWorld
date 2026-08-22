@@ -268,6 +268,15 @@ watch(
                             >
                                 👀 {{ post.views }} 次阅读
                             </span>
+                            <span
+                                v-if="post.series"
+                                class="flex items-center gap-1 bg-yellow-100/90 px-2 py-1 rounded border border-black/30 font-bold"
+                            >
+                                📚 {{ post.series.name
+                                }}<template v-if="post.seriesOrder">
+                                    · 第 {{ post.seriesOrder }} 篇</template
+                                >
+                            </span>
                         </div>
                     </div>
                 </header>
@@ -335,6 +344,56 @@ watch(
                         <div
                             class="mt-12 pt-8 border-t-4 border-black border-dashed"
                         >
+                            <!-- 系列上下篇导航 -->
+                            <div
+                                v-if="post.series && (post.prevPost || post.nextPost)"
+                                class="flex flex-col md:flex-row gap-4 mb-8"
+                            >
+                                <router-link
+                                    v-if="post.prevPost"
+                                    :to="`/post/${post.prevPost.slug}`"
+                                    class="flex-1 group bg-white border-4 border-black rounded-lg p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform"
+                                >
+                                    <div
+                                        class="pixel-text text-xs text-gray-500 mb-1"
+                                    >
+                                        ← 上一篇
+                                    </div>
+                                    <div
+                                        class="font-bold truncate group-hover:text-sky-700"
+                                    >
+                                        {{ post.prevPost.title }}
+                                    </div>
+                                </router-link>
+                                <div v-else class="flex-1 hidden md:block"></div>
+
+                                <div
+                                    class="flex items-center justify-center px-4 bg-yellow-100 border-4 border-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                                >
+                                    <span class="pixel-text text-sm text-center">
+                                        📚 {{ post.series.name }}
+                                    </span>
+                                </div>
+
+                                <router-link
+                                    v-if="post.nextPost"
+                                    :to="`/post/${post.nextPost.slug}`"
+                                    class="flex-1 group bg-white border-4 border-black rounded-lg p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-transform text-right"
+                                >
+                                    <div
+                                        class="pixel-text text-xs text-gray-500 mb-1"
+                                    >
+                                        下一篇 →
+                                    </div>
+                                    <div
+                                        class="font-bold truncate group-hover:text-sky-700"
+                                    >
+                                        {{ post.nextPost.title }}
+                                    </div>
+                                </router-link>
+                                <div v-else class="flex-1 hidden md:block"></div>
+                            </div>
+
                             <div
                                 class="bg-gray-100 border-4 border-black p-4 rounded-lg mb-8 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]"
                             >

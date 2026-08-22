@@ -1,4 +1,5 @@
 export * from './post-form.ts'
+export * from './series-form.ts'
 export * from './post-category-form.ts'
 export * from './post-tag-form.ts'
 export * from './dex-form.ts'

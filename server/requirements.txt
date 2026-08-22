@@ -7,3 +7,7 @@ python-multipart
 pillow
 mutagen
 alembic
+bcrypt
+PyJWT
+aiosmtplib
+email-validator

@@ -2,6 +2,7 @@ from typing import Annotated
 
 from app.core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
+from app.modules.auth.dependency import require_role
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import crud
@@ -51,12 +52,12 @@ async def get_dex_by_id(entry_id: str, db: Annotated[AsyncSession, Depends(get_d
     return entry
 
 
-@router.post("", response_model=DexResponse, status_code=201)
+@router.post("", response_model=DexResponse, status_code=201, dependencies=[Depends(require_role('admin', 'editor'))])
 async def create_dex(data: DexCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     return await crud.create_dex(db, data)
 
 
-@router.put("/{entry_id}", response_model=DexResponse)
+@router.put("/{entry_id}", response_model=DexResponse, dependencies=[Depends(require_role('admin', 'editor'))])
 async def update_dex(
     entry_id: str, data: DexUpdate, db: Annotated[AsyncSession, Depends(get_db)]
 ):
@@ -67,7 +68,7 @@ async def update_dex(
     return entry
 
 
-@router.delete("/{entry_id}", status_code=204)
+@router.delete("/{entry_id}", status_code=204, dependencies=[Depends(require_role('admin', 'editor'))])
 async def delete_dex(entry_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     entry = await crud.get_dex_by_id(db, entry_id)
     if not entry:

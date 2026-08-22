@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
 from app.core.database import Base
 from app.modules.post_category.model import PostCategory
@@ -15,6 +16,9 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from app.modules.series.model import Series
 
 
 def _utcnow():
@@ -60,10 +64,19 @@ class Post(Base):
     featured: Mapped[bool] = mapped_column(Boolean, default=False)
 
     category_id: Mapped[str] = mapped_column(
-        String, ForeignKey("post_categories.id", ondelete="SET NULL")
+        String, ForeignKey("post_categories.id", ondelete="RESTRICT")
     )
 
     category: Mapped["PostCategory"] = relationship(
+        back_populates="posts", lazy="selectin"
+    )
+
+    series_id: Mapped[str | None] = mapped_column(
+        String, ForeignKey("series.id", ondelete="SET NULL")
+    )
+    series_order: Mapped[int | None] = mapped_column(Integer)
+
+    series: Mapped["Series | None"] = relationship(
         back_populates="posts", lazy="selectin"
     )
 

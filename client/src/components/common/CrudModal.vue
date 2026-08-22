@@ -17,6 +17,8 @@ import {
     mediaTagUpdateConfig,
     mediaCreateConfig,
     mediaUpdateConfig,
+    seriesCreateConfig,
+    seriesUpdateConfig,
 } from "@/config";
 
 const props = defineProps<{
@@ -60,6 +62,10 @@ const config = computed<FormConfig<any>>(() => {
         medias: {
             create: mediaCreateConfig,
             update: mediaUpdateConfig,
+        },
+        series: {
+            create: seriesCreateConfig,
+            update: seriesUpdateConfig,
         },
     };
 
@@ -296,7 +302,7 @@ async function handleFileUpload(field: FormField, event: Event) {
                         v-model="form[field.key]"
                         class="w-full p-3 border-4 border-black bg-white"
                     >
-                        <option disabled value="">
+                        <option disabled value="" v-if="field.required">
                             请选择 {{ field.label }}
                         </option>
                         <option

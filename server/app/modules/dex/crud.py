@@ -1,3 +1,4 @@
+from app.modules.media.model import Media
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -76,28 +77,39 @@ async def get_dex_by_id(db: AsyncSession, dex_id: str) -> Dex | None:
 
 async def create_dex(db: AsyncSession, data: DexCreate) -> Dex:
     """创建新的 Dex 条目"""
-    # 提取 genre_ids（排除关联字段，避免直接传入模型）
+    # 提取关联字段（排除关联字段，避免直接传入模型）
     genre_ids = data.genre_ids
+    media_ids = data.media_ids
 
-    # 准备基础字段（排除 genre_ids）
-    entry_data = data.model_dump(exclude={"genre_ids"})
+    # 准备基础字段（排除关联字段）
+    entry_data = data.model_dump(exclude={"genre_ids", "media_ids"})
 
     # 创建 DexEntry 实例
     entry = Dex(**entry_data)
 
-    # 处理多对多关联：绑定标签
+    # 处理多对多关联：绑定题材
     if genre_ids:
         stmt = select(DexGenre).where(DexGenre.id.in_(genre_ids))
         result = await db.execute(stmt)
         genres = list(result.scalars().all())
         entry.genres = genres  # 设置关联关系
 
+    # 处理多对多关联：绑定媒体资源
+    if media_ids:
+        stmt = select(Media).where(Media.id.in_(media_ids))
+        result = await db.execute(stmt)
+        entry.medias = list(result.scalars().all())
+
     db.add(entry)
     await db.commit()
     await db.refresh(entry)
 
-    # 重新加载关联数据（确保返回的对象包含 genres）
-    stmt = select(Dex).options(selectinload(Dex.genres)).where(Dex.id == entry.id)
+    # 重新加载关联数据（确保返回的对象包含 genres/medias）
+    stmt = (
+        select(Dex)
+        .options(selectinload(Dex.genres), selectinload(Dex.medias))
+        .where(Dex.id == entry.id)
+    )
     result = await db.execute(stmt)
     return result.scalar_one()
 
@@ -109,12 +121,13 @@ async def update_dex(db: AsyncSession, entry: Dex, data: DexUpdate) -> Dex:
 
     # 单独处理多对多关联字段
     genre_ids = update_data.pop("genre_ids", None)
+    media_ids = update_data.pop("media_ids", None)
 
     # 更新普通字段
     for key, value in update_data.items():
         setattr(entry, key, value)
 
-    # 处理标签关联更新
+    # 处理题材关联更新
     if genre_ids is not None:
         # 清空现有关联
         entry.genres.clear()
@@ -126,11 +139,24 @@ async def update_dex(db: AsyncSession, entry: Dex, data: DexUpdate) -> Dex:
             genres = result.scalars().all()
             entry.genres.extend(genres)
 
+    # 处理媒体资源关联更新
+    if media_ids is not None:
+        entry.medias.clear()
+
+        if media_ids:
+            stmt = select(Media).where(Media.id.in_(media_ids))
+            result = await db.execute(stmt)
+            entry.medias.extend(result.scalars().all())
+
     await db.commit()
     await db.refresh(entry)
 
     # 重新加载关联数据
-    stmt = select(Dex).options(selectinload(Dex.genres)).where(Dex.id == entry.id)
+    stmt = (
+        select(Dex)
+        .options(selectinload(Dex.genres), selectinload(Dex.medias))
+        .where(Dex.id == entry.id)
+    )
     result = await db.execute(stmt)
     return result.scalar_one()
 

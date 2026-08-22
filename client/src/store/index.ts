@@ -1,5 +1,7 @@
+export { useAuthStore } from "./auth";
 export { usePostStore } from "./post";
 export { usePostCategoryStore } from "./post-category";
+export { useSeriesStore } from "./series";
 export { usePostTagStore } from "./post-tag";
 export { useDexStore } from "./dex";
 export { useDexGenreStore } from "./dex-genre";

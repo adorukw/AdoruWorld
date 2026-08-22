@@ -37,8 +37,9 @@ async function openEditModal(item: any) {
     modalMode.value = "update";
     editingItem.value = {
         ...item,
-        categoryId: item.category?.id,
-        tagIds: item.tags?.map((t: any) => t.id) || [],
+        genreIds: item.genres?.map((g: any) => g.id) || [],
+        mediaIds: item.medias?.map((m: any) => m.id) || [],
+        externalUrl: item.externalUrl ?? "",
     };
     showModal.value = true;
 }
